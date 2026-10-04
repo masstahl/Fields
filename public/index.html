@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#242522">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon.svg">
+<title>Field Headings</title>
+<style>
+:root{
+  --ink:#242522;--ink2:#4d4e49;--muted:#777872;--line:#d9d9d3;
+  --surface:#fff;--surface2:#f4f4f0;--page:#ecece7;
+  --accent:#3f403b;--danger:#8b4b47;--shadow:0 10px 30px rgba(25,25,22,.08);
+}
+*{box-sizing:border-box}
+html{background:var(--page)}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,system-ui,sans-serif;color:var(--ink);background:var(--page);min-height:100vh;-webkit-font-smoothing:antialiased}
+button,input{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+header{position:sticky;top:0;z-index:20;background:rgba(244,244,240,.92);backdrop-filter:saturate(120%) blur(18px);border-bottom:1px solid rgba(36,37,34,.08);padding:calc(14px + env(safe-area-inset-top)) 18px 14px}
+.header-inner{max-width:860px;margin:auto}
+.brand-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.mark{width:42px;height:42px;border:1px solid #bdbdb7;border-radius:13px;background:#fff;display:grid;place-items:center;box-shadow:0 3px 10px rgba(0,0,0,.06)}
+.mark svg{width:24px;height:24px}
+h1{font-size:20px;line-height:1.1;letter-spacing:-.03em;margin:0;font-weight:720}
+.sub{font-size:12px;color:var(--muted);margin-top:3px}
+.add{border:0;background:var(--ink);color:#fff;border-radius:11px;padding:11px 14px;font-size:14px;font-weight:650;box-shadow:0 5px 15px rgba(0,0,0,.13)}
+.add:active{transform:translateY(1px)}
+nav{display:flex;gap:5px;margin-top:15px;background:#dfdfda;border-radius:10px;padding:3px}
+nav button{flex:1;border:0;border-radius:8px;padding:8px;background:transparent;color:#656660;font-size:13px;font-weight:650}
+nav button.active{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+main{max-width:860px;margin:auto;padding:18px 18px 48px}
+.search-wrap{position:relative;margin-bottom:14px}
+.search{width:100%;height:52px;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:0 78px 0 45px;outline:0;color:var(--ink);box-shadow:0 3px 15px rgba(25,25,22,.04);font-size:16px}
+.search:focus{border-color:#a5a59f;box-shadow:0 0 0 3px rgba(36,37,34,.07)}
+.search-icon{position:absolute;left:16px;top:16px;color:#858680;pointer-events:none}
+.clear{position:absolute;right:9px;top:8px;height:36px;border:0;border-radius:9px;background:var(--surface2);color:var(--muted);padding:0 10px;font-size:12px;font-weight:650}
+.summary{display:flex;justify-content:space-between;align-items:center;margin:3px 2px 10px;color:var(--muted);font-size:12px}
+.status{display:flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:#73746e}
+.dot.bad{background:#9b5a56}
+.list{display:grid;gap:9px}
+.card{background:var(--surface);border:1px solid rgba(36,37,34,.08);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.card-main{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 16px;min-height:78px}
+.card-main:active{background:#fafaf8}
+.name{font-size:16px;font-weight:690;letter-spacing:-.015em}
+.meta{font-size:12px;color:var(--muted);margin-top:4px}
+.heading{text-align:right;min-width:70px}
+.degrees{font-size:20px;font-weight:720;letter-spacing:-.03em}
+.direction{font-size:11px;color:var(--muted);margin-top:1px}
+.details{border-top:1px solid #ecece8;padding:14px 16px 16px;background:#fafaf8}
+.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.detail{background:#fff;border:1px solid #e5e5df;border-radius:11px;padding:10px}
+.detail label{display:block;text-transform:uppercase;letter-spacing:.08em;font-size:9px;font-weight:750;color:#898a84;margin-bottom:4px}
+.detail b{font-size:13px;font-weight:650}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+.action{border:1px solid #d5d5cf;background:#fff;color:var(--ink2);border-radius:9px;padding:8px 11px;font-size:12px;font-weight:650;text-decoration:none}
+.action.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.action.danger{color:var(--danger)}
+.empty{background:rgba(255,255,255,.55);border:1px dashed #c9c9c3;border-radius:16px;text-align:center;padding:42px 20px;color:var(--muted)}
+.empty strong{display:block;color:var(--ink2);font-size:15px;margin-bottom:5px}
+.activity{background:var(--surface);border:1px solid rgba(36,37,34,.08);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.log{padding:13px 15px;border-bottom:1px solid #ecece8;font-size:13px}
+.log:last-child{border-bottom:0}
+.log b{font-weight:700}
+.log small{display:block;color:var(--muted);margin-top:3px;font-size:11px}
+dialog{width:min(440px,calc(100% - 30px));border:0;border-radius:20px;padding:0;background:var(--surface);box-shadow:0 25px 70px rgba(0,0,0,.25);color:var(--ink)}
+dialog::backdrop{background:rgba(20,20,18,.42);backdrop-filter:blur(3px)}
+.form{padding:20px}
+.form h2{margin:0;font-size:20px;letter-spacing:-.03em}
+.form p{margin:5px 0 17px;color:var(--muted);font-size:12px}
+label{display:block;color:#686963;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin:12px 0 6px}
+input[type=text],input[type=date],input[type=number]{width:100%;height:45px;border:1px solid var(--line);border-radius:10px;background:#fafaf8;padding:0 12px;outline:0;color:var(--ink)}
+input:focus{border-color:#9d9e97;box-shadow:0 0 0 3px rgba(36,37,34,.06)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.form-actions{display:flex;gap:8px;margin-top:20px}
+.form-actions button{flex:1;height:43px;border-radius:10px;border:1px solid var(--line);font-weight:650}
+.save{background:var(--ink);border-color:var(--ink)!important;color:#fff}
+.delete{background:#fff;color:var(--danger)}
+.cancel{background:#f2f2ee}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;border-radius:11px;padding:10px 14px;font-size:12px;font-weight:650;transition:.2s;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:520px){
+  header{padding-left:14px;padding-right:14px}
+  main{padding-left:14px;padding-right:14px}
+  .brand .sub{display:none}
+  .add{padding:10px 11px}
+  .detail-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<div class="header-inner">
+<div class="brand-row">
+<div class="brand">
+<div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 17.5 17.5 5l1.5 1.5L6.5 19H5v-1.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m13 7 4 4M7.5 14.5l2 2" stroke="currentColor" stroke-width="1.4"/><path d="M4 20h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+<div><h1>Field Headings</h1><div class="sub" id="who">Local field reference</div></div>
+</div>
+<button class="add" id="addBtn">+ Add field</button>
+</div>
+<nav><button id="fieldsTab" class="active">Fields</button><button id="activityTab">Activity</button></nav>
+</div>
+</header>
+<main>
+<section id="fieldsView">
+<div class="search-wrap">
+<svg class="search-icon" width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+<input id="q" class="search" placeholder="Search field name…" autocomplete="off" autocapitalize="off" spellcheck="false">
+<button class="clear" id="clearBtn" hidden>Clear</button>
+</div>
+<div class="summary"><span id="count">Loading fields…</span><span class="status"><span id="dot" class="dot"></span><span id="statusText">Connecting</span></span></div>
+<div id="out" class="list"></div>
+</section>
+<section id="activityView" hidden>
+<div class="summary"><span>Recent activity</span><span id="activityStatus"></span></div>
+<div id="activity" class="activity"></div>
+</section>
+</main>
+</div>
+<dialog id="dlg">
+<form class="form" id="fieldForm" method="dialog">
+<h2 id="formTitle">Add field</h2><p>Keep the field record clean and consistent for the crew.</p>
+<label for="fn">Field name</label><input id="fn" type="text" required>
+<label for="fh">Heading (degrees)</label><input id="fh" type="text" required inputmode="decimal">
+<label for="fd">Date planted</label><input id="fd" type="date">
+<div class="two"><div><label for="fa">Latitude</label><input id="fa" type="number" step="any" inputmode="decimal"></div><div><label for="fo">Longitude</label><input id="fo" type="number" step="any" inputmode="decimal"></div></div>
+<div class="form-actions"><button type="button" class="cancel" id="cancelBtn">Cancel</button><button type="button" class="delete" id="deleteBtn" hidden>Delete</button><button type="submit" class="save">Save</button></div>
+</form>
+</dialog>
+<div id="toast" class="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+let fields=[],tab='fields',editId=null,openIds=new Set(),user=localStorage.getItem('fieldUser')||'';
+
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const api=async(path,options={})=>{
+  const headers={'content-type':'application/json',...(options.headers||{})};
+  if(user)headers['x-user']=encodeURIComponent(user);
+  const r=await fetch('/api/'+path,{...options,headers});
+  let data=null; try{data=await r.json()}catch{}
+  if(!r.ok)throw new Error(data?.error||('Request failed ('+r.status+')'));
+  return data;
+};
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),2200)}
+function direction(v){const n=parseFloat(v);if(!Number.isFinite(n))return '';return ['N','NE','E','SE','S','SW','W','NW'][Math.round(((n%360)+360)%360/45)%8]}
+function normalize(v){return String(v??'').toLowerCase().normalize('NFKD').replace(/[’']/g,"'").replace(/[–—]/g,'-').replace(/\s+/g,' ').trim()}
+function visibleFields(){
+  const q=normalize($('#q').value);
+  if(!q)return [];
+  const terms=q.split(' ').filter(Boolean);
+  return fields.filter(f=>terms.every(t=>normalize(f.name).includes(t)||normalize(f.heading).includes(t))).slice(0,80);
+}
+function render(){
+  const q=$('#q').value.trim();
+  $('#clearBtn').hidden=!q;
+  if(!q){$('#out').innerHTML='<div class="empty"><strong>Search your field list</strong>Start typing a field name to see its heading, planting date and location.</div>';return}
+  const list=visibleFields();
+  if(!list.length){$('#out').innerHTML='<div class="empty"><strong>No matching field</strong>Try a shorter name or check the spelling.</div>';return}
+  $('#out').innerHTML=list.map(f=>{
+    const open=openIds.has(f.id);
+    const coords=f.lat!=null&&f.lng!=null?f.lat.toFixed(5)+', '+f.lng.toFixed(5):'Not saved';
+    return '<article class="card"><div class="card-main" data-open="'+f.id+'"><div><div class="name">'+esc(f.name)+'</div><div class="meta">'+esc(f.planted||'No planting date')+' · '+esc(coords)+'</div></div><div class="heading"><div class="degrees">'+esc(f.heading)+(Number.isFinite(+f.heading)?'°':'')+'</div><div class="direction">'+esc(direction(f.heading))+'</div></div></div>'+
+    (open?'<div class="details"><div class="detail-grid"><div class="detail"><label>Heading</label><b>'+esc(f.heading)+(Number.isFinite(+f.heading)?'°':'')+'</b></div><div class="detail"><label>Planted</label><b>'+esc(f.planted||'—')+'</b></div><div class="detail"><label>Coordinates</label><b>'+esc(coords)+'</b></div></div><div class="actions">'+(f.lat!=null&&f.lng!=null?'<a class="action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(f.lat+','+f.lng)+'">Open map</a>':'')+'<button class="action primary" data-edit="'+f.id+'">Edit</button></div>'+(f.updated_by?'<div class="meta" style="margin-top:9px">Last changed by '+esc(f.updated_by)+'</div>':'')+'</div>':'')+'</article>'
+  }).join('');
+  document.querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>{const id=+el.dataset.open;openIds.has(id)?openIds.delete(id):openIds.add(id);render()});
+  document.querySelectorAll('[data-edit]').forEach(el=>el.onclick=e=>{e.stopPropagation();openForm(+el.dataset.edit)});
+}
+async function load(){
+  try{
+    const data=await api('fields');
+    if(!Array.isArray(data))throw new Error('Invalid field data returned');
+    fields=data;
+    $('#count').textContent=fields.length+' fields available';
+    $('#dot').classList.remove('bad');$('#statusText').textContent='Database connected';
+    render();
+  }catch(e){
+    $('#count').textContent='Unable to load fields';
+    $('#dot').classList.add('bad');$('#statusText').textContent='Connection error';
+    $('#out').innerHTML='<div class="empty"><strong>Couldn’t load the field database</strong>'+esc(e.message)+'<br><br><button class="action primary" id="retry">Retry</button></div>';
+    $('#retry').onclick=load;
+  }
+}
+function setUser(){
+  if(!user){
+    const n=prompt('Your name (used only for the activity log):','');
+    user=(n||'Guest').trim()||'Guest';localStorage.setItem('fieldUser',user);
+  }
+  $('#who').textContent=user+' · field reference';
+}
+function openForm(id=null){
+  editId=id;
+  const f=fields.find(x=>x.id===id)||{};
+  $('#formTitle').textContent=id?'Edit field':'Add field';
+  $('#fn').value=f.name||$('#q').value.trim()||'';
+  $('#fh').value=f.heading??'';
+  $('#fd').value=f.planted||new Date().toISOString().slice(0,10);
+  $('#fa').value=f.lat??'';$('#fo').value=f.lng??'';
+  $('#deleteBtn').hidden=!id;$('#dlg').showModal();
+}
+async function save(){
+  const body={name:$('#fn').value.trim(),heading:$('#fh').value.trim(),planted:$('#fd').value,lat:$('#fa').value,lng:$('#fo').value};
+  if(!body.name||!body.heading)return toast('Field name and heading are required');
+  try{
+    await api(editId?'fields/'+editId:'fields',{method:editId?'PUT':'POST',body:JSON.stringify(body)});
+    $('#dlg').close();await load();toast(editId?'Field updated':'Field added');
+  }catch(e){toast(e.message)}
+}
+async function remove(){
+  if(!editId||!confirm('Delete this field? The deletion will remain in the activity log.'))return;
+  try{await api('fields/'+editId,{method:'DELETE'});$('#dlg').close();await load();toast('Field deleted')}catch(e){toast(e.message)}
+}
+async function loadActivity(){
+  try{
+    const data=await api('log');
+    $('#activityStatus').textContent=data.length+' entries';
+    $('#activity').innerHTML=data.length?data.map(x=>'<div class="log"><b>'+esc(x.user)+'</b> '+esc(x.action)+' '+esc(x.detail)+'<small>'+new Date(String(x.at).replace(' ','T')+'Z').toLocaleString()+'</small></div>').join(''):'<div class="empty">No activity recorded yet.</div>';
+  }catch(e){
+    $('#activityStatus').textContent='Restricted';
+    $('#activity').innerHTML='<div class="empty"><strong>Activity log</strong>Administrator access is required.</div>';
+  }
+}
+function setTab(next){
+  tab=next;$('#fieldsTab').classList.toggle('active',next==='fields');$('#activityTab').classList.toggle('active',next==='activity');
+  $('#fieldsView').hidden=next!=='fields';$('#activityView').hidden=next!=='activity';
+  if(next==='activity')loadActivity();
+}
+$('#q').oninput=render;
+$('#clearBtn').onclick=()=>{$('#q').value='';render();$('#q').focus()};
+$('#addBtn').onclick=()=>openForm();
+$('#cancelBtn').onclick=()=>$('#dlg').close();
+$('#deleteBtn').onclick=remove;
+$('#fieldForm').onsubmit=e=>{e.preventDefault();save()};
+$('#fieldsTab').onclick=()=>setTab('fields');$('#activityTab').onclick=()=>setTab('activity');
+setUser();load();
+setInterval(()=>tab==='fields'&&load(),30000);
+</script>
+</body>
+</html>
