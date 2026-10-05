@@ -1,12 +1,31 @@
-const CACHE='field-headings-static-v20261005-0600';
-const STATIC=['/manifest.webmanifest?v=20261005-0600','/icon.svg'];
-self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(STATIC).catch(()=>{})))});
-self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-self.addEventListener('message',e=>{if(e.data?.type==='SKIP_WAITING')self.skipWaiting()});
-self.addEventListener('fetch',e=>{
-  const u=new URL(e.request.url);
-  if(u.origin!==location.origin)return;
-  if(u.pathname.startsWith('/api/')){e.respondWith(fetch(e.request).catch(()=>new Response(JSON.stringify({error:'Offline — reconnect and retry.'}),{status:503,headers:{'content-type':'application/json'}})));return}
-  if(e.request.mode==='navigate'){e.respondWith(fetch(e.request,{cache:'no-store'}).catch(()=>caches.match('/index.html')));return}
-  e.respondWith(fetch(e.request).then(r=>{if(r.ok&&['script','style','image','font'].includes(e.request.destination)){const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy)).catch(()=>{})}return r}).catch(()=>caches.match(e.request)));
+const CACHE='field-headings-static-v20261005-0700';
+const STATIC=['/manifest.webmanifest?v=20261005-0700','/icon.svg'];
+self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(STATIC).catch(()=>{})).then(()=>self.skipWaiting()))});
+self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+self.addEventListener('message',event=>{if(event.data&&event.data.type==='SKIP_WAITING')self.skipWaiting()});
+self.addEventListener('fetch',event=>{
+ const request=event.request,url=new URL(request.url);
+ if(url.origin!==self.location.origin)return;
+ if(request.method!=='GET')return;
+ if(url.pathname.startsWith('/api/')){
+   event.respondWith(fetch(request,{cache:'no-store'}).catch(()=>new Response(JSON.stringify({error:'Offline — reconnect and retry.'}),{status:503,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}})));
+   return;
+ }
+ if(request.mode==='navigate'){
+   event.respondWith((async()=>{
+     try{
+       const response=await fetch(new Request(url.href,{method:'GET',headers:request.headers,cache:'no-store',redirect:'error'}));
+       if(response.type==='opaqueredirect'||response.redirected)throw new Error('redirected navigation');
+       return response;
+     }catch{
+       const cached=await caches.match('/index.html',{ignoreSearch:true});
+       return cached||new Response('The app is temporarily unavailable. Reconnect to the internet and try again.',{status:503,headers:{'content-type':'text/plain; charset=utf-8'}});
+     }
+   })());
+   return;
+ }
+ event.respondWith(fetch(request).then(response=>{
+   if(response.ok&&['script','style','image','font'].includes(request.destination)){const copy=response.clone();caches.open(CACHE).then(c=>c.put(request,copy)).catch(()=>{})}
+   return response;
+ }).catch(()=>caches.match(request)));
 });
