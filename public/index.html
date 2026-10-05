@@ -96,11 +96,16 @@ async function load(){
   }
 }
 function setUser(){
-  if(!user){
-    const n=prompt('Your name (used only for the activity log):','');
-    user=(n||'Guest').trim()||'Guest';localStorage.setItem('fieldUser',user);
-  }
+  user=localStorage.getItem('fieldUser')||'';
+  $('#who').textContent=user?user+' · field reference':'Field reference · planting & orientation';
+}
+function ensureUser(){
+  if(user)return true;
+  const n=prompt('Your name (used only for the activity log):','');
+  user=(n||'Guest').trim()||'Guest';
+  localStorage.setItem('fieldUser',user);
   $('#who').textContent=user+' · field reference';
+  return true;
 }
 function openForm(id=null){
   editId=id;
@@ -113,6 +118,7 @@ function openForm(id=null){
   $('#deleteBtn').hidden=!id;$('#dlg').showModal();
 }
 async function save(){
+  ensureUser();
   const body={name:$('#fn').value.trim(),heading:$('#fh').value.trim(),planted:$('#fd').value,lat:$('#fa').value,lng:$('#fo').value};
   if(!body.name||!body.heading)return toast('Field name and heading are required');
   try{
@@ -122,6 +128,7 @@ async function save(){
 }
 async function remove(){
   if(!editId||!confirm('Delete this field? The deletion will remain in the activity log.'))return;
+  ensureUser();
   try{await api('fields/'+editId,{method:'DELETE'});$('#dlg').close();await load();toast('Field deleted')}catch(e){toast(e.message)}
 }
 async function loadActivity(){
