@@ -130,7 +130,7 @@ async function load(){
   }catch(e){
     $('#count').textContent='Unable to load fields';
     $('#dot').classList.add('bad');$('#statusText').textContent='Connection error';
-    $('#out').innerHTML='<div class="empty"><strong>Couldn't load the field database</strong><div style="margin-top:8px">'+esc(e.message)+'</div><div style="margin-top:16px"><button class="action primary" id="retryLoad">Retry</button></div></div>';
+    $('#out').innerHTML='<div class="empty"><strong>Could not load the field database</strong><div style="margin-top:8px">'+esc(e.message)+'</div><div style="margin-top:16px"><button class="action primary" id="retryLoad">Retry</button></div></div>';
     $('#retryLoad').onclick=load;
   }
 }
