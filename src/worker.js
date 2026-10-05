@@ -5,7 +5,7 @@ export default{async fetch(request,env){
   if(!url.pathname.startsWith('/api/')){
     if(url.pathname==='/' || url.pathname==='/index.html'){
       const fresh=new URL('/index.html',url);
-      fresh.searchParams.set('v','20261005-0045');
+      fresh.searchParams.set('v','20261005-0100');
       const asset=await env.ASSETS.fetch(new Request(fresh,request));
       const headers=new Headers(asset.headers);headers.set('cache-control','no-store, max-age=0');
       return new Response(asset.body,{status:asset.status,statusText:asset.statusText,headers});
