@@ -3,6 +3,13 @@ const num=v=>(v===null||v===''||v===undefined||Number.isNaN(+v))?null:+v;
 export default{async fetch(request,env){
   const url=new URL(request.url);
   if(!url.pathname.startsWith('/api/')){
+    if(url.pathname==='/' || url.pathname==='/index.html'){
+      const fresh=new URL('/index.html',url);
+      fresh.searchParams.set('v','20261005-0045');
+      const asset=await env.ASSETS.fetch(new Request(fresh,request));
+      const headers=new Headers(asset.headers);headers.set('cache-control','no-store, max-age=0');
+      return new Response(asset.body,{status:asset.status,statusText:asset.statusText,headers});
+    }
     if(url.pathname==='/manifest.webmanifest')return new Response("{\n  \"name\":\"Field Headings\",\n  \"short_name\":\"Headings\",\n  \"start_url\":\"/\",\n  \"scope\":\"/\",\n  \"display\":\"standalone\",\n  \"background_color\":\"#ecece7\",\n  \"theme_color\":\"#242522\",\n  \"icons\":[{\"src\":\"/icon.svg\",\"sizes\":\"any\",\"type\":\"image/svg+xml\",\"purpose\":\"any maskable\"}]\n}",{headers:{'content-type':'application/manifest+json','cache-control':'no-cache'}});
     if(url.pathname==='/icon.svg')return new Response("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" rx=\"22\" fill=\"#242522\"/><path d=\"M27 67 66 28l9 9-39 39H27v-9Z\" fill=\"none\" stroke=\"#f4f4f0\" stroke-width=\"7\" stroke-linejoin=\"round\"/><path d=\"m53 37 10 10M38 52l10 10\" stroke=\"#bcbdb6\" stroke-width=\"5\" stroke-linecap=\"round\"/></svg>",{headers:{'content-type':'image/svg+xml','cache-control':'no-cache'}});
     return env.ASSETS.fetch(request);
