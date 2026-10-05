@@ -88,9 +88,22 @@ function locationImage(lat,lng){
   return 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox='+encodeURIComponent(bbox)+'&bboxSR=4326&size=1200,520&imageSR=4326&format=jpg&f=image';
 }
 async function load(){
-  $('#count').textContent='Ready to search';
-  $('#dot').classList.remove('bad');$('#statusText').textContent='Database ready';
-  render();
+  $('#count').textContent='Connecting to database…';
+  $('#dot').classList.remove('bad');$('#statusText').textContent='Connecting';
+  $('#out').innerHTML='<div class="empty"><strong>Connecting to the field database…</strong><div style="margin-top:8px">Please wait.</div></div>';
+  try{
+    const data=await api('fields');
+    if(!Array.isArray(data))throw new Error('The server returned an invalid field list.');
+    fields=data;
+    $('#count').textContent=data.length+' fields available';
+    $('#dot').classList.remove('bad');$('#statusText').textContent='Database connected';
+    render();
+  }catch(e){
+    $('#count').textContent='Unable to load fields';
+    $('#dot').classList.add('bad');$('#statusText').textContent='Connection error';
+    $('#out').innerHTML='<div class="empty"><strong>Couldn’t load the field database</strong><div style="margin-top:8px">'+esc(e.message)+'</div><div style="margin-top:16px"><button class="action primary" id="retryLoad">Retry</button></div></div>';
+    $('#retryLoad').onclick=load;
+  }
 }
 let searchTimer;
 async function searchFields(){
