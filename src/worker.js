@@ -19,8 +19,8 @@ export default{async fetch(request,env){
 async function handle(request,env,a,b){
   const db=env.DB||env['field-headings'];
   if(!db)return json({error:'Database binding is not configured'},500);
-  if(a==='health'&&m==='GET'){try{const r=await db.prepare('SELECT COUNT(*) AS count FROM fields').first();return json({ok:true,fields:r?.count??0})}catch(e){return json({ok:false,error:e?.message||'Database health check failed'},500)}}
   const m=request.method;
+  if(a==='health'&&m==='GET'){try{const r=await db.prepare('SELECT COUNT(*) AS count FROM fields').first();return json({ok:true,fields:r?.count??0})}catch(e){return json({ok:false,error:e?.message||'Database health check failed'},500)}}
   let who='unknown';try{who=decodeURIComponent(request.headers.get('x-user')||'unknown').slice(0,40)}catch{}
   const log=async(action,detail)=>{await db.prepare('INSERT INTO activity(user,action,detail) VALUES(?,?,?)').bind(who,action,detail).run()};
   try{
