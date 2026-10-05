@@ -36,7 +36,7 @@ async function handle(request, env, a, b) {
       const q = new URL(request.url).searchParams.get("q")?.trim() || "";
       if (!q) return json((await db.prepare("SELECT * FROM fields ORDER BY name").all()).results);
       const like = "%" + q.replace(/[\\%_]/g, "\\$&") + "%";
-      return json((await db.prepare("SELECT * FROM fields WHERE name LIKE ? ESCAPE '\\' OR heading LIKE ? ESCAPE '\\' ORDER BY name LIMIT 100").bind(like, like).all()).results);
+      return json((await db.prepare("SELECT * FROM fields WHERE name LIKE ? ESCAPE '\\' ORDER BY name LIMIT 100").bind(like).all()).results);
     }
     if (a === "fields" && m === "POST") {
       const f = await request.json();
