@@ -1,5 +1,5 @@
-const CACHE='field-headings-static-v20261005-0700';
-const STATIC=['/index.html','/manifest.webmanifest?v=20261005-0700','/icon.svg'];
+const CACHE='field-headings-static-v20261005-0800';
+const STATIC=['/index.html','/manifest.webmanifest?v=20261005-0800','/icon.svg'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(STATIC).catch(()=>{})).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('message',event=>{if(event.data&&event.data.type==='SKIP_WAITING')self.skipWaiting()});
