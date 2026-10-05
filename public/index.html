@@ -33,10 +33,10 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
 </head>
 <body>
 <div class="app">
-<header><div class="header-inner"><div class="brand-row"><div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M8 34c8-1 14-8 16-20 7 4 10 10 7 18-3 8-12 10-23 2Z" fill="#d8b35f"/><path d="M10 35c10-2 16-8 21-20" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M27 12c4-4 8-5 12-4-1 5-4 8-10 8" fill="#89a77e"/></svg></div><div><h1>Field Headings</h1><div class="sub" id="who">Field reference � planting & orientation</div></div></div><button class="add" id="addBtn">+ Add field</button></div><nav><button id="fieldsTab" class="tab active">Fields</button><button id="activityTab" class="tab">Activity</button></nav></div></header>
+<header><div class="header-inner"><div class="brand-row"><div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M8 34c8-1 14-8 16-20 7 4 10 10 7 18-3 8-12 10-23 2Z" fill="#d8b35f"/><path d="M10 35c10-2 16-8 21-20" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M27 12c4-4 8-5 12-4-1 5-4 8-10 8" fill="#89a77e"/></svg></div><div><h1>Field Headings</h1><div class="sub" id="who">Field reference · planting & orientation</div></div></div><button class="add" id="addBtn">+ Add field</button></div><nav><button id="fieldsTab" class="tab active">Fields</button><button id="activityTab" class="tab">Activity</button></nav></div></header>
 <main>
 <section class="hero"><div class="hero-copy"><div class="kicker">FIELD REFERENCE</div><h2>Know the field.<br>Plant with confidence.</h2><p>Quickly confirm heading, planting date and location before you put equipment in the ground.</p></div><div class="hero-art" aria-hidden="true"><svg viewBox="0 0 420 190" preserveAspectRatio="none"><path d="M190 0h230v190H0c75-24 125-54 148-88 18-27 25-61 42-102Z" fill="#28583b"/><g opacity=".42" stroke="#b8cdb3" stroke-width="3" fill="none"><path d="M182 190C230 148 246 72 260 0"/><path d="M215 190C263 145 280 67 292 0"/><path d="M248 190C294 141 311 63 323 0"/><path d="M281 190C325 138 342 61 354 0"/><path d="M314 190C356 136 373 60 384 0"/></g><path d="M319 155c0-25 18-44 40-44 14 0 27 8 34 21-4-1-8-2-12-2-22 0-40 11-62 25Z" fill="#89a77e"/><circle cx="359" cy="102" r="4" fill="#c49a4a"/></svg></div></section>
-<section id="fieldsView"><div class="search-panel"><svg class="search-icon" width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="q" class="search" placeholder="Search by field or heading." autocomplete="off" autocapitalize="off" spellcheck="false"><button class="clear" id="clearBtn" hidden>Clear</button></div><div class="summary"><span id="count">Loading fields.</span><span class="status"><span id="dot" class="dot"></span><span id="statusText">Connecting</span></span></div><div id="out" class="list"></div></section>
+<section id="fieldsView"><div class="search-panel"><svg class="search-icon" width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="q" class="search" placeholder="Search by field name…" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="clear" id="clearBtn" hidden>Clear</button></div><div class="summary"><span id="count">Loading fields…</span><span class="status"><span id="dot" class="dot"></span><span id="statusText">Connecting</span></span></div><div id="out" class="list"></div></section>
 <section id="activityView" hidden><div class="summary"><span>Recent activity</span><span id="activityStatus"></span></div><div id="activity" class="activity"></div></section>
 </main></div>
 <dialog id="dlg"><form class="form" id="fieldForm" method="dialog"><h2 id="formTitle">Add field</h2><p>Keep the field record clean and consistent for the crew.</p><label for="fn">Field name</label><input id="fn" type="text" required><label for="fh">Heading (degrees)</label><input id="fh" type="text" required inputmode="decimal"><label for="fd">Date planted</label><input id="fd" type="date"><div class="two"><div><label for="fa">Latitude</label><input id="fa" type="number" step="any" inputmode="decimal"></div><div><label for="fo">Longitude</label><input id="fo" type="number" step="any" inputmode="decimal"></div></div><div class="form-actions"><button type="button" class="cancel" id="cancelBtn">Cancel</button><button type="button" class="delete" id="deleteBtn" hidden>Delete</button><button type="submit" class="save">Save</button></div></form></dialog>
@@ -70,7 +70,7 @@ function visibleFields(){
   const q=normalize($('#q').value);
   if(!q)return fields.slice(0,80);
   const terms=q.split(' ').filter(Boolean);
-  return fields.filter(f=>terms.every(t=>normalize(f.name).includes(t)||normalize(f.heading).includes(t))).slice(0,80);
+  return fields.filter(f=>terms.every(t=>normalize(f.name).includes(t))).slice(0,80);
 }
 function render(){
   const q=$('#q').value.trim();
@@ -82,8 +82,8 @@ function render(){
     const open=openIds.has(f.id);
     const hasCoords=f.lat!=null&&f.lng!=null&&Number.isFinite(+f.lat)&&Number.isFinite(+f.lng);
     const coords=hasCoords?f.lat.toFixed(5)+', '+f.lng.toFixed(5):'Not saved';
-    const details='<div class="location-preview">'+(hasCoords?'<div class="map-shell"><div class="leaflet-map" id="map-'+f.id+'"></div><div class="map-toolbar"><button type="button" data-map-mode="sat" data-map="'+f.id+'">Satellite</button><button type="button" data-map-mode="map" data-map="'+f.id+'">Map</button></div><button type="button" class="map-recenter" data-recenter="'+f.id+'" aria-label="Recenter map">?</button></div>':'')+'<div class="location-overlay"><div class="detail-grid"><div class="detail"><label>Heading</label><b>'+esc(f.heading)+(Number.isFinite(+f.heading)?'�':'')+'</b></div><div class="detail"><label>Planted</label><b>'+esc(f.planted||'-')+'</b></div><div class="detail"><label>Coordinates</label><b>'+esc(coords)+'</b></div></div><div class="actions">'+(hasCoords?'<a class="action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(f.lat+','+f.lng)+'">Open map</a>':'')+'<button class="action primary" data-edit="'+f.id+'">Edit</button></div>'+(f.updated_by?'<div class="meta" style="margin-top:9px">Last changed by '+esc(f.updated_by)+'</div>':'')+'</div></div>';
-    return '<article class="card'+(open?' expanded':'')+'"><div class="card-main" data-open="'+f.id+'"><div><div class="name">'+esc(f.name)+'</div><div class="meta">'+esc(f.planted||'No planting date')+' � '+esc(coords)+'</div></div><div class="heading"><div class="degrees">'+esc(f.heading)+(Number.isFinite(+f.heading)?'�':'')+'</div><div class="direction">'+esc(direction(f.heading))+'</div></div></div>'+(open?details:'')+'</article>'
+    const details='<div class="location-preview">'+(hasCoords?'<div class="map-shell"><div class="leaflet-map" id="map-'+f.id+'"></div><div class="map-toolbar"><button type="button" data-map-mode="sat" data-map="'+f.id+'">Satellite</button><button type="button" data-map-mode="map" data-map="'+f.id+'">Map</button></div><button type="button" class="map-recenter" data-recenter="'+f.id+'" aria-label="Recenter map">?</button></div>':'')+'<div class="location-overlay"><div class="detail-grid"><div class="detail"><label>Heading</label><b>'+esc(f.heading)+(Number.isFinite(+f.heading)?'°':'')+'</b></div><div class="detail"><label>Planted</label><b>'+esc(f.planted||'-')+'</b></div><div class="detail"><label>Coordinates</label><b>'+esc(coords)+'</b></div></div><div class="actions">'+(hasCoords?'<a class="action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(f.lat+','+f.lng)+'">Open map</a>':'')+'<button class="action primary" data-edit="'+f.id+'">Edit</button></div>'+(f.updated_by?'<div class="meta" style="margin-top:9px">Last changed by '+esc(f.updated_by)+'</div>':'')+'</div></div>';
+    return '<article class="card'+(open?' expanded':'')+'"><div class="card-main" data-open="'+f.id+'"><div><div class="name">'+esc(f.name)+'</div><div class="meta">'+esc(f.planted||'No planting date')+' · '+esc(coords)+'</div></div><div class="heading"><div class="degrees">'+esc(f.heading)+(Number.isFinite(+f.heading)?'°':'')+'</div><div class="direction">'+esc(direction(f.heading))+'</div></div></div>'+(open?details:'')+'</article>'
   }).join('');
   document.querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>{const id=+el.dataset.open;openIds.has(id)?openIds.delete(id):openIds.add(id);render()});
   document.querySelectorAll('[data-edit]').forEach(el=>el.onclick=e=>{e.stopPropagation();openForm(+el.dataset.edit)});
@@ -109,7 +109,7 @@ function initFieldMap(f){
   const map=L.map(el,{zoomControl:true,scrollWheelZoom:true,dragging:true,doubleClickZoom:true,touchZoom:true}).setView(center,zoom);
   const layers=makeLayers(); layers[mapMode].addTo(map);
   const icon=L.divIcon({className:'',html:'<div class="heading-marker" style="transform:rotate('+((parseFloat(f.heading)||0))+'deg)"><div class="ring"></div><div class="arrow"></div><div class="core"></div></div>',iconSize:[42,42],iconAnchor:[21,21]});
-  L.marker([+f.lat,+f.lng],{icon}).addTo(map).bindTooltip(esc(f.name)+' � '+esc(f.heading)+'�',{direction:'top',offset:[0,-18]});
+  L.marker([+f.lat,+f.lng],{icon}).addTo(map).bindTooltip(esc(f.name)+' · '+esc(f.heading)+'°',{direction:'top',offset:[0,-18]});
   map.on('moveend zoomend',()=>saveMapState(f.id,map));
   maps.set(f.id,{map,layers});
   requestAnimationFrame(()=>map.invalidateSize());
@@ -134,39 +134,29 @@ async function load(){
     $('#retryLoad').onclick=load;
   }
 }
-let searchTimer;
-async function searchFields(){
+function searchFields(){
   const q=$('#q').value.trim();
   $('#clearBtn').hidden=!q;
-  if(!q){fields=[];$('#count').textContent='Ready to search';$('#out').innerHTML='<div class="empty"><strong>Search your field list</strong>Start typing a field name to see its heading, planting date and location.</div>';return}
-  $('#count').textContent='Searching.';$('#dot').classList.remove('bad');$('#statusText').textContent='Searching';
-  clearTimeout(searchTimer);
-  searchTimer=setTimeout(async()=>{
-    try{
-      const data=await api('fields?q='+encodeURIComponent(q));
-      if(!Array.isArray(data))throw new Error('Invalid field data returned');
-      fields=data;
-      $('#count').textContent=data.length+(data.length===100?'+':'')+' matching fields';
-      $('#dot').classList.remove('bad');$('#statusText').textContent='Database connected';
-      render();
-    }catch(e){
-      $('#count').textContent='Search failed';
-      $('#dot').classList.add('bad');$('#statusText').textContent='Connection error';
-      $('#out').innerHTML='<div class="empty"><strong>Couldn't search the field database</strong>'+esc(e.message)+'<br><br><button class="action primary" id="retry">Retry</button></div>';
-      $('#retry').onclick=searchFields;
-    }
-  },180);
+  $('#dot').classList.remove('bad');
+  $('#statusText').textContent='Database connected';
+  if(!q){
+    $('#count').textContent='Ready to search';
+    render();
+    return;
+  }
+  $('#count').textContent=visibleFields().length+' matching fields';
+  render();
 }
 function setUser(){
   user=localStorage.getItem('fieldUser')||'';
-  $('#who').textContent=user?user+' � field reference':'Field reference � planting & orientation';
+  $('#who').textContent=user?user+' · field reference':'Field reference · planting & orientation';
 }
 function ensureUser(){
   if(user)return true;
   const n=prompt('Your name (used only for the activity log):','');
   user=(n||'Guest').trim()||'Guest';
   localStorage.setItem('fieldUser',user);
-  $('#who').textContent=user+' � field reference';
+  $('#who').textContent=user+' · field reference';
   return true;
 }
 function openForm(id=null){
