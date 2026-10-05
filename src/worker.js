@@ -19,11 +19,11 @@ export default{async fetch(request,env){
 async function handle(request,env,a,b){
   const db=env.DB||env['field-headings'];
   if(!db)return json({error:'Database binding is not configured'},500);
+  if(a==='health'&&m==='GET'){try{const r=await db.prepare('SELECT COUNT(*) AS count FROM fields').first();return json({ok:true,fields:r?.count??0})}catch(e){return json({ok:false,error:e?.message||'Database health check failed'},500)}}
   const m=request.method;
   let who='unknown';try{who=decodeURIComponent(request.headers.get('x-user')||'unknown').slice(0,40)}catch{}
   const log=async(action,detail)=>{await db.prepare('INSERT INTO activity(user,action,detail) VALUES(?,?,?)').bind(who,action,detail).run()};
   try{
-    if(a==='health'&&m==='GET'){const r=await db.prepare('SELECT COUNT(*) AS count FROM fields').first();return json({ok:true,fields:r?.count??0})}
     if(a==='fields'&&m==='GET'){
       const q=new URL(request.url).searchParams.get('q')?.trim()||'';
       if(!q)return json((await db.prepare('SELECT * FROM fields ORDER BY name').all()).results);
@@ -49,7 +49,7 @@ async function handle(request,env,a,b){
     }
     if(a==='open'&&m==='POST'){const body=await request.json();await log(body.event==='installed'?'installed app':'opened app','');return json({ok:true})}
     if(a==='log'&&m==='GET'){
-      if(env.ADMIN_KEY&&request.headers.get('x-admin')!==env.ADMIN_KEY)return json({error:'denied'},403);
+      if(!env.ADMIN_KEY || request.headers.get('x-admin')!==env.ADMIN_KEY)return json({error:'denied'},403);
       return json((await db.prepare('SELECT * FROM activity ORDER BY id DESC LIMIT 200').all()).results);
     }
     return json({error:'Not found'},404);
