@@ -183,14 +183,25 @@ async function remove(){
   ensureUser();
   try{await api('fields/'+editId,{method:'DELETE'});closeDialog($('#dlg'));await load();toast('Field deleted')}catch(e){toast(e.message)}
 }
-async function loadActivity(){
+async function loadActivity(accessKey){
+  const key=accessKey===undefined?(localStorage.getItem('fieldAdmin')||''):accessKey;
   try{
-    const data=await api('log');
+    const response=await fetch('/api/log',{cache:'no-store',headers:{'x-admin':key,'x-user':encodeURIComponent(user)}});
+    const data=await response.json().catch(()=>null);
+    if(response.status===403){
+      $('#activityStatus').textContent=accessKey===undefined?'Access required':'Code not accepted';
+      $('#activity').innerHTML='<div class="empty"><strong>Administrator access required</strong><form id="adminKeyForm"><label for="adminKey">Access code</label><input id="adminKey" type="password" autocomplete="current-password" required style="width:100%;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:10px"><button type="submit" class="action primary">Unlock activity</button></form></div>';
+      $('#adminKeyForm').onsubmit=e=>{e.preventDefault();loadActivity($('#adminKey').value)};
+      $('#adminKey').focus();
+      return;
+    }
+    if(!response.ok||!Array.isArray(data))throw new Error((data&&data.error)||'Unable to load activity');
+    if(key)localStorage.setItem('fieldAdmin',key);
     $('#activityStatus').textContent=data.length+' entries';
     $('#activity').innerHTML=data.length?data.map(x=>'<div class="log"><b>'+esc(x.user)+'</b> '+esc(x.action)+' '+esc(x.detail)+'<small>'+new Date(String(x.at).replace(' ','T')+'Z').toLocaleString()+'</small></div>').join(''):'<div class="empty">No activity recorded yet.</div>';
   }catch(e){
-    $('#activityStatus').textContent='Restricted';
-    $('#activity').innerHTML='<div class="empty"><strong>Activity log</strong>Administrator access is required.</div>';
+    $('#activityStatus').textContent='Unavailable';
+    $('#activity').innerHTML='<div class="empty"><strong>Activity log</strong>'+esc(e.message)+'</div>';
   }
 }
 function setTab(next){
@@ -209,4 +220,4 @@ setUser();load();
 setInterval(()=>tab==='fields'&&load(),30000);
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="/fix.js?v=20261005-0700"></script></body></html
+<script src="/fix.js?v=20261005-0800"></script></body></html
