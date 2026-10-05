@@ -10,7 +10,7 @@ export default{async fetch(request,env){
       const headers=new Headers(asset.headers);headers.set('cache-control','no-store, max-age=0');
       return new Response(asset.body,{status:asset.status,statusText:asset.statusText,headers});
     }
-    if(url.pathname==='/manifest.webmanifest')return new Response("{\n  \"name\":\"Field Headings\",\n  \"short_name\":\"Headings\",\n  \"start_url\":\"/\",\n  \"scope\":\"/\",\n  \"display\":\"standalone\",\n  \"background_color\":\"#ecece7\",\n  \"theme_color\":\"#242522\",\n  \"icons\":[{\"src\":\"/icon.svg\",\"sizes\":\"any\",\"type\":\"image/svg+xml\",\"purpose\":\"any maskable\"}]\n}",{headers:{'content-type':'application/manifest+json','cache-control':'no-cache'}});
+    if(url.pathname==='/manifest.webmanifest')return new Response("{\n  \"name\":\"Field Headings\",\n  \"short_name\":\"Headings\",\n  \"start_url\":\"/?v=20261005-0200\",\n  \"scope\":\"/\",\n  \"display\":\"standalone\",\n  \"background_color\":\"#ecece7\",\n  \"theme_color\":\"#242522\",\n  \"icons\":[{\"src\":\"/icon.svg\",\"sizes\":\"any\",\"type\":\"image/svg+xml\",\"purpose\":\"any maskable\"}]\n}",{headers:{'content-type':'application/manifest+json','cache-control':'no-store, max-age=0'}});
     if(url.pathname==='/icon.svg')return new Response("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><rect width=\"100\" height=\"100\" rx=\"22\" fill=\"#242522\"/><path d=\"M27 67 66 28l9 9-39 39H27v-9Z\" fill=\"none\" stroke=\"#f4f4f0\" stroke-width=\"7\" stroke-linejoin=\"round\"/><path d=\"m53 37 10 10M38 52l10 10\" stroke=\"#bcbdb6\" stroke-width=\"5\" stroke-linecap=\"round\"/></svg>",{headers:{'content-type':'image/svg+xml','cache-control':'no-cache'}});
     return env.ASSETS.fetch(request);
   }
@@ -27,8 +27,10 @@ async function handle(request,env,a,b){
     if(a==='fields'&&m==='GET'){
       const q=new URL(request.url).searchParams.get('q')?.trim()||'';
       if(!q)return json((await db.prepare('SELECT * FROM fields ORDER BY name').all()).results);
-      const like='%'+q.replace(/[%_]/g,'$&')+'%';
-      return json((await db.prepare("SELECT * FROM fields WHERE name LIKE ? OR heading LIKE ? ORDER BY name LIMIT 100").bind(like,like).all()).results);
+      const escaped=q.replace(/[\\%_]/g,'\\const like='%'+q.replace(/[%_]/g,'$&')+'%';
+      return json((await db.prepare("SELECT * FROM fields WHERE name LIKE ? OR heading LIKE ? ORDER BY name LIMIT 100").bind(like,like).all()).results);');
+      const like='%'+escaped+'%';
+      return json((await db.prepare("SELECT * FROM fields WHERE (name LIKE ? ESCAPE '\\' OR heading LIKE ? ESCAPE '\\') ORDER BY name LIMIT 100").bind(like,like).all()).results);
     }
     if(a==='fields'&&m==='POST'){
       const f=await request.json();if(!f.name?.trim()||!f.heading?.trim())return json({error:'Field name and heading are required'},400);
