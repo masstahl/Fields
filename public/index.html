@@ -193,4 +193,27 @@ $('#fieldForm').onsubmit=e=>{e.preventDefault();save()};
 $('#fieldsTab').onclick=()=>setTab('fields');$('#activityTab').onclick=()=>setTab('activity');
 setUser();load();
 setInterval(()=>tab==='fields'&&load(),30000);
+var mapMode = localStorage.getItem('mapMode') || 'sat';
+function locationImage(lat, lng) {
+  const widthMeters = 915; // about 3000 ft across. Bigger number = zoomed out more
+  const heightMeters = widthMeters * 0.7;
+  const latDelta = heightMeters / 111320;
+  const lngDelta = widthMeters / (111320 * Math.cos(lat * Math.PI / 180));
+  const bbox = [lng - lngDelta / 2, lat - latDelta / 2, lng + lngDelta / 2, lat + latDelta / 2].join(',');
+  const layer = mapMode === 'map' ? 'World_Street_Map' : 'World_Imagery';
+  return 'https://server.arcgisonline.com/ArcGIS/rest/services/' + layer + '/MapServer/export?bbox=' + encodeURIComponent(bbox) + '&bboxSR=4326&size=1000,700&imageSR=4326&format=jpg&f=image';
+}
+(function () {
+  const s = document.querySelector('.summary');
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:6px;align-items:center;margin:0 2px 10px;font-size:11px;color:#68756c';
+  row.innerHTML = 'Map view <button class="action" id="mSat">Satellite</button><button class="action" id="mMap">Map</button>';
+  s.parentNode.insertBefore(row, s.nextSibling);
+  const paint = () => { $('#mSat').classList.toggle('primary', mapMode !== 'map'); $('#mMap').classList.toggle('primary', mapMode === 'map'); };
+  const pick = m => { mapMode = m; localStorage.setItem('mapMode', m); paint(); render(); };
+  $('#mSat').onclick = () => pick('sat');
+  $('#mMap').onclick = () => pick('map');
+  paint();
+})();
+
 </script><script src="/fix.js"></script></body></html
