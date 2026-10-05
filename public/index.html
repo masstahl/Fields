@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="/manifest.webmanifest?v=20261005-0700">
 <link rel="preconnect" href="https://unpkg.com">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3FQ7qYfX2hP7zY8x9Wm9Y0Q5n0A=" crossorigin="">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <link rel="apple-touch-icon" href="/icon.svg">
 <style>
 :root{--forest:#183f2a;--forest2:#28583b;--sage:#78946f;--cream:#f6f3e9;--paper:#fffdf8;--ink:#17231c;--muted:#68756c;--line:#dce1d8;--gold:#c49a4a;--danger:#9a514b;--shadow:0 18px 50px rgba(24,63,42,.10);--shadow-soft:0 8px 24px rgba(24,63,42,.07)}
@@ -18,9 +18,9 @@ nav{display:flex;gap:4px;margin-top:11px;border-top:1px solid rgba(24,63,42,.06)
 main{max-width:940px;margin:auto;padding:16px 16px 55px}.hero{position:relative;overflow:hidden;min-height:166px;border-radius:24px;background:linear-gradient(135deg,#173d29 0%,#235438 58%,#315f42 100%);color:white;padding:22px 20px;margin-bottom:14px;box-shadow:0 20px 46px rgba(24,63,42,.19);isolation:isolate}.hero:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 85% 20%,rgba(255,255,255,.12),transparent 30%),linear-gradient(90deg,transparent 45%,rgba(255,255,255,.025));pointer-events:none}.hero-copy{position:relative;z-index:2;max-width:54%}.kicker{font-size:10px;letter-spacing:.16em;font-weight:800;color:#cbd9c7}.hero h2{font-size:27px;line-height:1.02;letter-spacing:-.045em;margin:8px 0 7px}.hero p{font-size:12px;line-height:1.45;color:#d9e3d7;margin:0}.hero-art{position:absolute;right:-4px;bottom:-4px;width:49%;height:100%}.hero-art svg{width:100%;height:100%}
 .search-panel{position:relative;margin-top:-3px;margin-bottom:14px}.search{width:100%;height:54px;border:1px solid rgba(24,63,42,.12);border-radius:16px;background:rgba(255,253,248,.96);padding:0 76px 0 46px;outline:0;font-size:16px;color:var(--ink);box-shadow:0 10px 28px rgba(24,63,42,.075);transition:border-color .18s,box-shadow .18s}.search:focus{border-color:#a9b8a7;box-shadow:0 0 0 4px rgba(120,148,111,.14)}.search-icon{position:absolute;left:16px;top:17px;color:#748078;pointer-events:none}.clear{position:absolute;right:9px;top:9px;height:36px;border:0;border-radius:10px;background:#edf0e9;color:#647067;padding:0 10px;font-size:12px;font-weight:750}
 .summary{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 9px;font-size:11px;color:var(--muted)}.status{display:flex;align-items:center;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:#6d956b}.dot.bad{background:#a95a53}
-.list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.card{background:var(--paper);border:1px solid rgba(24,63,42,.095);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;transition:transform .18s,box-shadow .18s,border-color .18s}.card:hover{transform:translateY(-1px);box-shadow:0 20px 48px rgba(24,63,42,.13);border-color:rgba(24,63,42,.15)}.card-main{display:flex;align-items:center;justify-content:space-between;gap:13px;padding:16px;min-height:88px;position:relative}.card-main:after{content:"";width:6px;height:6px;border-right:1.5px solid #839087;border-bottom:1.5px solid #839087;transform:rotate(45deg);transition:transform .18s,opacity .18s;opacity:.65}.card:has(.location-preview) .card-main:after{transform:rotate(225deg);opacity:.85}.card-main:active{background:#f8f7f0}.name{font-size:16px;font-weight:760;letter-spacing:-.02em}.meta{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.35}.heading{text-align:right;min-width:67px}.degrees{font-size:22px;font-weight:800;letter-spacing:-.05em;color:var(--forest);font-variant-numeric:tabular-nums}.direction{font-size:10px;color:var(--sage);font-weight:750;text-transform:uppercase;letter-spacing:.08em}.location-preview{position:relative;min-height:250px;overflow:hidden;border-top:1px solid #e8ebe3;background:#dfe5dc;animation:reveal .22s ease-out}@keyframes reveal{from{opacity:.35;transform:translateY(-4px)}to{opacity:1;transform:none}}.location-map{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(.9) contrast(.94);transform:scale(1.015)}.location-map::after{content:"";position:absolute;inset:0;background:rgba(244,244,237,.34)}.location-overlay{position:relative;margin:14px;z-index:1;background:rgba(250,249,243,.88);border:1px solid rgba(255,255,255,.8);border-radius:15px;padding:13px;box-shadow:0 10px 28px rgba(24,63,42,.13);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}.location-pin{position:absolute;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);border-radius:50% 50% 50% 0;background:var(--forest);border:3px solid rgba(255,255,255,.95);box-shadow:0 3px 12px rgba(0,0,0,.28);rotate:-45deg;z-index:2}.location-pin::after{content:"";position:absolute;inset:4px;border-radius:50%;background:#fff}.details{border-top:1px solid #e8ebe3;padding:13px 15px 15px;background:#faf9f3}.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}.detail{background:rgba(255,255,255,.84);border:1px solid rgba(24,63,42,.09);border-radius:10px;padding:9px;box-shadow:0 2px 8px rgba(24,63,42,.025)}.detail label{display:block;text-transform:uppercase;letter-spacing:.08em;font-size:8px;font-weight:800;color:#89928b;margin-bottom:4px}.detail b{font-size:12px;font-weight:700}.actions{display:flex;gap:7px;flex-wrap:wrap}.action{border:1px solid #d7ddd4;background:rgba(255,255,255,.92);color:#3e4c43;border-radius:9px;padding:8px 11px;font-size:11px;font-weight:750;text-decoration:none;transition:background .15s,transform .15s,border-color .15s}.action:hover{background:#f5f6f0;border-color:#c8d0c7}.action:active{transform:scale(.98)}.action.primary{background:var(--forest);color:white;border-color:var(--forest)}.action.danger{color:var(--danger)}
+.list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.card{background:var(--paper);border:1px solid rgba(24,63,42,.095);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;transition:transform .18s,box-shadow .18s,border-color .18s}.card:hover{transform:translateY(-1px);box-shadow:0 20px 48px rgba(24,63,42,.13);border-color:rgba(24,63,42,.15)}.card-main{display:flex;align-items:center;justify-content:space-between;gap:13px;padding:16px;min-height:88px;position:relative}.card-main:after{content:"";width:6px;height:6px;border-right:1.5px solid #839087;border-bottom:1.5px solid #839087;transform:rotate(45deg);transition:transform .18s,opacity .18s;opacity:.65}.card.expanded .card-main:after{transform:rotate(225deg);opacity:.85}.card-main:active{background:#f8f7f0}.name{font-size:16px;font-weight:760;letter-spacing:-.02em}.meta{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.35}.heading{text-align:right;min-width:67px}.degrees{font-size:22px;font-weight:800;letter-spacing:-.05em;color:var(--forest);font-variant-numeric:tabular-nums}.direction{font-size:10px;color:var(--sage);font-weight:750;text-transform:uppercase;letter-spacing:.08em}.location-preview{position:relative;min-height:250px;overflow:hidden;border-top:1px solid #e8ebe3;background:#dfe5dc;animation:reveal .22s ease-out}@keyframes reveal{from{opacity:.35;transform:translateY(-4px)}to{opacity:1;transform:none}}.location-map{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(.9) contrast(.94);transform:scale(1.015)}.location-map::after{content:"";position:absolute;inset:0;background:rgba(244,244,237,.34)}.location-overlay{position:relative;margin:14px;z-index:1;background:rgba(250,249,243,.88);border:1px solid rgba(255,255,255,.8);border-radius:15px;padding:13px;box-shadow:0 10px 28px rgba(24,63,42,.13);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}.location-pin{position:absolute;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);border-radius:50% 50% 50% 0;background:var(--forest);border:3px solid rgba(255,255,255,.95);box-shadow:0 3px 12px rgba(0,0,0,.28);rotate:-45deg;z-index:2}.location-pin::after{content:"";position:absolute;inset:4px;border-radius:50%;background:#fff}.details{border-top:1px solid #e8ebe3;padding:13px 15px 15px;background:#faf9f3}.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}.detail{background:rgba(255,255,255,.84);border:1px solid rgba(24,63,42,.09);border-radius:10px;padding:9px;box-shadow:0 2px 8px rgba(24,63,42,.025)}.detail label{display:block;text-transform:uppercase;letter-spacing:.08em;font-size:8px;font-weight:800;color:#89928b;margin-bottom:4px}.detail b{font-size:12px;font-weight:700}.actions{display:flex;gap:7px;flex-wrap:wrap}.action{border:1px solid #d7ddd4;background:rgba(255,255,255,.92);color:#3e4c43;border-radius:9px;padding:8px 11px;font-size:11px;font-weight:750;text-decoration:none;transition:background .15s,transform .15s,border-color .15s}.action:hover{background:#f5f6f0;border-color:#c8d0c7}.action:active{transform:scale(.98)}.action.primary{background:var(--forest);color:white;border-color:var(--forest)}.action.danger{color:var(--danger)}
 .empty{background:rgba(255,253,248,.72);border:1px dashed #cbd3c8;border-radius:18px;text-align:center;padding:43px 20px;color:var(--muted);grid-column:1/-1;box-shadow:var(--shadow-soft)}.empty strong{display:block;color:#334239;font-size:15px;margin-bottom:5px}.activity{background:var(--paper);border:1px solid rgba(24,63,42,.10);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}.log{padding:13px 15px;border-bottom:1px solid #e8ebe3;font-size:12px}.log:last-child{border-bottom:0}.log b{font-weight:800}.log small{display:block;color:var(--muted);margin-top:4px;font-size:10px}
-dialog{width:min(450px,calc(100% - 28px));border:0;border-radius:22px;padding:0;background:var(--paper);box-shadow:0 28px 80px rgba(0,0,0,.25);color:var(--ink)}dialog::backdrop{background:rgba(12,35,22,.48);backdrop-filter:blur(4px)}.form{padding:21px}.form h2{margin:0;font-size:21px;letter-spacing:-.04em}.form p{margin:5px 0 17px;color:var(--muted);font-size:11px}label{display:block;color:#68736b;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin:12px 0 6px}input[type=text],input[type=date],input[type=number]{width:100%;height:46px;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:0 12px;outline:0;color:var(--ink)}input:focus{border-color:#9eb09d;box-shadow:0 0 0 3px rgba(120,148,111,.14)}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.form-actions{display:flex;gap:8px;margin-top:20px}.form-actions button{flex:1;height:44px;border-radius:11px;border:1px solid var(--line);font-weight:700}.save{background:var(--forest);border-color:var(--forest)!important;color:#fff}.delete{background:#fff;color:var(--danger)}.cancel{background:#f0f1eb}.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--forest);color:white;border-radius:12px;padding:11px 15px;font-size:12px;font-weight:750;transition:.2s;z-index:50;box-shadow:0 12px 35px rgba(0,0,0,.22)}.toast.show{opacity:1;transform:translate(-50%,0)}
+dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:0;margin:auto;max-height:calc(100% - 32px);overflow:auto}dialog{width:min(450px,calc(100% - 28px));border:0;border-radius:22px;padding:0;background:var(--paper);box-shadow:0 28px 80px rgba(0,0,0,.25);color:var(--ink)}dialog::backdrop{background:rgba(12,35,22,.48);backdrop-filter:blur(4px)}.form{padding:21px}.form h2{margin:0;font-size:21px;letter-spacing:-.04em}.form p{margin:5px 0 17px;color:var(--muted);font-size:11px}label{display:block;color:#68736b;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin:12px 0 6px}input[type=text],input[type=date],input[type=number]{width:100%;height:46px;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:0 12px;outline:0;color:var(--ink)}input:focus{border-color:#9eb09d;box-shadow:0 0 0 3px rgba(120,148,111,.14)}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.form-actions{display:flex;gap:8px;margin-top:20px}.form-actions button{flex:1;height:44px;border-radius:11px;border:1px solid var(--line);font-weight:700}.save{background:var(--forest);border-color:var(--forest)!important;color:#fff}.delete{background:#fff;color:var(--danger)}.cancel{background:#f0f1eb}.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--forest);color:white;border-radius:12px;padding:11px 15px;font-size:12px;font-weight:750;transition:.2s;z-index:50;box-shadow:0 12px 35px rgba(0,0,0,.22)}.toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:650px){.list{grid-template-columns:1fr}.hero{min-height:182px}.hero-copy{max-width:62%}.hero h2{font-size:25px}.hero-art{width:57%}.detail-grid{grid-template-columns:1fr 1fr}.brand .sub{display:none}}
 @media(max-width:390px){main{padding-left:12px;padding-right:12px}.hero{padding:19px 17px}.hero-copy{max-width:65%}.hero-art{width:60%}.hero h2{font-size:23px}.add{padding:10px 11px}}header{background:#f6f3e9!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 .location-preview{min-height:0!important;display:flex;flex-direction:column;background:#fffdf8}.map-shell{position:relative;height:280px;background:#e6e8e2;overflow:hidden}.leaflet-map{position:absolute;inset:0}.map-toolbar{position:absolute;z-index:500;top:10px;right:10px;display:flex;gap:5px}.map-toolbar button{border:1px solid rgba(255,255,255,.85);background:rgba(255,253,248,.92);color:#344139;border-radius:9px;padding:7px 9px;font-size:10px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.12)}.map-toolbar button.active{background:#28362d;color:#fff;border-color:#28362d}.map-recenter{position:absolute;z-index:500;bottom:10px;right:10px;width:36px;height:36px;border:1px solid rgba(255,255,255,.85);border-radius:10px;background:rgba(255,253,248,.94);color:#344139;box-shadow:0 5px 14px rgba(0,0,0,.14);font-size:16px}.heading-marker{width:42px;height:42px;position:relative}.heading-marker .ring{position:absolute;inset:3px;border-radius:50%;background:#fffdf8;border:2px solid #28362d;box-shadow:0 3px 12px rgba(0,0,0,.24)}.heading-marker .arrow{position:absolute;left:17px;top:4px;width:8px;height:24px;background:#28362d;clip-path:polygon(50% 0,100% 42%,68% 42%,68% 100%,32% 100%,32% 42%,0 42%)}.heading-marker .core{position:absolute;left:17px;top:17px;width:8px;height:8px;border-radius:50%;background:#fffdf8}.leaflet-control-zoom{border:0!important;box-shadow:0 5px 14px rgba(0,0,0,.13)!important}.leaflet-control-zoom a{color:#344139!important;background:#fffdf8!important;border:0!important}.leaflet-control-attribution{font-size:8px!important;background:rgba(255,253,248,.76)!important}
@@ -33,16 +33,18 @@ dialog{width:min(450px,calc(100% - 28px));border:0;border-radius:22px;padding:0;
 </head>
 <body>
 <div class="app">
-<header><div class="header-inner"><div class="brand-row"><div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M8 34c8-1 14-8 16-20 7 4 10 10 7 18-3 8-12 10-23 2Z" fill="#d8b35f"/><path d="M10 35c10-2 16-8 21-20" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M27 12c4-4 8-5 12-4-1 5-4 8-10 8" fill="#89a77e"/></svg></div><div><h1>Field Headings</h1><div class="sub" id="who">Field reference · planting & orientation</div></div></div><button class="add" id="addBtn">+ Add field</button></div><nav><button id="fieldsTab" class="tab active">Fields</button><button id="activityTab" class="tab">Activity</button></nav></div></header>
+<header><div class="header-inner"><div class="brand-row"><div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M8 34c8-1 14-8 16-20 7 4 10 10 7 18-3 8-12 10-23 2Z" fill="#d8b35f"/><path d="M10 35c10-2 16-8 21-20" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M27 12c4-4 8-5 12-4-1 5-4 8-10 8" fill="#89a77e"/></svg></div><div><h1>Field Headings</h1><div class="sub" id="who">Field reference � planting & orientation</div></div></div><button class="add" id="addBtn">+ Add field</button></div><nav><button id="fieldsTab" class="tab active">Fields</button><button id="activityTab" class="tab">Activity</button></nav></div></header>
 <main>
 <section class="hero"><div class="hero-copy"><div class="kicker">FIELD REFERENCE</div><h2>Know the field.<br>Plant with confidence.</h2><p>Quickly confirm heading, planting date and location before you put equipment in the ground.</p></div><div class="hero-art" aria-hidden="true"><svg viewBox="0 0 420 190" preserveAspectRatio="none"><path d="M190 0h230v190H0c75-24 125-54 148-88 18-27 25-61 42-102Z" fill="#28583b"/><g opacity=".42" stroke="#b8cdb3" stroke-width="3" fill="none"><path d="M182 190C230 148 246 72 260 0"/><path d="M215 190C263 145 280 67 292 0"/><path d="M248 190C294 141 311 63 323 0"/><path d="M281 190C325 138 342 61 354 0"/><path d="M314 190C356 136 373 60 384 0"/></g><path d="M319 155c0-25 18-44 40-44 14 0 27 8 34 21-4-1-8-2-12-2-22 0-40 11-62 25Z" fill="#89a77e"/><circle cx="359" cy="102" r="4" fill="#c49a4a"/></svg></div></section>
-<section id="fieldsView"><div class="search-panel"><svg class="search-icon" width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="q" class="search" placeholder="Search by field or heading…" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="clear" id="clearBtn" hidden>Clear</button></div><div class="summary"><span id="count">Loading fields…</span><span class="status"><span id="dot" class="dot"></span><span id="statusText">Connecting</span></span></div><div id="out" class="list"></div></section>
+<section id="fieldsView"><div class="search-panel"><svg class="search-icon" width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="q" class="search" placeholder="Search by field or heading." autocomplete="off" autocapitalize="off" spellcheck="false"><button class="clear" id="clearBtn" hidden>Clear</button></div><div class="summary"><span id="count">Loading fields.</span><span class="status"><span id="dot" class="dot"></span><span id="statusText">Connecting</span></span></div><div id="out" class="list"></div></section>
 <section id="activityView" hidden><div class="summary"><span>Recent activity</span><span id="activityStatus"></span></div><div id="activity" class="activity"></div></section>
 </main></div>
 <dialog id="dlg"><form class="form" id="fieldForm" method="dialog"><h2 id="formTitle">Add field</h2><p>Keep the field record clean and consistent for the crew.</p><label for="fn">Field name</label><input id="fn" type="text" required><label for="fh">Heading (degrees)</label><input id="fh" type="text" required inputmode="decimal"><label for="fd">Date planted</label><input id="fd" type="date"><div class="two"><div><label for="fa">Latitude</label><input id="fa" type="number" step="any" inputmode="decimal"></div><div><label for="fo">Longitude</label><input id="fo" type="number" step="any" inputmode="decimal"></div></div><div class="form-actions"><button type="button" class="cancel" id="cancelBtn">Cancel</button><button type="button" class="delete" id="deleteBtn" hidden>Delete</button><button type="submit" class="save">Save</button></div></form></dialog>
 <div id="toast" class="toast"></div>
 <script>
 const $=s=>document.querySelector(s);
+function showDialog(el){if(typeof el.showModal==='function')el.showModal();else{el.setAttribute('open','');el.setAttribute('role','dialog');el.setAttribute('aria-modal','true')}}
+function closeDialog(el){if(typeof el.close==='function')el.close();else el.removeAttribute('open')}
 let fields=[],tab='fields',editId=null,openIds=new Set(),user=localStorage.getItem('fieldUser')||'';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -63,7 +65,7 @@ const api=async(path,options={})=>{
 };
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),2200)}
 function direction(v){const n=parseFloat(v);if(!Number.isFinite(n))return '';return ['N','NE','E','SE','S','SW','W','NW'][Math.round(((n%360)+360)%360/45)%8]}
-function normalize(v){return String(v??'').toLowerCase().normalize('NFKD').replace(/[’']/g,"'").replace(/[–—]/g,'-').replace(/\s+/g,' ').trim()}
+function normalize(v){return String(v??'').toLowerCase().normalize('NFKD').replace(/['']/g,"'").replace(/[--]/g,'-').replace(/\s+/g,' ').trim()}
 function visibleFields(){
   const q=normalize($('#q').value);
   if(!q)return fields.slice(0,80);
@@ -80,8 +82,8 @@ function render(){
     const open=openIds.has(f.id);
     const hasCoords=f.lat!=null&&f.lng!=null&&Number.isFinite(+f.lat)&&Number.isFinite(+f.lng);
     const coords=hasCoords?f.lat.toFixed(5)+', '+f.lng.toFixed(5):'Not saved';
-    const details='<div class="location-preview">'+(hasCoords?'<div class="map-shell"><div class="leaflet-map" id="map-'+f.id+'"></div><div class="map-toolbar"><button type="button" data-map-mode="sat" data-map="'+f.id+'">Satellite</button><button type="button" data-map-mode="map" data-map="'+f.id+'">Map</button></div><button type="button" class="map-recenter" data-recenter="'+f.id+'" aria-label="Recenter map">⌾</button></div>':'')+'<div class="location-overlay"><div class="detail-grid"><div class="detail"><label>Heading</label><b>'+esc(f.heading)+(Number.isFinite(+f.heading)?'°':'')+'</b></div><div class="detail"><label>Planted</label><b>'+esc(f.planted||'—')+'</b></div><div class="detail"><label>Coordinates</label><b>'+esc(coords)+'</b></div></div><div class="actions">'+(hasCoords?'<a class="action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(f.lat+','+f.lng)+'">Open map</a>':'')+'<button class="action primary" data-edit="'+f.id+'">Edit</button></div>'+(f.updated_by?'<div class="meta" style="margin-top:9px">Last changed by '+esc(f.updated_by)+'</div>':'')+'</div></div>';
-    return '<article class="card"><div class="card-main" data-open="'+f.id+'"><div><div class="name">'+esc(f.name)+'</div><div class="meta">'+esc(f.planted||'No planting date')+' · '+esc(coords)+'</div></div><div class="heading"><div class="degrees">'+esc(f.heading)+(Number.isFinite(+f.heading)?'°':'')+'</div><div class="direction">'+esc(direction(f.heading))+'</div></div></div>'+(open?details:'')+'</article>'
+    const details='<div class="location-preview">'+(hasCoords?'<div class="map-shell"><div class="leaflet-map" id="map-'+f.id+'"></div><div class="map-toolbar"><button type="button" data-map-mode="sat" data-map="'+f.id+'">Satellite</button><button type="button" data-map-mode="map" data-map="'+f.id+'">Map</button></div><button type="button" class="map-recenter" data-recenter="'+f.id+'" aria-label="Recenter map">?</button></div>':'')+'<div class="location-overlay"><div class="detail-grid"><div class="detail"><label>Heading</label><b>'+esc(f.heading)+(Number.isFinite(+f.heading)?'�':'')+'</b></div><div class="detail"><label>Planted</label><b>'+esc(f.planted||'-')+'</b></div><div class="detail"><label>Coordinates</label><b>'+esc(coords)+'</b></div></div><div class="actions">'+(hasCoords?'<a class="action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(f.lat+','+f.lng)+'">Open map</a>':'')+'<button class="action primary" data-edit="'+f.id+'">Edit</button></div>'+(f.updated_by?'<div class="meta" style="margin-top:9px">Last changed by '+esc(f.updated_by)+'</div>':'')+'</div></div>';
+    return '<article class="card'+(open?' expanded':'')+'"><div class="card-main" data-open="'+f.id+'"><div><div class="name">'+esc(f.name)+'</div><div class="meta">'+esc(f.planted||'No planting date')+' � '+esc(coords)+'</div></div><div class="heading"><div class="degrees">'+esc(f.heading)+(Number.isFinite(+f.heading)?'�':'')+'</div><div class="direction">'+esc(direction(f.heading))+'</div></div></div>'+(open?details:'')+'</article>'
   }).join('');
   document.querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>{const id=+el.dataset.open;openIds.has(id)?openIds.delete(id):openIds.add(id);render()});
   document.querySelectorAll('[data-edit]').forEach(el=>el.onclick=e=>{e.stopPropagation();openForm(+el.dataset.edit)});
@@ -107,7 +109,7 @@ function initFieldMap(f){
   const map=L.map(el,{zoomControl:true,scrollWheelZoom:true,dragging:true,doubleClickZoom:true,touchZoom:true}).setView(center,zoom);
   const layers=makeLayers(); layers[mapMode].addTo(map);
   const icon=L.divIcon({className:'',html:'<div class="heading-marker" style="transform:rotate('+((parseFloat(f.heading)||0))+'deg)"><div class="ring"></div><div class="arrow"></div><div class="core"></div></div>',iconSize:[42,42],iconAnchor:[21,21]});
-  L.marker([+f.lat,+f.lng],{icon}).addTo(map).bindTooltip(esc(f.name)+' · '+esc(f.heading)+'°',{direction:'top',offset:[0,-18]});
+  L.marker([+f.lat,+f.lng],{icon}).addTo(map).bindTooltip(esc(f.name)+' � '+esc(f.heading)+'�',{direction:'top',offset:[0,-18]});
   map.on('moveend zoomend',()=>saveMapState(f.id,map));
   maps.set(f.id,{map,layers});
   requestAnimationFrame(()=>map.invalidateSize());
@@ -115,9 +117,9 @@ function initFieldMap(f){
 function destroyClosedMaps(){for(const [id,obj] of maps){if(!document.getElementById('map-'+id)){obj.map.remove();maps.delete(id)}}}
 function initVisibleMaps(){for(const f of fields){if(openIds.has(f.id)&&f.lat!=null&&f.lng!=null)initFieldMap(f)}destroyClosedMaps()}
 async function load(){
-  $('#count').textContent='Connecting to database…';
+  $('#count').textContent='Connecting to database.';
   $('#dot').classList.remove('bad');$('#statusText').textContent='Connecting';
-  $('#out').innerHTML='<div class="empty"><strong>Connecting to the field database…</strong><div style="margin-top:8px">Please wait.</div></div>';
+  $('#out').innerHTML='<div class="empty"><strong>Connecting to the field database.</strong><div style="margin-top:8px">Please wait.</div></div>';
   try{
     const data=await api('fields');
     if(!Array.isArray(data))throw new Error('The server returned an invalid field list.');
@@ -128,7 +130,7 @@ async function load(){
   }catch(e){
     $('#count').textContent='Unable to load fields';
     $('#dot').classList.add('bad');$('#statusText').textContent='Connection error';
-    $('#out').innerHTML='<div class="empty"><strong>Couldn’t load the field database</strong><div style="margin-top:8px">'+esc(e.message)+'</div><div style="margin-top:16px"><button class="action primary" id="retryLoad">Retry</button></div></div>';
+    $('#out').innerHTML='<div class="empty"><strong>Couldn't load the field database</strong><div style="margin-top:8px">'+esc(e.message)+'</div><div style="margin-top:16px"><button class="action primary" id="retryLoad">Retry</button></div></div>';
     $('#retryLoad').onclick=load;
   }
 }
@@ -137,7 +139,7 @@ async function searchFields(){
   const q=$('#q').value.trim();
   $('#clearBtn').hidden=!q;
   if(!q){fields=[];$('#count').textContent='Ready to search';$('#out').innerHTML='<div class="empty"><strong>Search your field list</strong>Start typing a field name to see its heading, planting date and location.</div>';return}
-  $('#count').textContent='Searching…';$('#dot').classList.remove('bad');$('#statusText').textContent='Searching';
+  $('#count').textContent='Searching.';$('#dot').classList.remove('bad');$('#statusText').textContent='Searching';
   clearTimeout(searchTimer);
   searchTimer=setTimeout(async()=>{
     try{
@@ -150,21 +152,21 @@ async function searchFields(){
     }catch(e){
       $('#count').textContent='Search failed';
       $('#dot').classList.add('bad');$('#statusText').textContent='Connection error';
-      $('#out').innerHTML='<div class="empty"><strong>Couldn’t search the field database</strong>'+esc(e.message)+'<br><br><button class="action primary" id="retry">Retry</button></div>';
+      $('#out').innerHTML='<div class="empty"><strong>Couldn't search the field database</strong>'+esc(e.message)+'<br><br><button class="action primary" id="retry">Retry</button></div>';
       $('#retry').onclick=searchFields;
     }
   },180);
 }
 function setUser(){
   user=localStorage.getItem('fieldUser')||'';
-  $('#who').textContent=user?user+' · field reference':'Field reference · planting & orientation';
+  $('#who').textContent=user?user+' � field reference':'Field reference � planting & orientation';
 }
 function ensureUser(){
   if(user)return true;
   const n=prompt('Your name (used only for the activity log):','');
   user=(n||'Guest').trim()||'Guest';
   localStorage.setItem('fieldUser',user);
-  $('#who').textContent=user+' · field reference';
+  $('#who').textContent=user+' � field reference';
   return true;
 }
 function openForm(id=null){
@@ -175,7 +177,7 @@ function openForm(id=null){
   $('#fh').value=f.heading??'';
   $('#fd').value=f.planted||new Date().toISOString().slice(0,10);
   $('#fa').value=f.lat??'';$('#fo').value=f.lng??'';
-  $('#deleteBtn').hidden=!id;$('#dlg').showModal();
+  $('#deleteBtn').hidden=!id;showDialog($('#dlg'));
 }
 async function save(){
   ensureUser();
@@ -183,13 +185,13 @@ async function save(){
   if(!body.name||!body.heading)return toast('Field name and heading are required');
   try{
     await api(editId?'fields/'+editId:'fields',{method:editId?'PUT':'POST',body:JSON.stringify(body)});
-    $('#dlg').close();await load();toast(editId?'Field updated':'Field added');
+    closeDialog($('#dlg'));await load();toast(editId?'Field updated':'Field added');
   }catch(e){toast(e.message)}
 }
 async function remove(){
   if(!editId||!confirm('Delete this field? The deletion will remain in the activity log.'))return;
   ensureUser();
-  try{await api('fields/'+editId,{method:'DELETE'});$('#dlg').close();await load();toast('Field deleted')}catch(e){toast(e.message)}
+  try{await api('fields/'+editId,{method:'DELETE'});closeDialog($('#dlg'));await load();toast('Field deleted')}catch(e){toast(e.message)}
 }
 async function loadActivity(){
   try{
@@ -209,7 +211,7 @@ function setTab(next){
 $('#q').oninput=searchFields;
 $('#clearBtn').onclick=async()=>{$('#q').value='';$('#clearBtn').hidden=true;await load();$('#q').focus()};
 $('#addBtn').onclick=()=>openForm();
-$('#cancelBtn').onclick=()=>$('#dlg').close();
+$('#cancelBtn').onclick=()=>closeDialog($('#dlg'));
 $('#deleteBtn').onclick=remove;
 $('#fieldForm').onsubmit=e=>{e.preventDefault();save()};
 $('#fieldsTab').onclick=()=>setTab('fields');$('#activityTab').onclick=()=>setTab('activity');
@@ -217,4 +219,4 @@ setUser();load();
 setInterval(()=>tab==='fields'&&load(),30000);
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="/fix.js?v=20261005-0600"></script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("/service-worker.js?v=20261005-0700",{scope:"/"}).then(r=>r.update()).catch(()=>{}));}</script></body></html
+<script src="/fix.js?v=20261005-0700"></script></body></html
