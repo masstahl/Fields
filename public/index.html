@@ -40,12 +40,19 @@ let fields=[],tab='fields',editId=null,openIds=new Set(),user=localStorage.getIt
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api=async(path,options={})=>{
-  const headers={'content-type':'application/json',...(options.headers||{})};
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),10000);
+  const headers={...(options.method&&options.method!=='GET'?{'content-type':'application/json'}:{}),...(options.headers||{})};
   if(user)headers['x-user']=encodeURIComponent(user);
-  const r=await fetch('/api/'+path,{...options,headers});
-  let data=null; try{data=await r.json()}catch{}
-  if(!r.ok)throw new Error(data?.error||('Request failed ('+r.status+')'));
-  return data;
+  try{
+    const r=await fetch('/api/'+path,{...options,headers,cache:'no-store',signal:controller.signal});
+    let data=null; try{data=await r.json()}catch{}
+    if(!r.ok)throw new Error(data?.error||('Request failed ('+r.status+')'));
+    return data;
+  }catch(e){
+    if(e.name==='AbortError')throw new Error('The field database timed out. Tap Retry.');
+    throw e;
+  }finally{clearTimeout(timer)}
 };
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),2200)}
 function direction(v){const n=parseFloat(v);if(!Number.isFinite(n))return '';return ['N','NE','E','SE','S','SW','W','NW'][Math.round(((n%360)+360)%360/45)%8]}
@@ -81,19 +88,32 @@ function locationImage(lat,lng){
   return 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox='+encodeURIComponent(bbox)+'&bboxSR=4326&size=1200,520&imageSR=4326&format=jpg&f=image';
 }
 async function load(){
-  try{
-    const data=await api('fields');
-    if(!Array.isArray(data))throw new Error('Invalid field data returned');
-    fields=data;
-    $('#count').textContent=fields.length+' fields available';
-    $('#dot').classList.remove('bad');$('#statusText').textContent='Database connected';
-    render();
-  }catch(e){
-    $('#count').textContent='Unable to load fields';
-    $('#dot').classList.add('bad');$('#statusText').textContent='Connection error';
-    $('#out').innerHTML='<div class="empty"><strong>Couldn’t load the field database</strong>'+esc(e.message)+'<br><br><button class="action primary" id="retry">Retry</button></div>';
-    $('#retry').onclick=load;
-  }
+  $('#count').textContent='Ready to search';
+  $('#dot').classList.remove('bad');$('#statusText').textContent='Database ready';
+  render();
+}
+let searchTimer;
+async function searchFields(){
+  const q=$('#q').value.trim();
+  $('#clearBtn').hidden=!q;
+  if(!q){fields=[];$('#count').textContent='Ready to search';$('#out').innerHTML='<div class="empty"><strong>Search your field list</strong>Start typing a field name to see its heading, planting date and location.</div>';return}
+  $('#count').textContent='Searching…';$('#dot').classList.remove('bad');$('#statusText').textContent='Searching';
+  clearTimeout(searchTimer);
+  searchTimer=setTimeout(async()=>{
+    try{
+      const data=await api('fields?q='+encodeURIComponent(q));
+      if(!Array.isArray(data))throw new Error('Invalid field data returned');
+      fields=data;
+      $('#count').textContent=data.length+(data.length===100?'+':'')+' matching fields';
+      $('#dot').classList.remove('bad');$('#statusText').textContent='Database connected';
+      render();
+    }catch(e){
+      $('#count').textContent='Search failed';
+      $('#dot').classList.add('bad');$('#statusText').textContent='Connection error';
+      $('#out').innerHTML='<div class="empty"><strong>Couldn’t search the field database</strong>'+esc(e.message)+'<br><br><button class="action primary" id="retry">Retry</button></div>';
+      $('#retry').onclick=searchFields;
+    }
+  },180);
 }
 function setUser(){
   user=localStorage.getItem('fieldUser')||'';
@@ -146,7 +166,7 @@ function setTab(next){
   $('#fieldsView').hidden=next!=='fields';$('#activityView').hidden=next!=='activity';
   if(next==='activity')loadActivity();
 }
-$('#q').oninput=render;
+$('#q').oninput=searchFields;
 $('#clearBtn').onclick=()=>{$('#q').value='';render();$('#q').focus()};
 $('#addBtn').onclick=()=>openForm();
 $('#cancelBtn').onclick=()=>$('#dlg').close();
