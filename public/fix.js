@@ -12,7 +12,7 @@
 
   // If the main script never started, find out why
   setTimeout(async () => {
-    const stuck = typeof load !== 'function' || document.getElementById('count').textContent === 'Loading fields…';
+    const stuck = typeof load !== 'function' || document.getElementById('count').textContent.indexOf('Loading fields') === 0;
     if (!stuck) return;
     try {
       const h = await (await fetch('/?x=' + Date.now(), { cache: 'no-store' })).text();
@@ -22,7 +22,7 @@
     } catch (e) { bar('Could not re-read the page: ' + e.message); }
   }, 2500);
 
-  // Refresh quietly: no more "Connecting…" wipe every 30 seconds, and keeps your search
+  // Refresh quietly: no more "Connecting\u2026" wipe every 30 seconds, and keeps your search
   window.load = async function () {
     const q = $('#q').value.trim();
     try {
@@ -36,7 +36,7 @@
       $('#count').textContent = 'Unable to load fields';
       $('#dot').classList.add('bad'); $('#statusText').textContent = 'Connection error';
       if (!fields.length) {
-        $('#out').innerHTML = '<div class="empty"><strong>Couldn’t load the field database</strong><div style="margin-top:8px">' + esc(e.message) + '</div><div style="margin-top:16px"><button class="action primary" id="retryLoad">Retry</button></div></div>';
+        $('#out').innerHTML = '<div class="empty"><strong>Couldn\u2019t load the field database</strong><div style="margin-top:8px">' + esc(e.message) + '</div><div style="margin-top:16px"><button class="action primary" id="retryLoad">Retry</button></div></div>';
         $('#retryLoad').onclick = load;
       }
     }
@@ -63,7 +63,7 @@
   // Log who opens the app (the redesigned page never did)
   const hdr = () => ({ 'content-type': 'application/json', 'x-user': encodeURIComponent(user) });
   if (!sessionStorage.getItem('opened')) {
-    if (!user) { const n = prompt('Your name (so changes are tracked):', ''); user = (n || 'Guest').trim() || 'Guest'; localStorage.setItem('fieldUser', user); $('#who').textContent = user + ' · field reference'; }
+    if (!user) { const n = prompt('Your name (so changes are tracked):', ''); user = (n || 'Guest').trim() || 'Guest'; localStorage.setItem('fieldUser', user); $('#who').textContent = user + ' \u00b7 field reference'; }
     fetch('/api/open', { method: 'POST', headers: hdr(), body: '{"event":"open"}' }).catch(() => {});
     sessionStorage.setItem('opened', '1');
   }
