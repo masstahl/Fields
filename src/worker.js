@@ -4,7 +4,7 @@ const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (!url.pathname.startsWith("/api/")) {
+    // Emergency PWA recovery endpoint.\n    if (url.pathname === "/service-worker.js") {\n      return new Response("self.addEventListener(\"install\",()=>self.skipWaiting());self.addEventListener(\"activate\",e=>e.waitUntil(self.clients.claim().then(()=>self.registration.unregister()).then(()=>self.clients.matchAll()).then(cs=>Promise.all(cs.map(c=>c.navigate(c.url))))));", { headers: { "content-type": "application/javascript; charset=utf-8", "cache-control": "no-store, no-cache, must-revalidate" } });\n    }\n    if (!url.pathname.startsWith("/api/")) {
       return env.ASSETS.fetch(request);
     }
     return handle(request, env, ...url.pathname.slice(5).split("/").filter(Boolean));
