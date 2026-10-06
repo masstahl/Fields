@@ -335,6 +335,7 @@ function showPlantEditDialog(record){
 }
 
 async function loadActivity(accessKey){
+  await loadPlantingRecords();
   const key=accessKey===undefined?(localStorage.getItem('fieldAdmin')||''):accessKey;
   try{
     const response=await fetch('/api/log',{cache:'no-store',headers:{'x-admin':key,'x-user':encodeURIComponent(user)}});
@@ -353,7 +354,6 @@ async function loadActivity(accessKey){
     $('#activity').innerHTML=logins.length
       ?logins.map(x=>'<div class="log"><b>'+esc(x.user)+'</b> '+esc(x.action)+'<small>'+new Date(String(x.at).replace(' ','T')+'Z').toLocaleString()+'</small></div>').join('')
       :'<div class="empty">No login history recorded yet.</div>';
-    await loadPlantingRecords();
   }catch(e){
     $('#activityStatus').textContent='Unavailable';
     $('#activity').innerHTML='<div class="empty"><strong>Activity log</strong>'+esc(e.message)+'</div>';
