@@ -128,7 +128,10 @@ async function load(){
     $('#count').textContent=data.length>80?'Showing first 80 of '+data.length+' fields':data.length+' fields available';
     $('#dot').classList.remove('bad');$('#statusText').textContent='Database connected';
     render();
+    detectNearestField();
+
   }catch(e){
+        console.error(e);
     $('#count').textContent='Unable to load fields';
     $('#dot').classList.add('bad');$('#statusText').textContent='Connection error';
     $('#out').innerHTML='<div class="empty"><strong>Could not load the field database</strong><div style="margin-top:8px">'+esc(e.message)+'</div><div style="margin-top:16px"><button class="action primary" id="retryLoad">Retry</button></div></div>';
