@@ -134,7 +134,6 @@ async function load(){
     $('#count').textContent=data.length>80?'Showing first 80 of '+data.length+' fields':data.length+' fields available';
     $('#dot').classList.remove('bad');$('#statusText').textContent='Database connected';
     render();
-    detectNearestField();
 
   }catch(e){
         console.error(e);
