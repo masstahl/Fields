@@ -38,25 +38,139 @@ async function handle(request, env, a, b) {
       const heading = String(p.heading || "").trim();
       const plantingDate = String(p.planting_date || "").trim();
       if (!fieldName || !heading || !plantingDate) return json({ error: "Field name, heading and planting date are required" }, 400);
+
       const fieldId = Number.isInteger(+p.field_id) ? +p.field_id : null;
       const latitude = num(p.latitude);
       const longitude = num(p.longitude);
       const variety = String(p.variety || "").trim();
       const notes = String(p.notes || "").trim();
-      const r = await db.prepare("INSERT INTO planting_records(field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by) VALUES(?,?,?,?,?,?,?,?,?)")
-        .bind(fieldId, fieldName, heading, latitude, longitude, plantingDate, variety || null, notes || null, who).run();
-      return json({ id: r.meta.last_row_id });
+
+      const existing = await db.prepare(
+        "SELECT * FROM planting_records WHERE field_name=? AND planting_date=? ORDER BY id DESC LIMIT 1"
+      ).bind(fieldName, plantingDate).first();
+
+      if (existing) {
+        const mergedNotes = existing.notes && notes
+          ? (String(existing.notes).includes(notes) ? String(existing.notes) : String(existing.notes) + "\n" + notes)
+          : (notes || existing.notes || null);
+
+        await db.prepare(
+          "UPDATE planting_records SET field_id=?,field_name=?,heading=?,latitude=?,longitude=?,planting_date=?,variety=?,notes=? WHERE id=?"
+        ).bind(fieldId, fieldName, heading, latitude, longitude, plantingDate, variety || null, mergedNotes, existing.id).run();
+
+        await log("planting edited", `planting_id:${existing.id} merged duplicate`);
+        return json({ id: existing.id, merged: true });
+      }
+
+      const r = await db.prepare(
+        "INSERT INTO planting_records(field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by) VALUES(?,?,?,?,?,?,?,?,?)"
+      ).bind(fieldId, fieldName, heading, latitude, longitude, plantingDate, variety || null, notes || null, who).run();
+
+      await log("planting created", `planting_id:${r.meta.last_row_id}`);
+      return json({ id: r.meta.last_row_id, merged: false });
+    }
+
+    if (a === "planting-records" && b && m === "PUT") {
+      const id = Number(b);
+      if (!Number.isInteger(id)) return json({ error: "Invalid planting record" }, 400);
+
+      const existing = await db.prepare("SELECT * FROM planting_records WHERE id=?").bind(id).first();
+      if (!existing) return json({ error: "Planting record not found" }, 404);
+
+      const p = await request.json();
+      const fieldName = String(p.field_name || "").trim();
+      const heading = String(p.heading || "").trim();
+      const plantingDate = String(p.planting_date || "").trim();
+      if (!fieldName || !heading || !plantingDate) return json({ error: "Field name, heading and planting date are required" }, 400);
+
+      const fieldId = Number.isInteger(+p.field_id) ? +p.field_id : null;
+      const latitude = num(p.latitude);
+      const longitude = num(p.longitude);
+      const variety = String(p.variety || "").trim();
+      const notes = String(p.notes || "").trim();
+
+      const duplicate = await db.prepare(
+        "SELECT * FROM planting_records WHERE field_name=? AND planting_date=? AND id<>? ORDER BY id DESC LIMIT 1"
+      ).bind(fieldName, plantingDate, id).first();
+
+      if (duplicate) {
+        const mergedNotes = duplicate.notes && notes
+          ? (String(duplicate.notes).includes(notes) ? String(duplicate.notes) : String(duplicate.notes) + "\n" + notes)
+          : (notes || duplicate.notes || null);
+
+        await db.prepare(
+          "UPDATE planting_records SET field_id=?,field_name=?,heading=?,latitude=?,longitude=?,planting_date=?,variety=?,notes=? WHERE id=?"
+        ).bind(fieldId, fieldName, heading, latitude, longitude, plantingDate, variety || null, mergedNotes, duplicate.id).run();
+        await db.prepare("DELETE FROM planting_records WHERE id=?").bind(id).run();
+        await log("planting edited", `planting_id:${duplicate.id} merged duplicate`);
+        return json({ id: duplicate.id, merged: true });
+      }
+
+      await db.prepare(
+        "UPDATE planting_records SET field_id=?,field_name=?,heading=?,latitude=?,longitude=?,planting_date=?,variety=?,notes=? WHERE id=?"
+      ).bind(fieldId, fieldName, heading, latitude, longitude, plantingDate, variety || null, notes || null, id).run();
+
+      await log("planting edited", `planting_id:${id}`);
+      return json({ id, merged: false });
     }
 
     if (a === "planting-records" && m === "GET") {
-      return json((await db.prepare("SELECT id,field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by,created_at FROM planting_records ORDER BY id").all()).results);
+      const rows = (await db.prepare(
+        "SELECT id,field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by,created_at FROM planting_records ORDER BY id"
+      ).all()).results;
+
+      const history = (await db.prepare(
+        "SELECT id,at,user,action,detail FROM activity WHERE action IN ('planting created','planting edited') ORDER BY id"
+      ).all()).results;
+
+      const byRecord = new Map();
+      for (const item of history) {
+        const match = String(item.detail || "").match(/planting_id:(\\d+)/);
+        if (!match) continue;
+        const id = Number(match[1]);
+        if (!byRecord.has(id)) byRecord.set(id, []);
+        byRecord.get(id).push(item);
+      }
+
+      return json(rows.map(row => {
+        const events = byRecord.get(row.id) || [];
+        const contributors = [...new Set([row.created_by, ...events.map(x => x.user)].filter(Boolean))];
+        const last = events.length ? events[events.length - 1] : null;
+        return {
+          ...row,
+          last_modified_by: last?.user || row.created_by || "",
+          contributors
+        };
+      }));
     }
 
     if (a === "planting-records" && b === "export" && m === "GET") {
-      const rows = (await db.prepare("SELECT id,field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by,created_at FROM planting_records ORDER BY id").all()).results;
+      const rows = (await db.prepare(
+        "SELECT id,field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by,created_at FROM planting_records ORDER BY id"
+      ).all()).results;
+
+      const merged = new Map();
+      for (const row of rows) {
+        const key = String(row.field_name) + "\u0000" + String(row.planting_date);
+        if (!merged.has(key)) {
+          merged.set(key, {...row});
+          continue;
+        }
+        const current = merged.get(key);
+        current.heading = row.heading;
+        current.latitude = row.latitude;
+        current.longitude = row.longitude;
+        current.variety = row.variety;
+        current.notes = current.notes && row.notes
+          ? (String(current.notes).includes(String(row.notes)) ? current.notes : String(current.notes) + "\n" + row.notes)
+          : (row.notes || current.notes || null);
+        current.created_by = current.created_by || row.created_by;
+      }
+
       const cols = ["id","field_id","field_name","heading","latitude","longitude","planting_date","variety","notes","created_by","created_at"];
       const cell = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
-      const csv = "\uFEFF" + [cols, ...rows.map(row => cols.map(c => row[c]))].map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
+      const csv = "\uFEFF" + [cols, ...[...merged.values()].map(row => cols.map(c => row[c]))]
+        .map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
       return new Response(csv, {status:200,headers:{
         "content-type":"text/csv; charset=utf-8",
         "content-disposition":'attachment; filename="planting-records.csv"',
@@ -66,6 +180,7 @@ async function handle(request, env, a, b) {
 
     if (a === "planting-records" && b === "archive" && m === "POST") {
       const r = await db.prepare("DELETE FROM planting_records").run();
+      await log("archive season", `${r.meta?.changes ?? 0} planting records archived`);
       return json({ ok:true, removed:r.meta?.changes ?? 0 });
     }
 
