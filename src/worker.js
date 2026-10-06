@@ -32,6 +32,43 @@ async function handle(request, env, a, b) {
   };
 
   try {
+    if (a === "planting-records" && m === "POST") {
+      const p = await request.json();
+      const fieldName = String(p.field_name || "").trim();
+      const heading = String(p.heading || "").trim();
+      const plantingDate = String(p.planting_date || "").trim();
+      if (!fieldName || !heading || !plantingDate) return json({ error: "Field name, heading and planting date are required" }, 400);
+      const fieldId = Number.isInteger(+p.field_id) ? +p.field_id : null;
+      const latitude = num(p.latitude);
+      const longitude = num(p.longitude);
+      const variety = String(p.variety || "").trim();
+      const notes = String(p.notes || "").trim();
+      const r = await db.prepare("INSERT INTO planting_records(field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by) VALUES(?,?,?,?,?,?,?,?,?)")
+        .bind(fieldId, fieldName, heading, latitude, longitude, plantingDate, variety || null, notes || null, who).run();
+      return json({ id: r.meta.last_row_id });
+    }
+
+    if (a === "planting-records" && m === "GET") {
+      return json((await db.prepare("SELECT id,field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by,created_at FROM planting_records ORDER BY id").all()).results);
+    }
+
+    if (a === "planting-records" && b === "export" && m === "GET") {
+      const rows = (await db.prepare("SELECT id,field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by,created_at FROM planting_records ORDER BY id").all()).results;
+      const cols = ["id","field_id","field_name","heading","latitude","longitude","planting_date","variety","notes","created_by","created_at"];
+      const cell = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+      const csv = "\uFEFF" + [cols, ...rows.map(row => cols.map(c => row[c]))].map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
+      return new Response(csv, {status:200,headers:{
+        "content-type":"text/csv; charset=utf-8",
+        "content-disposition":'attachment; filename="planting-records.csv"',
+        "cache-control":"no-store"
+      }});
+    }
+
+    if (a === "planting-records" && b === "archive" && m === "POST") {
+      const r = await db.prepare("DELETE FROM planting_records").run();
+      return json({ ok:true, removed:r.meta?.changes ?? 0 });
+    }
+
     if (a === "fields" && m === "GET") {
       const q = new URL(request.url).searchParams.get("q")?.trim() || "";
       if (!q) return json((await db.prepare("SELECT * FROM fields ORDER BY name").all()).results);
