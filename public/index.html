@@ -56,7 +56,7 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
   </button>
 </main>
 <dialog id="dlg"><form class="form" id="fieldForm" method="dialog"><h2 id="formTitle">Add field</h2><p>Keep the field record clean and consistent for the crew.</p><label for="fn">Field name</label><input id="fn" type="text" required><label for="fh">Heading (degrees)</label><input id="fh" type="text" required inputmode="decimal"><label for="fd">Date planted</label><input id="fd" type="date"><div class="two"><div><label for="fa">Latitude</label><input id="fa" type="number" step="any" inputmode="decimal"></div><div><label for="fo">Longitude</label><input id="fo" type="number" step="any" inputmode="decimal"></div></div><div class="form-actions"><button type="button" class="cancel" id="cancelBtn">Cancel</button><button type="button" class="delete" id="deleteBtn" hidden>Delete</button><button type="submit" class="save">Save</button></div></form></dialog>
-<dialog id="plantDlg"><form class="form" id="plantForm" method="dialog"><h2>🌱 Plant Field</h2><p>Start a planting record from the nearest field.</p><label for="plantFieldName">Field Name</label><input id="plantFieldName" type="text" required><label for="plantHeading">Heading</label><input id="plantHeading" type="text" required inputmode="decimal"><div class="two"><div><label for="plantLat">Latitude</label><input id="plantLat" type="number" step="any" inputmode="decimal"></div><div><label for="plantLng">Longitude</label><input id="plantLng" type="number" step="any" inputmode="decimal"></div></div><label for="plantDate">Planting Date</label><input id="plantDate" type="date" required><label for="plantVariety">Variety</label><input id="plantVariety" type="text" placeholder="Enter variety"><label for="plantNotes">Notes</label><textarea id="plantNotes" rows="3" placeholder="Optional notes" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantCancelBtn">Cancel</button><button type="submit" class="save">Save</button></div></form></dialog>
+<dialog id="plantDlg"><form class="form" id="plantForm" method="dialog"><h2>🌱 Plant Field</h2><p>Start a planting record from the nearest field.</p><label for="plantFieldName">Field Name</label><input id="plantFieldName" type="text" required><label for="plantHeading">Heading</label><input id="plantHeading" type="text" required inputmode="decimal"><div class="two"><div><label for="plantLat">Latitude</label><input id="plantLat" type="number" step="any" inputmode="decimal"></div><div><label for="plantLng">Longitude</label><input id="plantLng" type="number" step="any" inputmode="decimal"></div></div><label for="plantDate">Planting Date</label><input id="plantDate" type="date" required><label for="plantVariety">Variety</label><input id="plantVariety" type="text" placeholder="Enter variety"><label for="plantNotes">Notes</label><textarea id="plantNotes" rows="3" placeholder="Optional notes" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantCancelBtn">Cancel</button><button type="button" class="action" id="exportPlantingBtn">Export CSV</button><button type="button" class="delete" id="archivePlantingBtn">Archive Season</button><button type="submit" class="save">Save</button></div></form></dialog>
 <div id="toast" class="toast"></div>
 <script>
 const $=s=>document.querySelector(s);
@@ -302,51 +302,55 @@ $('#plantCancelBtn').onclick=()=>closeDialog($('#plantDlg'));
 
 $('#plantForm').onsubmit=async e=>{
   e.preventDefault();
+  ensureUser();
   const record={
-    fieldName:$('#plantFieldName').value.trim(),
+    field_id:plantFieldId,
+    field_name:$('#plantFieldName').value.trim(),
     heading:$('#plantHeading').value.trim(),
     latitude:$('#plantLat').value,
     longitude:$('#plantLng').value,
-    plantingDate:$('#plantDate').value,
+    planting_date:$('#plantDate').value,
     variety:$('#plantVariety').value.trim(),
     notes:$('#plantNotes').value.trim()
   };
-
-  if(!record.fieldName||!record.heading||!record.plantingDate){
+  if(!record.field_name||!record.heading||!record.planting_date){
     toast('Field name, heading and planting date are required');
     return;
   }
-
   try{
-    const source=fields.find(f=>f.id===plantFieldId);
-    const headingChanged=source&&String(source.heading??'')!==String(record.heading);
-    const latChanged=source&&String(source.lat??'')!==String(record.latitude);
-    const lngChanged=source&&String(source.lng??'')!==String(record.longitude);
-
-    if(source&&(headingChanged||latChanged||lngChanged)){
-      await api('fields/'+source.id,{
-        method:'PUT',
-        body:JSON.stringify({
-          name:source.name,
-          heading:record.heading,
-          planted:source.planted||null,
-          lat:record.latitude,
-          lng:record.longitude
-        })
-      });
-    }
-
-    const records=JSON.parse(localStorage.getItem('plantingRecords')||'[]');
-    records.push({...record,fieldId:plantFieldId,savedAt:new Date().toISOString()});
-    localStorage.setItem('plantingRecords',JSON.stringify(records));
-
+    await api('planting-records',{method:'POST',body:JSON.stringify(record)});
     closeDialog($('#plantDlg'));
-    if(source&&(headingChanged||latChanged||lngChanged))await load();
     toast('Planting record saved');
   }catch(e){
     toast(e.message);
   }
 };
+
+$('#exportPlantingBtn').onclick=async()=>{
+  try{
+    const r=await fetch('/api/planting-records/export',{cache:'no-store'});
+    if(!r.ok)throw new Error('Unable to export planting records');
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='planting-records.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }catch(e){toast(e.message)}
+};
+
+$('#archivePlantingBtn').onclick=async()=>{
+  if(!confirm('Archive this season? This removes only planting records. Fields will not be changed.'))return;
+  try{
+    const r=await api('planting-records/archive',{method:'POST',body:JSON.stringify({})});
+    closeDialog($('#plantDlg'));
+    toast((r.removed||0)+' planting records archived');
+  }catch(e){toast(e.message)}
+};
+
 $('#cancelBtn').onclick=()=>closeDialog($('#dlg'));
 $('#deleteBtn').onclick=remove;
 $('#fieldForm').onsubmit=e=>{e.preventDefault();save()};
