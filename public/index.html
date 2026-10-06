@@ -183,6 +183,78 @@ async function remove(){
   if(!editId||!confirm('Delete this field? The deletion will remain in the activity log.'))return;
   ensureUser();
   try{await api('fields/'+editId,{method:'DELETE'});closeDialog($('#dlg'));await load();toast('Field deleted')}catch(e){toast(e.message)}
+}// GPS FIELD DETECTION
+let gpsAutoSelected=false;
+
+const gpsDistanceMeters=(lat1,lng1,lat2,lng2)=>{
+  const R=6371000;
+  const toRad=v=>v*Math.PI/180;
+  const dLat=toRad(lat2-lat1);
+  const dLng=toRad(lng2-lng1);
+  const a=Math.sin(dLat/2)**2+
+    Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+};
+
+function detectNearestField(){
+  if(gpsAutoSelected||!navigator.geolocation||!fields.length)return;
+  if($('#q').value.trim())return;
+
+  navigator.geolocation.getCurrentPosition(
+    position=>{
+      if(gpsAutoSelected||$('#q').value.trim())return;
+
+      const {latitude,longitude}=position.coords;
+
+      let nearest=null;
+      let nearestDistance=Infinity;
+
+      for(const field of fields){
+        const lat=Number(field.lat);
+        const lng=Number(field.lng);
+
+        if(!Number.isFinite(lat)||!Number.isFinite(lng))continue;
+
+        const distance=gpsDistanceMeters(
+          latitude,
+          longitude,
+          lat,
+          lng
+        );
+
+        if(distance<nearestDistance){
+          nearest=field;
+          nearestDistance=distance;
+        }
+      }
+
+      if(!nearest)return;
+
+      gpsAutoSelected=true;
+
+      $('#q').value=nearest.name;
+      $('#clearBtn').hidden=false;
+      $('#count').textContent='Nearest field';
+      openIds.add(nearest.id);
+      render();
+
+      requestAnimationFrame(()=>{
+        const card=document.querySelector(`[data-open="${nearest.id}"]`);
+        card?.closest('.card')?.scrollIntoView({
+          behavior:'smooth',
+          block:'center'
+        });
+      });
+    },
+    ()=>{
+      // GPS unavailable or permission denied; leave existing field search unchanged.
+    },
+    {
+      enableHighAccuracy:true,
+      maximumAge:30000,
+      timeout:10000
+    }
+  );
 }
 async function loadActivity(accessKey){
   const key=accessKey===undefined?(localStorage.getItem('fieldAdmin')||''):accessKey;
