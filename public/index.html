@@ -214,7 +214,7 @@ const gpsDistanceMeters=(lat1,lng1,lat2,lng2)=>{
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 };
 
-function detectNearestField(){
+function detectNearestField(callback){
   if(gpsAutoSelected||!navigator.geolocation||!fields.length)return;
   if($('#q').value.trim())return;
 
@@ -255,6 +255,8 @@ function detectNearestField(){
       $('#count').textContent='Nearest field';
       openIds.add(nearest.id);
       render();
+      if(callback) callback(nearest);
+
 
       requestAnimationFrame(()=>{
         const card=document.querySelector(`[data-open="${nearest.id}"]`);
@@ -314,7 +316,12 @@ function openPlantField(){
   $('#plantVariety').value='';$('#plantNotes').value='';
   showDialog($('#plantDlg'));
 }
-$('#plantBtn').onclick=openPlantField;
+$('#plantBtn').onclick=()=>{
+  detectNearestField(()=>{
+    openPlantField();
+  });
+};
+
 $('#plantCancelBtn').onclick=()=>closeDialog($('#plantDlg'));
 $('#plantForm').onsubmit=e=>{e.preventDefault();closeDialog($('#plantDlg'));toast('Plant Field details ready');};
 $('#cancelBtn').onclick=()=>closeDialog($('#dlg'));
