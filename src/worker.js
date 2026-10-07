@@ -120,11 +120,20 @@ async function handle(request, env, a, b) {
           ? (String(duplicate.notes).includes(notes) ? String(duplicate.notes) : String(duplicate.notes) + "\n" + notes)
           : (notes || duplicate.notes || null);
 
+        const priorEvents = (await db.prepare(
+          "SELECT user FROM activity WHERE action IN ('planting created','planting edited') AND detail LIKE ? ORDER BY id"
+        ).bind(`%planting_id:${id}%`).all()).results;
+        const priorContributors = [...new Set(priorEvents.map(x => x.user).filter(Boolean))];
+
         await db.prepare(
           "UPDATE planting_records SET field_id=?,field_name=?,heading=?,latitude=?,longitude=?,planting_date=?,variety=?,notes=? WHERE id=?"
         ).bind(fieldId, fieldName, heading, latitude, longitude, plantingDate, variety || null, mergedNotes, duplicate.id).run();
         await db.prepare("DELETE FROM planting_records WHERE id=?").bind(id).run();
-        await log("planting edited", `planting_id:${duplicate.id} merged duplicate`);
+
+        const contributorDetail = priorContributors.length
+          ? ` contributors:${priorContributors.join("|")}`
+          : "";
+        await log("planting edited", `planting_id:${duplicate.id} merged duplicate${contributorDetail}`);
         return json({ id: duplicate.id, merged: true });
       }
 
@@ -134,6 +143,16 @@ async function handle(request, env, a, b) {
 
       await log("planting edited", `planting_id:${id}`);
       return json({ id, merged: false });
+    }
+
+    if (a === "planting-records" && b && m === "DELETE") {
+      const id = Number(b);
+      if (!Number.isInteger(id)) return json({ error: "Invalid planting record" }, 400);
+      const existing = await db.prepare("SELECT * FROM planting_records WHERE id=?").bind(id).first();
+      if (!existing) return json({ error: "Planting record not found" }, 404);
+      await db.prepare("DELETE FROM planting_records WHERE id=?").bind(id).run();
+      await log("planting deleted", `planting_id:${id} field:${existing.field_name} date:${existing.planting_date}`);
+      return json({ ok: true });
     }
 
     if (a === "planting-records" && m === "GET") {
@@ -156,7 +175,11 @@ async function handle(request, env, a, b) {
 
       return json(rows.map(row => {
         const events = byRecord.get(row.id) || [];
-        const contributors = [...new Set([row.created_by, ...events.map(x => x.user)].filter(Boolean))];
+        const carriedContributors = events.flatMap(x => {
+          const match = String(x.detail || "").match(/contributors:([^\s]+)/);
+          return match ? match[1].split("|") : [];
+        });
+        const contributors = [...new Set([row.created_by, ...events.map(x => x.user), ...carriedContributors].filter(Boolean))];
         const last = events.length ? events[events.length - 1] : null;
         return {
           ...row,
