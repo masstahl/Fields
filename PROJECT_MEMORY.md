@@ -918,3 +918,13 @@ No new D1 table or schema migration is used for variety management. Variety cata
 - Existing field database schema is unchanged.
 - Existing field lookup workflow is unchanged.
 - Existing visual styling and overall layout are preserved.
+
+
+## Planting Workflow Correction — 2026-10-07
+
+- Plant Field remains GPS-first: tapping Plant Field immediately runs the existing nearest-field GPS detection and opens the planting form with that existing field populated.
+- Plant Field has exactly one field-selection control: Field Name.
+- Field Name is a searchable existing-field input backed only by the fields already loaded from D1; it cannot create a field.
+- Typing filters existing field names. A non-matching value shows “No matching field found,” clears the authoritative field metadata, and blocks save.
+- Selecting or GPS-populating an existing field immediately supplies Heading, Latitude, and Longitude from the stored field record.
+- Manual field selection is an override for entering a record later or correcting the GPS-detected field.
