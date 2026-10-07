@@ -30,10 +30,11 @@ Application source is operational as a Cloudflare Worker-backed D1 application. 
 
 ### Plant Field
 
-- GPS nearest-field detection remains unchanged
-- Planting starts from an existing field
-- Field can be searched and selected from the existing field database
-- Field name cannot be typed as a new planting field
+- GPS nearest-field detection remains unchanged and runs immediately when Plant Field is tapped
+- Planting starts automatically on the GPS-detected existing field
+- Plant Field has one searchable Field Name control; typing filters existing fields only
+- A later manual selection can override the GPS-detected field
+- Field name cannot be created or saved from Plant Field; a non-matching search shows “No matching field found” and blocks save
 - Heading, latitude, and longitude are automatically populated from the selected field
 - Heading, latitude, and longitude are read-only in the planting form
 - Planting save is server-validated against an existing D1 field ID
