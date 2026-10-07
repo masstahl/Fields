@@ -4,16 +4,12 @@ const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === "/service-worker.js") {
-      const script = `self.addEventListener("install",e=>e.waitUntil(self.skipWaiting()));self.addEventListener("activate",e=>e.waitUntil((async()=>{await self.clients.claim();await self.registration.unregister();const clients=await self.clients.matchAll({type:"window"});await Promise.all(clients.map(c=>c.navigate(c.url)));})()));`;
-      return new Response(script, {headers: {"content-type":"application/javascript; charset=utf-8","cache-control":"no-store, no-cache, must-revalidate","service-worker-allowed":"/"}});
-    }
     if (url.pathname === "/fix.js" || url.pathname === "/" || url.pathname === "/index.html") {
       const asset = await env.ASSETS.fetch(request);
       if (!asset.ok) return asset;
       let source = await asset.text();
       if (url.pathname === "/fix.js") {
-        // Serve the recovery build without re-registering a service worker.
+        source = source.replace(/  if\('serviceWorker' in navigator\)\{[\s\S]*?\n  \}/, "");
       } else {
         source = source.replace("a.href=url;a.download='planting-records.csv';", "a.href=url;a.download='potato-planting-records.csv';");
       }
