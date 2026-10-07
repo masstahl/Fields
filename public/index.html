@@ -470,7 +470,7 @@ $('#exportPlantingBtn').onclick=async()=>{
     const blob=await r.blob();
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
-    a.href=url;a.download='planting-records.csv';
+    a.href=url;a.download='potato-planting-records.csv';
     document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
   }catch(e){toast(e.message)}
 };
