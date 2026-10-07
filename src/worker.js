@@ -268,8 +268,11 @@ async function handle(request, env, a, b) {
         "FALSE", row.field_name, excelDate(row.planting_date), row.latitude, row.longitude,
         row.heading, row.variety, row.notes, "", "", "", ""
       ]);
-      const cell = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
-      const csv = "\uFEFF" + [cols, ...exportRows].map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
+      const cell = v => {
+        const value = String(v ?? "");
+        return /[",\r\n]/.test(value) ? '"' + value.replace(/"/g, '""') + '"' : value;
+      };
+      const csv = [cols, ...exportRows].map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
       return new Response(csv, {status:200,headers:{
         "content-type":"text/csv; charset=utf-8",
         "content-disposition":'attachment; filename="planting-records.csv"',
