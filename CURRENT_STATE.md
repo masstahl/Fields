@@ -42,6 +42,7 @@ Application is operational as a Cloudflare Worker backed by D1.
 - Field change logging
 - Planting change logging
 - Admin-protected log access
+- Admin-protected season archive
 
 ### GPS
 - Browser geolocation
