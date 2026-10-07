@@ -90,7 +90,7 @@ Environment:
 
 Worker URL:
 
-`https://field-headings.workers.dev`
+`https://field-headings.stahlsays.workers.dev`
 
 Cloudflare dashboard URL:
 
@@ -621,7 +621,7 @@ After the emergency Worker endpoint is confirmed live:
 
 Open:
 
-`https://field-headings.workers.dev/`
+`https://field-headings.stahlsays.workers.dev/`
 
 in Safari.
 
@@ -832,7 +832,7 @@ After deployment, test normal Safari/Edge access first, then test the existing i
 | GitHub repo | `masstahl/Fields` |
 | Worker | `field-headings` |
 | Environment | `production` |
-| Worker URL | `https://field-headings.workers.dev` |
+| Worker URL | `https://field-headings.stahlsays.workers.dev` |
 | Cloudflare account | `2ae2d9dcdd314bf2e28be89feb75509c` |
 | D1 database | `c2e9677e-38f2-4c32-a625-76365146367d` |
 | Verified field count | 440 |
