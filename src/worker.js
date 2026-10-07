@@ -4,6 +4,14 @@ const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/service-worker.js") {
+      const script = 'self.addEventListener("install",()=>self.skipWaiting());self.addEventListener("activate",e=>e.waitUntil((async()=>{await self.clients.claim();await self.registration.unregister();const clients=await self.clients.matchAll({type:"window"});await Promise.all(clients.map(c=>c.navigate(c.url)))})()));';
+      return new Response(script, { headers: {
+        "content-type": "application/javascript; charset=utf-8",
+        "cache-control": "no-store, no-cache, must-revalidate",
+        "service-worker-allowed": "/"
+      }});
+    }
     if (!url.pathname.startsWith("/api/")) {
       return env.ASSETS.fetch(request);
     }
@@ -190,13 +198,20 @@ async function handle(request, env, a, b) {
         current.created_by = current.created_by || row.created_by;
       }
 
-      const cols = ["id","field_id","field_name","heading","latitude","longitude","planting_date","variety","notes","created_by","created_at"];
+      const cols = ["", "Field", "Date", "Latitude", "Longitude ", "Heading", "Variety", "Notes", "Acres ", "Bags", "Bags per acre", "Avg OZ PER SEED"];
+      const excelDate = value => {
+        const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        return match ? `${Number(match[2])}/${Number(match[3])}/${match[1].slice(-2)}` : value;
+      };
+      const rows = [...merged.values()].map(row => [
+        "FALSE", row.field_name, excelDate(row.planting_date), row.latitude, row.longitude,
+        row.heading, row.variety, row.notes, "", "", "", ""
+      ]);
       const cell = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
-      const csv = "\uFEFF" + [cols, ...[...merged.values()].map(row => cols.map(c => row[c]))]
-        .map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
+      const csv = "\uFEFF" + [cols, ...rows].map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
       return new Response(csv, {status:200,headers:{
         "content-type":"text/csv; charset=utf-8",
-        "content-disposition":'attachment; filename="planting-records.csv"',
+        "content-disposition":'attachment; filename="potato-planting-records.csv"',
         "cache-control":"no-store"
       }});
     }
