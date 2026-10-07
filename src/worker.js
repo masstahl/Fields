@@ -1,31 +1,9 @@
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v)) ? null : +v;
 
-const emergencyServiceWorker = `
-self.addEventListener("install", () => self.skipWaiting());
-self.addEventListener("activate", event => {
-  event.waitUntil((async () => {
-    await self.clients.claim();
-    const registrations = await self.registration.getRegistrations();
-    await Promise.all(registrations.map(reg => reg.unregister()));
-    const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-    await Promise.all(clients.map(client => client.navigate(client.url)));
-  })());
-});
-`;
-
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === "/service-worker.js") {
-      return new Response(emergencyServiceWorker, {
-        status: 200,
-        headers: {
-          "content-type": "application/javascript; charset=utf-8",
-          "cache-control": "no-store, no-cache, must-revalidate"
-        }
-      });
-    }
     if (!url.pathname.startsWith("/api/")) {
       return env.ASSETS.fetch(request);
     }
