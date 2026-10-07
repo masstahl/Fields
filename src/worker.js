@@ -121,8 +121,8 @@ async function handle(request, env, a, b) {
           : (notes || duplicate.notes || null);
 
         const priorEvents = (await db.prepare(
-          "SELECT user FROM activity WHERE action IN ('planting created','planting edited') AND detail LIKE ? ORDER BY id"
-        ).bind(`%planting_id:${id}%`).all()).results;
+          "SELECT user,detail FROM activity WHERE action IN ('planting created','planting edited') ORDER BY id"
+        ).all()).results.filter(x => new RegExp(`(^|\\s)planting_id:${id}(\\s|$)`).test(String(x.detail || "")));
         const priorContributors = [...new Set(priorEvents.map(x => x.user).filter(Boolean))];
 
         await db.prepare(
@@ -176,7 +176,7 @@ async function handle(request, env, a, b) {
       return json(rows.map(row => {
         const events = byRecord.get(row.id) || [];
         const carriedContributors = events.flatMap(x => {
-          const match = String(x.detail || "").match(/contributors:([^\s]+)/);
+          const match = String(x.detail || "").match(/contributors:(.*)$/);
           return match ? match[1].split("|") : [];
         });
         const contributors = [...new Set([row.created_by, ...events.map(x => x.user), ...carriedContributors].filter(Boolean))];
