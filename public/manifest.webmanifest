@@ -1,9 +1,9 @@
 {
   "name": "Field Headings",
   "short_name": "Headings",
-  "start_url": "https://field-headings.workers.dev/?v=20261005-0700",
-  "scope": "https://field-headings.workers.dev/",
-  "id": "https://field-headings.workers.dev/",
+  "start_url": "https://field-headings.stahlsays.workers.dev/?v=20261007-0900",
+  "scope": "https://field-headings.stahlsays.workers.dev/",
+  "id": "https://field-headings.stahlsays.workers.dev/",
   "display": "standalone",
   "background_color": "#f6f3e9",
   "theme_color": "#28362d",
