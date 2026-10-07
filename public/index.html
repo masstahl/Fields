@@ -473,7 +473,7 @@ $('#exportPlantingBtn').onclick=async()=>{
 $('#archivePlantingBtn').onclick=async()=>{
   if(!confirm('Archive this season? This removes planting records only. Fields will not be changed.'))return;
   try{
-    const r=await api('planting-records/archive',{method:'POST',body:JSON.stringify({})});
+    const r=await api('planting-records/archive',{method:'POST',headers:{'x-admin':localStorage.getItem('fieldAdmin')||''},body:JSON.stringify({})});
     await loadPlantingRecords();
     toast((r.removed||0)+' planting records archived');
   }catch(e){toast(e.message)}
