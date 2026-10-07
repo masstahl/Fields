@@ -53,7 +53,7 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
     <div class="activity-tabs" role="tablist" aria-label="Activity tools">
       <button type="button" class="activity-tab" data-activity-panel="login">Login Activity</button>
       <button type="button" class="activity-tab" data-activity-panel="export">Export CSV</button>
-      <button type="button" class="activity-tab" data-activity-panel="archive">Archive Season</button>
+      <button type="button" class="activity-tab" data-activity-panel="archive" hidden>Archive Season</button>
     </div>
     <div id="activityPanelLogin" class="activity-panel" hidden>
       <div id="activity" class="activity"></div>
@@ -354,6 +354,7 @@ async function loadActivity(accessKey){
     const response=await fetch('/api/log',{cache:'no-store',headers:{'x-admin':key,'x-user':encodeURIComponent(user)}});
     const data=await response.json().catch(()=>null);
     if(response.status===403){
+      $('[data-activity-panel="archive"]').hidden=true;
       $('#activityStatus').textContent=accessKey===undefined?'Access required':'Code not accepted';
       $('#activity').innerHTML='<div class="empty"><strong>Administrator access required</strong><form id="adminKeyForm"><label for="adminKey">Access code</label><input id="adminKey" type="password" autocomplete="current-password" required style="width:100%;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:10px"><button type="submit" class="action primary">Unlock activity</button></form></div>';
       $('#adminKeyForm').onsubmit=e=>{e.preventDefault();loadActivity($('#adminKey').value)};
@@ -362,10 +363,12 @@ async function loadActivity(accessKey){
     }
     if(!response.ok||!Array.isArray(data))throw new Error((data&&data.error)||'Unable to load activity');
     if(key)localStorage.setItem('fieldAdmin',key);
+    $('[data-activity-panel="archive"]').hidden=false;
     loginHistory=data.filter(x=>x.action==='opened app'||x.action==='installed app');
     loginHistoryShown=10;
     renderLoginHistory();
   }catch(e){
+    $('[data-activity-panel="archive"]').hidden=true;
     $('#activityStatus').textContent='Unavailable';
     $('#activity').innerHTML='<div class="empty"><strong>Activity log</strong>'+esc(e.message)+'</div>';
     $('#viewMoreLoginsBtn').hidden=true;
