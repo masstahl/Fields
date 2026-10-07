@@ -378,12 +378,26 @@ function renderLoginHistory(){
   const more=$('#viewMoreLoginsBtn');
   more.hidden=loginHistoryShown>=loginHistory.length;
 }
-document.querySelectorAll('[data-activity-panel]').forEach(btn=>{
-  btn.onclick=()=>{
-    document.querySelectorAll('[data-activity-panel]').forEach(x=>x.classList.toggle('active',x===btn));
-    ['login','export','archive'].forEach(name=>{
-      $('#activityPanel'+name.charAt(0).toUpperCase()+name.slice(1)).hidden=btn.dataset.activityPanel!==name;
+document.querySelectorAll('[data-activity-panel]').forEach(btn => {
+  btn.onclick = () => {
+    const wasActive = btn.classList.contains('active');
+
+    // deactivate all buttons
+    document.querySelectorAll('[data-activity-panel]')
+      .forEach(x => x.classList.remove('active'));
+
+    // hide all panels
+    ['login', 'export', 'archive'].forEach(name => {
+      $('#activityPanel' + name.charAt(0).toUpperCase() + name.slice(1)).hidden = true;
     });
+
+    // if it wasn't active, open it
+    if (!wasActive) {
+      btn.classList.add('active');
+
+      const panelName = btn.dataset.activityPanel;
+      $('#activityPanel' + panelName.charAt(0).toUpperCase() + panelName.slice(1)).hidden = false;
+    }
   };
 });
 $('#viewMoreLoginsBtn').onclick=()=>{
