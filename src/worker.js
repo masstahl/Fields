@@ -14,7 +14,8 @@ export default {
       let source = await asset.text();
       if (url.pathname === "/fix.js") {
         // Serve the recovery build without re-registering a service worker.
-      } else {("a.href=url;a.download='planting-records.csv';", "a.href=url;a.download='potato-planting-records.csv';");
+      } else {
+        source = source.replace("a.href=url;a.download='planting-records.csv';", "a.href=url;a.download='potato-planting-records.csv';");
       }
       const headers = new Headers(asset.headers);
       headers.delete("content-length");
