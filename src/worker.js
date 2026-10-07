@@ -9,7 +9,12 @@ export default {
       if (!asset.ok) return asset;
       let source = await asset.text();
       if (url.pathname === "/fix.js") {
-        source = source.replace(/  if\('serviceWorker' in navigator\)\{[\s\S]*?\n  \}/, "");
+        if (!source.includes("navigator.serviceWorker.register('/service-worker.js")) {
+          source = source.replace(
+            "  // The Worker recovery endpoint unregisters stale service workers. Keep new installs unregistered.",
+            "  if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js?v='+APP_VERSION,{scope:'/'}).then(reg=>{if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});reg.addEventListener('updatefound',()=>{const w=reg.installing;if(!w)return;w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)w.postMessage({type:'SKIP_WAITING'})})})}).catch(e=>bar('PWA update service unavailable: '+e.message));navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!sessionStorage.getItem('swReloaded')){sessionStorage.setItem('swReloaded','1');location.reload()}});}\n  // The Worker recovery endpoint unregisters stale service workers. Keep new installs unregistered."
+          );
+        }
       } else {
         source = source.replace("a.href=url;a.download='planting-records.csv';", "a.href=url;a.download='potato-planting-records.csv';");
       }
