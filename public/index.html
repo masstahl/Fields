@@ -51,11 +51,11 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
   <div class="summary"><span>Activity</span><span id="activityStatus"></span></div>
   <div class="activity-section">
     <div class="activity-tabs" role="tablist" aria-label="Activity tools">
-      <button type="button" class="activity-tab active" data-activity-panel="login">Login Activity</button>
+      <button type="button" class="activity-tab" data-activity-panel="login">Login Activity</button>
       <button type="button" class="activity-tab" data-activity-panel="export">Export CSV</button>
       <button type="button" class="activity-tab" data-activity-panel="archive">Archive Season</button>
     </div>
-    <div id="activityPanelLogin" class="activity-panel">
+    <div id="activityPanelLogin" class="activity-panel" hidden>
       <div id="activity" class="activity"></div>
       <div style="padding-top:8px"><button type="button" class="action" id="viewMoreLoginsBtn" hidden>View More</button></div>
     </div>
