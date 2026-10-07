@@ -261,6 +261,7 @@ function detectNearestField(callback){
 
       if(!nearest)return toast('No field with saved coordinates was found nearby');
       if(callback)callback(nearest);
+      else{$('#q').value=nearest.name||'';searchFields();}
     },
     error=>{
       const message=error?.code===1
@@ -285,10 +286,11 @@ async function loadPlantingRecords(){
       const contributors=(r.contributors||[]).join(', ')||'—';
       return '<div class="plant-record" data-edit-plant="'+r.id+'" role="button" tabindex="0">'+
         '<div class="top"><span class="field">'+esc(r.field_name)+'</span><span>'+esc(r.planting_date)+'</span></div>'+
-        '<div class="meta">Variety: '+esc(r.variety||'—')+' · Last modified by '+esc(r.last_modified_by||r.created_by||'—')+'</div>'+
-        '<div class="meta">Created by '+esc(r.created_by||'—')+' · Contributors '+esc(contributors)+'</div>'+
-        '</div>';
-    }).join('');
+        '<div class="meta">Variety: '+esc(r.variety||'—')+'</div>'+
+        '<div class="meta">Notes: '+esc(r.notes||'—')+'</div>'+
+        '<div class="meta">Created by '+esc(r.created_by||'—')+' · Last modified by '+esc(r.last_modified_by||r.created_by||'—')+'</div>'+
+        '<div class="meta">Edit history: '+esc((r.history||[]).map(h=>[h.at,h.user,h.action,h.detail].filter(Boolean).join(' · ')).join(' | ')||'—')+'</div>'+
+        '</div>';}).join('');
     out.querySelectorAll('[data-edit-plant]').forEach(row=>{
       const open=()=>openPlantEdit(records.find(r=>String(r.id)===row.dataset.editPlant));
       row.onclick=open;
