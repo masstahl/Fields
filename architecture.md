@@ -1346,3 +1346,8 @@ For create and edit:
 5. CSV export remains unchanged.
 
 GPS nearest-field detection remains the entry point for the Plant Field button.
+
+
+## Plant Field Selection Correction
+
+The planting UI uses one authoritative Field Name control. GPS detection selects an existing field first; the same control then permits an operator to search and select another existing field. The client never creates a field from Plant Field. Field metadata displayed in the planting form is derived from the selected D1 `fields` row, and the planting API requires a valid `field_id` and re-derives name, heading, latitude, and longitude server-side. No field-schema or GPS-detection changes are introduced by this correction.
