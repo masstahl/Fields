@@ -247,6 +247,10 @@ and request header:
 
 If `ADMIN_KEY` is absent, the endpoint correctly denies access.
 
+### `POST /api/planting-records/archive`
+
+Archives the current planting season by removing planting records. Access uses the same `env.ADMIN_KEY` / `x-admin` administrator check as `GET /api/log`.
+
 ---
 
 ## 7. Front-End Design Direction
