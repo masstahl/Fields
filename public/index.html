@@ -49,17 +49,22 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
 <section id="fieldsView"><div class="search-panel"><svg class="search-icon" width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="q" class="search" placeholder="Search by field name…" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="clear" id="clearBtn" hidden>Clear</button></div><div class="summary"><span id="count">Loading fields…</span><span class="status"><span id="dot" class="dot"></span><span id="statusText">Connecting</span></span></div><div id="out" class="list"></div></section>
 <section id="activityView" hidden>
   <div class="summary"><span>Activity</span><span id="activityStatus"></span></div>
-  <div class="activity-tools">
-    <button type="button" class="action" id="exportPlantingBtn">Export CSV</button>
-    <button type="button" class="delete" id="archivePlantingBtn">Archive Season</button>
-  </div>
   <div class="activity-section">
-    <div class="activity-heading"><strong>Login History</strong></div>
+    <div class="activity-heading"><strong>Login Activity</strong></div>
     <div id="activity" class="activity"></div>
+    <div style="padding-top:8px"><button type="button" class="action" id="viewMoreLoginsBtn" hidden>View More</button></div>
   </div>
   <div class="activity-section">
     <div class="activity-heading"><strong>Planting Records</strong><span id="plantingStatus"></span></div>
     <div id="plantingRecords" class="activity"></div>
+  </div>
+  <div class="activity-section">
+    <div class="activity-heading"><strong>Export CSV</strong></div>
+    <button type="button" class="action" id="exportPlantingBtn">Export CSV</button>
+  </div>
+  <div class="activity-section">
+    <div class="activity-heading"><strong>Archive Season</strong></div>
+    <button type="button" class="delete" id="archivePlantingBtn">Archive Season</button>
   </div>
 </section>
   <button
@@ -70,7 +75,7 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
    🔍 Find Nearest Field
   </button>
 </main>
-<dialog id="plantEditDlg" class="plant-edit-dialog"><form class="form" id="plantEditForm" method="dialog"><h2>Edit Planting Record</h2><p>Update the saved planting entry.</p><input id="editPlantId" type="hidden"><label for="editPlantFieldName">Field Name</label><input id="editPlantFieldName" type="text" required><label for="editPlantHeading">Heading</label><input id="editPlantHeading" type="text" required inputmode="decimal"><div class="two"><div><label for="editPlantLat">Latitude</label><input id="editPlantLat" type="number" step="any" inputmode="decimal"></div><div><label for="editPlantLng">Longitude</label><input id="editPlantLng" type="number" step="any" inputmode="decimal"></div></div><label for="editPlantDate">Planting Date</label><input id="editPlantDate" type="date" required><label for="editPlantVariety">Variety</label><input id="editPlantVariety" type="text"><label for="editPlantNotes">Notes</label><textarea id="editPlantNotes" rows="4" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantEditCancelBtn">Cancel</button><button type="submit" class="save">Save</button></div></form></dialog>
+<dialog id="plantEditDlg" class="plant-edit-dialog"><form class="form" id="plantEditForm" method="dialog"><h2>Edit Planting Record</h2><p>Update the saved planting entry.</p><input id="editPlantId" type="hidden"><label for="editPlantFieldName">Field Name</label><input id="editPlantFieldName" type="text" required><label for="editPlantHeading">Heading</label><input id="editPlantHeading" type="text" required inputmode="decimal"><div class="two"><div><label for="editPlantLat">Latitude</label><input id="editPlantLat" type="number" step="any" inputmode="decimal"></div><div><label for="editPlantLng">Longitude</label><input id="editPlantLng" type="number" step="any" inputmode="decimal"></div></div><label for="editPlantDate">Planting Date</label><input id="editPlantDate" type="date" required><label for="editPlantVariety">Variety</label><input id="editPlantVariety" type="text"><label for="editPlantNotes">Notes</label><textarea id="editPlantNotes" rows="4" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantEditCancelBtn">Cancel</button><button type="button" class="delete" id="plantEditDeleteBtn">Delete</button><button type="submit" class="save">Save</button></div></form></dialog>
 <dialog id="dlg"><form class="form" id="fieldForm" method="dialog"><h2 id="formTitle">Add field</h2><p>Keep the field record clean and consistent for the crew.</p><label for="fn">Field name</label><input id="fn" type="text" required><label for="fh">Heading (degrees)</label><input id="fh" type="text" required inputmode="decimal"><label for="fd">Date planted</label><input id="fd" type="date"><div class="two"><div><label for="fa">Latitude</label><input id="fa" type="number" step="any" inputmode="decimal"></div><div><label for="fo">Longitude</label><input id="fo" type="number" step="any" inputmode="decimal"></div></div><div class="form-actions"><button type="button" class="cancel" id="cancelBtn">Cancel</button><button type="button" class="delete" id="deleteBtn" hidden>Delete</button><button type="submit" class="save">Save</button></div></form></dialog>
 <dialog id="plantDlg"><form class="form" id="plantForm" method="dialog"><h2>🌱 Plant Field</h2><p>Start a planting record from the nearest field.</p><label for="plantFieldName">Field Name</label><input id="plantFieldName" type="text" required><label for="plantHeading">Heading</label><input id="plantHeading" type="text" required inputmode="decimal"><div class="two"><div><label for="plantLat">Latitude</label><input id="plantLat" type="number" step="any" inputmode="decimal"></div><div><label for="plantLng">Longitude</label><input id="plantLng" type="number" step="any" inputmode="decimal"></div></div><label for="plantDate">Planting Date</label><input id="plantDate" type="date" required><label for="plantVariety">Variety</label><input id="plantVariety" type="text" placeholder="Enter variety"><label for="plantNotes">Notes</label><textarea id="plantNotes" rows="3" placeholder="Optional notes" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantCancelBtn">Cancel</button><button type="submit" class="save">Save</button></div></form></dialog>
 <div id="toast" class="toast"></div>
@@ -274,16 +279,16 @@ async function loadPlantingRecords(){
     }
     out.innerHTML=records.map(r=>{
       const contributors=(r.contributors||[]).join(', ')||'—';
-      return '<div class="plant-record">'+
+      return '<div class="plant-record" data-edit-plant="'+r.id+'" role="button" tabindex="0">'+
         '<div class="top"><span class="field">'+esc(r.field_name)+'</span><span>'+esc(r.planting_date)+'</span></div>'+
-        '<div class="meta">Heading '+esc(r.heading)+' · '+esc(r.latitude??'—')+', '+esc(r.longitude??'—')+' · '+esc(r.variety||'No variety')+'</div>'+
-        (r.notes?'<div class="notes">'+esc(r.notes)+'</div>':'')+
-        '<div class="meta">Created by '+esc(r.created_by||'—')+' · Last modified by '+esc(r.last_modified_by||r.created_by||'—')+' · Contributors '+esc(contributors)+'</div>'+
-        '<button type="button" class="action" data-edit-plant="'+r.id+'">Edit</button>'+
+        '<div class="meta">Variety: '+esc(r.variety||'—')+' · Last modified by '+esc(r.last_modified_by||r.created_by||'—')+'</div>'+
+        '<div class="meta">Created by '+esc(r.created_by||'—')+' · Contributors '+esc(contributors)+'</div>'+
         '</div>';
     }).join('');
-    out.querySelectorAll('[data-edit-plant]').forEach(btn=>{
-      btn.onclick=()=>openPlantEdit(records.find(r=>String(r.id)===btn.dataset.editPlant));
+    out.querySelectorAll('[data-edit-plant]').forEach(row=>{
+      const open=()=>openPlantEdit(records.find(r=>String(r.id)===row.dataset.editPlant));
+      row.onclick=open;
+      row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
     });
   }catch(e){
     status.textContent='Unavailable';
@@ -334,6 +339,8 @@ function showPlantEditDialog(record){
   });
 }
 
+let loginHistory=[];
+let loginHistoryShown=10;
 async function loadActivity(accessKey){
   await loadPlantingRecords();
   const key=accessKey===undefined?(localStorage.getItem('fieldAdmin')||''):accessKey;
@@ -349,15 +356,27 @@ async function loadActivity(accessKey){
     }
     if(!response.ok||!Array.isArray(data))throw new Error((data&&data.error)||'Unable to load activity');
     if(key)localStorage.setItem('fieldAdmin',key);
-    const logins=data.filter(x=>x.action==='opened app'||x.action==='installed app');
-    $('#activityStatus').textContent=logins.length+' login events';
-    $('#activity').innerHTML=logins.length
-      ?logins.map(x=>'<div class="log"><b>'+esc(x.user)+'</b> '+esc(x.action)+'<small>'+new Date(String(x.at).replace(' ','T')+'Z').toLocaleString()+'</small></div>').join('')
-      :'<div class="empty">No login history recorded yet.</div>';
+    loginHistory=data.filter(x=>x.action==='opened app'||x.action==='installed app');
+    loginHistoryShown=10;
+    renderLoginHistory();
   }catch(e){
     $('#activityStatus').textContent='Unavailable';
     $('#activity').innerHTML='<div class="empty"><strong>Activity log</strong>'+esc(e.message)+'</div>';
+    $('#viewMoreLoginsBtn').hidden=true;
   }
+}
+function renderLoginHistory(){
+  const shown=loginHistory.slice(0,loginHistoryShown);
+  $('#activityStatus').textContent=loginHistory.length+' login events';
+  $('#activity').innerHTML=shown.length
+    ?shown.map(x=>'<div class="log"><b>'+esc(x.user)+'</b> '+esc(x.action)+'<small>'+new Date(String(x.at).replace(' ','T')+'Z').toLocaleString()+'</small></div>').join('')
+    :'<div class="empty">No login history recorded yet.</div>';
+  const more=$('#viewMoreLoginsBtn');
+  more.hidden=loginHistoryShown>=loginHistory.length;
+}
+$('#viewMoreLoginsBtn').onclick=()=>{
+  loginHistoryShown+=10;
+  renderLoginHistory();
 }
 function setTab(next){
   tab=next;$('#fieldsTab').classList.toggle('active',next==='fields');$('#activityTab').classList.toggle('active',next==='activity');
@@ -443,6 +462,17 @@ $('#plantEditCancelBtn').onclick=()=>{
   const dlg=$('#plantEditDlg');
   dlg.dataset.cancel='1';
   closeDialog(dlg);
+};
+$('#plantEditDeleteBtn').onclick=async()=>{
+  const id=$('#editPlantId').value;
+  if(!id||!confirm('Delete this planting record? The field will not be deleted.'))return;
+  try{
+    ensureUser();
+    await api('planting-records/'+id,{method:'DELETE'});
+    closeDialog($('#plantEditDlg'));
+    await loadPlantingRecords();
+    toast('Planting record deleted');
+  }catch(e){toast(e.message)}
 };
 $('#plantEditForm').onsubmit=e=>{
   e.preventDefault();
