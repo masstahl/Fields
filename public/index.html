@@ -426,7 +426,7 @@ const localDate=()=>{
 
 function openPlantField(f){
   plantFieldId=f?.id??null;
-  $('#plantFieldName').value=f?.name||'';
+  $('#plantFieldSelect').value=f?.id??'';
   $('#plantHeading').value=f?.heading??'';
   $('#plantLat').value=f?.lat??'';
   $('#plantLng').value=f?.lng??'';
