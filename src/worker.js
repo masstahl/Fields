@@ -177,7 +177,8 @@ async function handle(request, env, a, b) {
         return {
           ...row,
           last_modified_by: last?.user || row.created_by || "",
-          contributors
+          contributors,
+          history: events.map(x => ({at:x.at,user:x.user,action:x.action,detail:x.detail}))
         };
       }));
     }
