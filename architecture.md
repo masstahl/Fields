@@ -386,6 +386,10 @@ configured.
 
 If not, access is denied.
 
+### `POST /api/planting-records/archive`
+
+Archives the season by removing planting records. The endpoint requires the same `x-admin: <ADMIN_KEY>` check as `GET /api/log`.
+
 ---
 
 # 5. D1 Data Architecture
@@ -757,7 +761,7 @@ The application currently relies primarily on:
 
 - Cloudflare HTTPS
 - server-side D1 access
-- an admin key for activity logs
+- an admin key for activity logs and season archive
 - a client-supplied `x-user` value for activity attribution
 
 This is appropriate for a small controlled operational application but is not equivalent to a fully authenticated multi-user SaaS application.
@@ -1277,7 +1281,7 @@ These should remain true after future changes:
 4. Field map viewport state remains per-field and local to the device.
 5. Map marker orientation comes from the field heading.
 6. Activity records survive field deletion.
-7. Activity-log access requires server-side authorization.
+7. Activity-log access and season archive require server-side administrator authorization.
 8. API responses are not browser-cached.
 9. The application remains usable on iPhone.
 10. PWA updates must not knowingly create an unrecoverable Home Screen state.
