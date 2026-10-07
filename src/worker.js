@@ -224,6 +224,7 @@ async function handle(request, env, a, b) {
     }
 
     if (a === "planting-records" && b === "archive" && m === "POST") {
+      if (!env.ADMIN_KEY || request.headers.get("x-admin") !== env.ADMIN_KEY) return json({ error: "denied" }, 403);
       const r = await db.prepare("DELETE FROM planting_records").run();
       await log("archive season", `${r.meta?.changes ?? 0} planting records archived`);
       return json({ ok:true, removed:r.meta?.changes ?? 0 });
