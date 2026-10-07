@@ -1,5 +1,5 @@
-const CACHE='field-headings-static-v20261005-0900';
-const STATIC=['/index.html','/manifest.webmanifest?v=20261005-0900','/icon.svg'];
+const CACHE='field-headings-static-v20261007-0900';
+const STATIC=['/index.html','/manifest.webmanifest?v=20261007-0900','/icon.svg'];
 self.addEventListener('install',event=>{event.waitUntil((async()=>{
  const cache=await caches.open(CACHE);
  await cache.addAll(STATIC).catch(()=>{});
