@@ -8,9 +8,7 @@ export default {
       const asset = await env.ASSETS.fetch(request);
       if (!asset.ok) return asset;
       let source = await asset.text();
-      if (url.pathname !== "/fix.js") {
-        source = source.replace("a.href=url;a.download='planting-records.csv';", "a.href=url;a.download='potato-planting-records.csv';");
-      }
+
       const headers = new Headers(asset.headers);
       headers.delete("content-length");
       headers.delete("etag");
