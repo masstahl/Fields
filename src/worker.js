@@ -218,12 +218,12 @@ async function handle(request, env, a, b) {
         const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
         return match ? `${Number(match[2])}/${Number(match[3])}/${match[1].slice(-2)}` : value;
       };
-      const rows = [...merged.values()].map(row => [
+      const exportRows = [...merged.values()].map(row => [
         "FALSE", row.field_name, excelDate(row.planting_date), row.latitude, row.longitude,
         row.heading, row.variety, row.notes, "", "", "", ""
       ]);
       const cell = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
-      const csv = "\uFEFF" + [cols, ...rows].map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
+      const csv = "\uFEFF" + [cols, ...exportRows].map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
       return new Response(csv, {status:200,headers:{
         "content-type":"text/csv; charset=utf-8",
         "content-disposition":'attachment; filename="potato-planting-records.csv"',
