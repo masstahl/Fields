@@ -272,7 +272,7 @@ async function handle(request, env, a, b) {
       const csv = "\uFEFF" + [cols, ...exportRows].map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
       return new Response(csv, {status:200,headers:{
         "content-type":"text/csv; charset=utf-8",
-        "content-disposition":'attachment; filename="potato-planting-records.csv"',
+        "content-disposition":'attachment; filename="planting-records.csv"',
         "cache-control":"no-store"
       }});
     }
