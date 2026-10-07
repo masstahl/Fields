@@ -2,7 +2,7 @@
 
 > **Purpose:** Persistent project memory for the Fields field-heading application. This document is intended to preserve architecture, infrastructure, product requirements, known-good states, known failures, deployment procedures, and decisions so future development can continue without repeating previous investigation.
 
-**Last updated:** 2026-10-06  
+**Last updated:** 2026-10-07  
 **Repository:** `masstahl/Fields`  
 **Primary deployment:** Cloudflare Worker + Workers Assets + D1  
 **Primary Worker:** `field-headings`  
@@ -871,3 +871,50 @@ If the user says the app is not opening:
 The most important architectural lesson from this project is:
 
 > **A Cloudflare Worker rollback does not roll back a service worker already installed on a user's device. PWA client state must be treated as an independent deployment layer.**
+
+
+---
+
+## 29. Planting Workflow Safeguards — 2026-10-07
+
+The Plant Field workflow is intentionally constrained to prevent accidental field database changes.
+
+### Existing fields only
+
+- Plant Field never creates a field.
+- The operator searches and selects an existing field from the D1-backed field list.
+- The planting API requires a valid existing `field_id`.
+- The Worker re-reads that field from D1 and derives:
+  - field name
+  - heading
+  - latitude
+  - longitude
+- Client-supplied field name, heading, and coordinates are not authoritative for planting records.
+
+### Add Field location
+
+The primary Fields screen no longer exposes the Add Field button.
+
+Add Field remains available from the Activity area. Existing field editing remains available through the field records themselves.
+
+### Variety workflow
+
+Planting forms use a dropdown populated from managed varieties and previously recorded planting varieties.
+
+A `+ Add new variety…` option allows an operator to add a variety when needed.
+
+Variety Management is available in Activity and supports:
+
+- viewing varieties
+- renaming varieties
+- deleting unused varieties
+
+No new D1 table or schema migration is used for variety management. Variety catalog additions, renames, and deletions are represented through the existing `activity` audit table, while current planting records remain the source for usage counts.
+
+### Scope invariants
+
+- GPS nearest-field detection is unchanged.
+- Planting CSV export is unchanged.
+- Existing field database schema is unchanged.
+- Existing field lookup workflow is unchanged.
+- Existing visual styling and overall layout are preserved.
