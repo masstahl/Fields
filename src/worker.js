@@ -1,6 +1,22 @@
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v)) ? null : +v;
 
+async function getVarieties(db) {
+  const rows = (await db.prepare("SELECT DISTINCT variety FROM planting_records WHERE variety IS NOT NULL AND TRIM(variety)<>''").all()).results;
+  const events = (await db.prepare("SELECT action,detail FROM activity WHERE action IN ('variety added','variety renamed','variety deleted') ORDER BY id").all()).results;
+  const active = new Set(rows.map(r => String(r.variety || '').trim()).filter(Boolean));
+  for (const event of events) {
+    try {
+      const detail = String(event.detail || '');
+      if (event.action === 'variety added' && detail.startsWith('variety:')) active.add(JSON.parse(detail.slice(8)).name);
+      else if (event.action === 'variety renamed' && detail.startsWith('variety rename:')) { const value=JSON.parse(detail.slice(15)); active.delete(value.from); active.add(value.to); }
+      else if (event.action === 'variety deleted' && detail.startsWith('variety:')) active.delete(JSON.parse(detail.slice(8)).name);
+    } catch {}
+  }
+  const names=[...active].filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  return Promise.all(names.map(async name=>{ const row=await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE variety=?").bind(name).first(); return {name,used:Number(row?.count||0)}; }));
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -43,18 +59,54 @@ async function handle(request, env, a, b) {
   };
 
   try {
+    if (a === "varieties" && m === "GET") return json(await getVarieties(db));
+    if (a === "varieties" && m === "POST") {
+      const p = await request.json(); const name = String(p.name || "").trim();
+      if (!name) return json({ error: "Variety name is required" }, 400);
+      const varieties = await getVarieties(db);
+      if (varieties.some(v => v.name === name)) return json({ name, existing:true });
+      await log("variety added", "variety:" + JSON.stringify({name}));
+      return json({ name, existing:false });
+    }
+    if (a === "varieties" && b === "rename" && m === "POST") {
+      const p = await request.json(); const from = String(p.from || "").trim(); const to = String(p.to || "").trim();
+      if (!from || !to) return json({ error: "Current and new variety names are required" }, 400);
+      if (from === to) return json({ name:to });
+      const varieties = await getVarieties(db);
+      if (!varieties.some(v=>v.name===from)) return json({ error:"Variety not found" },404);
+      if (varieties.some(v=>v.name===to)) return json({ error:"That variety name already exists" },409);
+      await db.prepare("UPDATE planting_records SET variety=? WHERE variety=?").bind(to,from).run();
+      await log("variety renamed","variety rename:"+JSON.stringify({from,to}));
+      return json({name:to});
+    }
+    if (a === "varieties" && b === "delete" && m === "POST") {
+      const p = await request.json(); const name = String(p.name || "").trim();
+      if (!name) return json({ error:"Variety name is required" },400);
+      const count = await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE variety=?").bind(name).first();
+      if (Number(count?.count||0)>0) return json({error:"Only unused varieties can be deleted"},409);
+      const varieties = await getVarieties(db);
+      if (!varieties.some(v=>v.name===name)) return json({error:"Variety not found"},404);
+      await log("variety deleted","variety:"+JSON.stringify({name}));
+      return json({ok:true});
+    }
+
     if (a === "planting-records" && m === "POST") {
       const p = await request.json();
-      const fieldName = String(p.field_name || "").trim();
-      const heading = String(p.heading || "").trim();
-      const plantingDate = String(p.planting_date || "").trim();
-      if (!fieldName || !heading || !plantingDate) return json({ error: "Field name, heading and planting date are required" }, 400);
-
       const fieldId = Number.isInteger(+p.field_id) ? +p.field_id : null;
-      const latitude = num(p.latitude);
-      const longitude = num(p.longitude);
+      const plantingDate = String(p.planting_date || "").trim();
+      if (!fieldId || !plantingDate) return json({ error: "An existing field and planting date are required" }, 400);
+      const field = await db.prepare("SELECT id,name,heading,lat,lng FROM fields WHERE id=?").bind(fieldId).first();
+      if (!field) return json({ error: "Selected field does not exist" }, 400);
+      const fieldName = String(field.name || "").trim();
+      const heading = String(field.heading || "").trim();
+      const latitude = field.lat ?? null;
+      const longitude = field.lng ?? null;
       const variety = String(p.variety || "").trim();
       const notes = String(p.notes || "").trim();
+      if (variety) {
+        const varieties = await getVarieties(db);
+        if (!varieties.some(v => v.name === variety)) return json({ error: "Select an existing variety or add the new variety first" }, 400);
+      }
 
       const existing = await db.prepare(
         "SELECT * FROM planting_records WHERE field_name=? AND planting_date=? ORDER BY id DESC LIMIT 1"
@@ -89,16 +141,21 @@ async function handle(request, env, a, b) {
       if (!existing) return json({ error: "Planting record not found" }, 404);
 
       const p = await request.json();
-      const fieldName = String(p.field_name || "").trim();
-      const heading = String(p.heading || "").trim();
-      const plantingDate = String(p.planting_date || "").trim();
-      if (!fieldName || !heading || !plantingDate) return json({ error: "Field name, heading and planting date are required" }, 400);
-
       const fieldId = Number.isInteger(+p.field_id) ? +p.field_id : null;
-      const latitude = num(p.latitude);
-      const longitude = num(p.longitude);
+      const plantingDate = String(p.planting_date || "").trim();
+      if (!fieldId || !plantingDate) return json({ error: "An existing field and planting date are required" }, 400);
+      const field = await db.prepare("SELECT id,name,heading,lat,lng FROM fields WHERE id=?").bind(fieldId).first();
+      if (!field) return json({ error: "Selected field does not exist" }, 400);
+      const fieldName = String(field.name || "").trim();
+      const heading = String(field.heading || "").trim();
+      const latitude = field.lat ?? null;
+      const longitude = field.lng ?? null;
       const variety = String(p.variety || "").trim();
       const notes = String(p.notes || "").trim();
+      if (variety) {
+        const varieties = await getVarieties(db);
+        if (!varieties.some(v => v.name === variety)) return json({ error: "Select an existing variety or add the new variety first" }, 400);
+      }
 
       const duplicate = await db.prepare(
         "SELECT * FROM planting_records WHERE field_name=? AND planting_date=? AND id<>? ORDER BY id DESC LIMIT 1"
