@@ -510,7 +510,8 @@ $('#exportPlantingBtn').onclick=async()=>{
   try{
     const r=await fetch('/api/planting-records/export',{cache:'no-store',headers:{'x-user':encodeURIComponent(user)}});
     if(!r.ok)throw new Error('Unable to export planting records');
-    const blob=await r.blob();
+    const csv=await r.text();
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;a.download='planting-records.csv';
