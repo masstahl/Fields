@@ -315,14 +315,13 @@ async function openPlantEdit(record){
   }catch(e){toast(e.message)}
 }
 
-function showPlantEditDialog(record){
+async function showPlantEditDialog(record){
   return new Promise(resolve=>{
     $('#editPlantId').value=record.id;
     renderFieldOptions('#editPlantFieldSelect','#editPlantFieldSearch',record.field_id);
     const matchingField=fields.find(f=>Number(f.id)===Number(record.field_id))||fields.find(f=>String(f.name)===String(record.field_name));
     if(matchingField){applyPlantField(matchingField,'editPlant');$('#editPlantFieldSearch').value='';}
     $('#editPlantDate').value=record.planting_date||'';
-    await loadVarieties();
     $('#editPlantVariety').value=record.variety||'';
     $('#editPlantNotes').value=record.notes||'';
     const dlg=$('#plantEditDlg');
