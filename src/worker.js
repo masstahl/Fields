@@ -12,6 +12,21 @@ export default {
         "service-worker-allowed": "/"
       }});
     }
+    if (url.pathname === "/fix.js" || url.pathname === "/" || url.pathname === "/index.html") {
+      const asset = await env.ASSETS.fetch(request);
+      if (!asset.ok) return asset;
+      let source = await asset.text();
+      if (url.pathname === "/fix.js") {
+        source = source.replace(/  if\('serviceWorker' in navigator\)\{[\s\S]*?\n  \}/, "");
+      } else {
+        source = source.replace("a.href=url;a.download='planting-records.csv';", "a.href=url;a.download='potato-planting-records.csv';");
+      }
+      const headers = new Headers(asset.headers);
+      headers.delete("content-length");
+      headers.delete("etag");
+      headers.set("cache-control", "no-store");
+      return new Response(source, { status: asset.status, statusText: asset.statusText, headers });
+    }
     if (!url.pathname.startsWith("/api/")) {
       return env.ASSETS.fetch(request);
     }
