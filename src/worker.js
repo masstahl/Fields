@@ -4,6 +4,18 @@ const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    // Emergency PWA recovery endpoint.
+    if (url.pathname === "/service-worker.js") {
+      return new Response(
+        "self.addEventListener(\"install\",()=>self.skipWaiting());self.addEventListener(\"activate\",e=>e.waitUntil(self.clients.claim().then(()=>self.registration.unregister()).then(()=>self.clients.matchAll()).then(cs=>Promise.all(cs.map(c=>c.navigate(c.url))))));",
+        {
+          headers: {
+            "content-type": "application/javascript; charset=utf-8",
+            "cache-control": "no-store, no-cache, must-revalidate"
+          }
+        }
+      );
+    }
     if (url.pathname === "/fix.js" || url.pathname === "/" || url.pathname === "/index.html") {
       const asset = await env.ASSETS.fetch(request);
       if (!asset.ok) return asset;
