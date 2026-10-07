@@ -1293,3 +1293,56 @@ These should remain true after future changes:
 # 28. One-Sentence System Model
 
 > **Fields is a lightweight, mobile-first Cloudflare application in which a vanilla JavaScript PWA talks to a Worker API, the Worker persists authoritative field/audit data in D1, Workers Assets serves the application shell, and Leaflet provides per-field interactive GIS state on the client.**
+
+
+---
+
+# 28. Planting Workflow Architecture
+
+## 28.1 Field selection
+
+Planting is reference-only against the authoritative `fields` table.
+
+The client presents:
+
+- searchable existing-field selection
+- selected field name
+- read-only heading
+- read-only latitude
+- read-only longitude
+
+The Worker requires `field_id`, verifies the field exists, and derives the planting record's field metadata from D1. This prevents a planting request from creating or inventing a field.
+
+## 28.2 Add Field boundary
+
+Field creation is no longer exposed on the primary Fields screen. The Add Field action is available from Activity.
+
+This is a workflow boundary, not a database permission boundary: existing field edit/delete behavior remains unchanged.
+
+## 28.3 Variety management without schema changes
+
+Varieties are represented without adding a D1 table.
+
+Current planting records provide the initial/used variety set. The existing `activity` table records variety catalog events:
+
+- `variety added`
+- `variety renamed`
+- `variety deleted`
+
+The Worker reconstructs the active variety list and calculates current usage from `planting_records`.
+
+Rename updates current planting records using that variety. Delete is rejected when the variety is still used by a planting record.
+
+This deliberately avoids a schema migration for a small catalog-management requirement.
+
+## 28.4 Planting record invariants
+
+For create and edit:
+
+1. A valid existing field must be selected.
+2. Field name, heading, latitude, and longitude come from the selected field.
+3. Planting date, variety, and notes come from the planting form.
+4. Duplicate merge behavior remains keyed by field name + planting date.
+5. CSV export remains unchanged.
+
+GPS nearest-field detection remains the entry point for the Plant Field button.
