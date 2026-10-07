@@ -19,7 +19,7 @@ main{max-width:940px;margin:auto;padding:16px 16px 55px}.hero{position:relative;
 .search-panel{position:relative;margin-top:-3px;margin-bottom:14px}.search{width:100%;height:54px;border:1px solid rgba(24,63,42,.12);border-radius:16px;background:rgba(255,253,248,.96);padding:0 76px 0 46px;outline:0;font-size:16px;color:var(--ink);box-shadow:0 10px 28px rgba(24,63,42,.075);transition:border-color .18s,box-shadow .18s}.search:focus{border-color:#a9b8a7;box-shadow:0 0 0 4px rgba(120,148,111,.14)}.search-icon{position:absolute;left:16px;top:17px;color:#748078;pointer-events:none}.clear{position:absolute;right:9px;top:9px;height:36px;border:0;border-radius:10px;background:#edf0e9;color:#647067;padding:0 10px;font-size:12px;font-weight:750}
 .summary{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 9px;font-size:11px;color:var(--muted)}.status{display:flex;align-items:center;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:#6d956b}.dot.bad{background:#a95a53}
 .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.card{background:var(--paper);border:1px solid rgba(24,63,42,.095);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;transition:transform .18s,box-shadow .18s,border-color .18s}.card:hover{transform:translateY(-1px);box-shadow:0 20px 48px rgba(24,63,42,.13);border-color:rgba(24,63,42,.15)}.card-main{display:flex;align-items:center;justify-content:space-between;gap:13px;padding:16px;min-height:88px;position:relative}.card-main:after{content:"";width:6px;height:6px;border-right:1.5px solid #839087;border-bottom:1.5px solid #839087;transform:rotate(45deg);transition:transform .18s,opacity .18s;opacity:.65}.card.expanded .card-main:after{transform:rotate(225deg);opacity:.85}.card-main:active{background:#f8f7f0}.name{font-size:16px;font-weight:760;letter-spacing:-.02em}.meta{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.35}.heading{text-align:right;min-width:67px}.degrees{font-size:22px;font-weight:800;letter-spacing:-.05em;color:var(--forest);font-variant-numeric:tabular-nums}.direction{font-size:10px;color:var(--sage);font-weight:750;text-transform:uppercase;letter-spacing:.08em}.location-preview{position:relative;min-height:250px;overflow:hidden;border-top:1px solid #e8ebe3;background:#dfe5dc;animation:reveal .22s ease-out}@keyframes reveal{from{opacity:.35;transform:translateY(-4px)}to{opacity:1;transform:none}}.location-map{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(.9) contrast(.94);transform:scale(1.015)}.location-map::after{content:"";position:absolute;inset:0;background:rgba(244,244,237,.34)}.location-overlay{position:relative;margin:14px;z-index:1;background:rgba(250,249,243,.88);border:1px solid rgba(255,255,255,.8);border-radius:15px;padding:13px;box-shadow:0 10px 28px rgba(24,63,42,.13);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}.location-pin{position:absolute;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);border-radius:50% 50% 50% 0;background:var(--forest);border:3px solid rgba(255,255,255,.95);box-shadow:0 3px 12px rgba(0,0,0,.28);rotate:-45deg;z-index:2}.location-pin::after{content:"";position:absolute;inset:4px;border-radius:50%;background:#fff}.details{border-top:1px solid #e8ebe3;padding:13px 15px 15px;background:#faf9f3}.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}.detail{background:rgba(255,255,255,.84);border:1px solid rgba(24,63,42,.09);border-radius:10px;padding:9px;box-shadow:0 2px 8px rgba(24,63,42,.025)}.detail label{display:block;text-transform:uppercase;letter-spacing:.08em;font-size:8px;font-weight:800;color:#89928b;margin-bottom:4px}.detail b{font-size:12px;font-weight:700}.actions{display:flex;gap:7px;flex-wrap:wrap}.action{border:1px solid #d7ddd4;background:rgba(255,255,255,.92);color:#3e4c43;border-radius:9px;padding:8px 11px;font-size:11px;font-weight:750;text-decoration:none;transition:background .15s,transform .15s,border-color .15s}.action:hover{background:#f5f6f0;border-color:#c8d0c7}.action:active{transform:scale(.98)}.action.primary{background:var(--forest);color:white;border-color:var(--forest)}.action.danger{color:var(--danger)}
-.empty{background:rgba(255,253,248,.72);border:1px dashed #cbd3c8;border-radius:18px;text-align:center;padding:43px 20px;color:var(--muted);grid-column:1/-1;box-shadow:var(--shadow-soft)}.empty strong{display:block;color:#334239;font-size:15px;margin-bottom:5px}.activity-tools{display:flex;gap:8px;margin:10px 0 14px}.activity-tools button{flex:1}.activity-section{margin-top:14px}.activity-tabs{display:flex;gap:4px;margin-bottom:10px;border-bottom:1px solid #e8ebe3;padding-bottom:5px}.activity-tab{flex:1;border:0;background:transparent;color:#6d776f;border-radius:9px;padding:9px 6px;font-size:11px;font-weight:750}.activity-tab.active{background:#fffdf8;color:var(--forest);box-shadow:0 2px 8px rgba(24,63,42,.08)}.activity-panel{min-height:44px}.activity-heading{display:flex;justify-content:space-between;align-items:center;margin:0 0 7px;font-size:12px;color:var(--muted)}.activity-heading strong{color:var(--ink);font-size:13px}.plant-record{padding:12px 14px;border-bottom:1px solid #e8ebe3;font-size:12px}.plant-record:last-child{border-bottom:0}.plant-record .top{display:flex;justify-content:space-between;gap:10px}.plant-record .field{font-weight:800}.plant-record .meta{color:var(--muted);font-size:10px;margin-top:4px;line-height:1.45}.plant-record .notes{margin-top:6px;white-space:pre-wrap}.plant-record button{margin-top:8px;width:100%}.plant-empty{padding:16px;color:var(--muted);font-size:12px}.plant-edit-dialog .form{padding-top:18px}
+.empty{background:rgba(255,253,248,.72);border:1px dashed #cbd3c8;border-radius:18px;text-align:center;padding:43px 20px;color:var(--muted);grid-column:1/-1;box-shadow:var(--shadow-soft)}.empty strong{display:block;color:#334239;font-size:15px;margin-bottom:5px}.activity-tools{display:flex;gap:8px;margin:10px 0 14px}.activity-tools button{flex:1}.activity-section{margin-top:14px}.activity-tabs{display:flex;gap:4px;margin-bottom:10px;border-bottom:1px solid #e8ebe3;padding-bottom:5px}.activity-tab{flex:1;border:0;background:transparent;color:#6d776f;border-radius:9px;padding:9px 6px;font-size:11px;font-weight:750}.activity-tab.active{background:#fffdf8;color:var(--forest);box-shadow:0 2px 8px rgba(24,63,42,.08)}.activity-panel{min-height:44px}.activity-inline-actions{display:flex;gap:8px}.activity-inline-actions button{flex:1}.activity-variety-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border-bottom:1px solid #e8ebe3;font-size:12px}.activity-variety-row:last-child{border-bottom:0}.activity-variety-row .meta{font-size:10px;color:var(--muted);margin-top:3px}.activity-variety-row .actions{display:flex;gap:6px}.activity-variety-row button{white-space:nowrap}.form select{width:100%;height:46px;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:0 12px;outline:0;color:var(--ink)}.form select:focus{border-color:#9eb09d;box-shadow:0 0 3px rgba(120,148,111,.14)}.activity-heading{display:flex;justify-content:space-between;align-items:center;margin:0 0 7px;font-size:12px;color:var(--muted)}.activity-heading strong{color:var(--ink);font-size:13px}.plant-record{padding:12px 14px;border-bottom:1px solid #e8ebe3;font-size:12px}.plant-record:last-child{border-bottom:0}.plant-record .top{display:flex;justify-content:space-between;gap:10px}.plant-record .field{font-weight:800}.plant-record .meta{color:var(--muted);font-size:10px;margin-top:4px;line-height:1.45}.plant-record .notes{margin-top:6px;white-space:pre-wrap}.plant-record button{margin-top:8px;width:100%}.plant-empty{padding:16px;color:var(--muted);font-size:12px}.plant-edit-dialog .form{padding-top:18px}
 .activity{background:var(--paper);border:1px solid rgba(24,63,42,.10);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}.log{padding:13px 15px;border-bottom:1px solid #e8ebe3;font-size:12px}.log:last-child{border-bottom:0}.log b{font-weight:800}.log small{display:block;color:var(--muted);margin-top:4px;font-size:10px}
 dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:0;margin:auto;max-height:calc(100% - 32px);overflow:auto}dialog{width:min(450px,calc(100% - 28px));border:0;border-radius:22px;padding:0;background:var(--paper);box-shadow:0 28px 80px rgba(0,0,0,.25);color:var(--ink)}dialog::backdrop{background:rgba(12,35,22,.48);backdrop-filter:blur(4px)}.form{padding:21px}.form h2{margin:0;font-size:21px;letter-spacing:-.04em}.form p{margin:5px 0 17px;color:var(--muted);font-size:11px}label{display:block;color:#68736b;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin:12px 0 6px}input[type=text],input[type=date],input[type=number]{width:100%;height:46px;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:0 12px;outline:0;color:var(--ink)}input:focus{border-color:#9eb09d;box-shadow:0 0 0 3px rgba(120,148,111,.14)}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.form-actions{display:flex;gap:8px;margin-top:20px}.form-actions button{flex:1;height:44px;border-radius:11px;border:1px solid var(--line);font-weight:700}.save{background:var(--forest);border-color:var(--forest)!important;color:#fff}.delete{background:#fff;color:var(--danger)}.cancel{background:#f0f1eb}.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--forest);color:white;border-radius:12px;padding:11px 15px;font-size:12px;font-weight:750;transition:.2s;z-index:50;box-shadow:0 12px 35px rgba(0,0,0,.22)}.toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:650px){.list{grid-template-columns:1fr}.hero{min-height:182px}.hero-copy{max-width:62%}.hero h2{font-size:25px}.hero-art{width:57%}.detail-grid{grid-template-columns:1fr 1fr}.brand .sub{display:none}}
@@ -43,7 +43,7 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
 </head>
 <body>
 <div class="app">
-<header><div class="header-inner"><div class="brand-row"><div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M8 34c8-1 14-8 16-20 7 4 10 10 7 18-3 8-12 10-23 2Z" fill="#d8b35f"/><path d="M10 35c10-2 16-8 21-20" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M27 12c4-4 8-5 12-4-1 5-4 8-10 8" fill="#89a77e"/></svg></div><div><h1>Field Headings</h1><div class="sub" id="who">Field reference · planting & orientation</div></div></div><div style="display:flex;gap:7px;align-items:center"><button class="add plant-add" id="plantBtn" type="button">🌱 Plant Field</button><button class="add" id="addBtn">+ Add field</button></div></div><nav><button id="fieldsTab" class="tab active">Fields</button><button id="activityTab" class="tab">Activity</button></nav></div></header>
+<header><div class="header-inner"><div class="brand-row"><div class="brand"><div class="mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none"><path d="M8 34c8-1 14-8 16-20 7 4 10 10 7 18-3 8-12 10-23 2Z" fill="#d8b35f"/><path d="M10 35c10-2 16-8 21-20" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M27 12c4-4 8-5 12-4-1 5-4 8-10 8" fill="#89a77e"/></svg></div><div><h1>Field Headings</h1><div class="sub" id="who">Field reference · planting & orientation</div></div></div><div style="display:flex;gap:7px;align-items:center"><button class="add plant-add" id="plantBtn" type="button">🌱 Plant Field</button></div></div><nav><button id="fieldsTab" class="tab active">Fields</button><button id="activityTab" class="tab">Activity</button></nav></div></header>
 <main>
 <section class="hero"><div class="hero-copy"><div class="kicker">FIELD REFERENCE</div><h2>Know the field.<br>Plant with confidence.</h2><p>Quickly confirm heading and location before you go.</p></div><div class="hero-art" aria-hidden="true"><svg viewBox="0 0 420 190" preserveAspectRatio="none"><path d="M190 0h230v190H0c75-24 125-54 148-88 18-27 25-61 42-102Z" fill="#28583b"/><g opacity=".42" stroke="#b8cdb3" stroke-width="3" fill="none"><path d="M182 190C230 148 246 72 260 0"/><path d="M215 190C263 145 280 67 292 0"/><path d="M248 190C294 141 311 63 323 0"/><path d="M281 190C325 138 342 61 354 0"/><path d="M314 190C356 136 373 60 384 0"/></g><path d="M319 155c0-25 18-44 40-44 14 0 27 8 34 21-4-1-8-2-12-2-22 0-40 11-62 25Z" fill="#89a77e"/><circle cx="359" cy="102" r="4" fill="#c49a4a"/></svg></div></section>
 <section id="fieldsView"><div class="search-panel"><svg class="search-icon" width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="q" class="search" placeholder="Search by field name…" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="clear" id="clearBtn" hidden>Clear</button></div><div class="summary"><span id="count">Loading fields…</span><span class="status"><span id="dot" class="dot"></span><span id="statusText">Connecting</span></span></div><div id="out" class="list"></div></section>
@@ -66,10 +66,9 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
       <button type="button" class="delete" id="archivePlantingBtn">Archive Season</button>
     </div>
   </div>
-  <div class="activity-section">
-    <div class="activity-heading"><strong>Planting Records</strong><span id="plantingStatus"></span></div>
-    <div id="plantingRecords" class="activity"></div>
-  </div>
+  <div class="activity-section"><div class="activity-inline-actions"><button type="button" class="action" id="activityAddFieldBtn">+ Add Field</button></div></div>
+  <div class="activity-section"><div class="activity-heading"><strong>Planting Records</strong><span id="plantingStatus"></span></div><div id="plantingRecords" class="activity"></div></div>
+  <div class="activity-section"><div class="activity-heading"><strong>Variety Management</strong><span id="varietyStatus"></span></div><div id="varietyManagement" class="activity"></div></div>
 </section>
   <button
     id="gpsBtn"
@@ -79,15 +78,16 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
    🔍 Find Nearest Field
   </button>
 </main>
-<dialog id="plantEditDlg" class="plant-edit-dialog"><form class="form" id="plantEditForm" method="dialog"><h2>Edit Planting Record</h2><p>Update the saved planting entry.</p><input id="editPlantId" type="hidden"><label for="editPlantFieldName">Field Name</label><input id="editPlantFieldName" type="text" required><label for="editPlantHeading">Heading</label><input id="editPlantHeading" type="text" required inputmode="decimal"><div class="two"><div><label for="editPlantLat">Latitude</label><input id="editPlantLat" type="number" step="any" inputmode="decimal"></div><div><label for="editPlantLng">Longitude</label><input id="editPlantLng" type="number" step="any" inputmode="decimal"></div></div><label for="editPlantDate">Planting Date</label><input id="editPlantDate" type="date" required><label for="editPlantVariety">Variety</label><input id="editPlantVariety" type="text"><label for="editPlantNotes">Notes</label><textarea id="editPlantNotes" rows="4" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantEditCancelBtn">Cancel</button><button type="button" class="delete" id="plantEditDeleteBtn">Delete</button><button type="submit" class="save">Save</button></div></form></dialog>
+<dialog id="plantEditDlg" class="plant-edit-dialog"><form class="form" id="plantEditForm" method="dialog"><h2>Edit Planting Record</h2><p>Select an existing field and update the saved planting entry.</p><input id="editPlantId" type="hidden"><label for="editPlantFieldSearch">Find Field</label><input id="editPlantFieldSearch" type="text" placeholder="Search existing fields…" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="editPlantFieldSelect">Field Name</label><select id="editPlantFieldSelect" required><option value="">Select an existing field</option></select><label for="editPlantHeading">Heading</label><input id="editPlantHeading" type="text" readonly><div class="two"><div><label for="editPlantLat">Latitude</label><input id="editPlantLat" type="number" step="any" readonly></div><div><label for="editPlantLng">Longitude</label><input id="editPlantLng" type="number" step="any" readonly></div></div><label for="editPlantDate">Planting Date</label><input id="editPlantDate" type="date" required><label for="editPlantVariety">Variety</label><select id="editPlantVariety"><option value="">No variety</option><option value="__add__">+ Add new variety…</option></select><label for="editPlantNotes">Notes</label><textarea id="editPlantNotes" rows="4" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantEditCancelBtn">Cancel</button><button type="button" class="delete" id="plantEditDeleteBtn">Delete</button><button type="submit" class="save">Save</button></div></form></dialog>
 <dialog id="dlg"><form class="form" id="fieldForm" method="dialog"><h2 id="formTitle">Add field</h2><p>Keep the field record clean and consistent for the crew.</p><label for="fn">Field name</label><input id="fn" type="text" required><label for="fh">Heading (degrees)</label><input id="fh" type="text" required inputmode="decimal"><label for="fd">Date planted</label><input id="fd" type="date"><div class="two"><div><label for="fa">Latitude</label><input id="fa" type="number" step="any" inputmode="decimal"></div><div><label for="fo">Longitude</label><input id="fo" type="number" step="any" inputmode="decimal"></div></div><div class="form-actions"><button type="button" class="cancel" id="cancelBtn">Cancel</button><button type="button" class="delete" id="deleteBtn" hidden>Delete</button><button type="submit" class="save">Save</button></div></form></dialog>
-<dialog id="plantDlg"><form class="form" id="plantForm" method="dialog"><h2>🌱 Plant Field</h2><p>Start a planting record from the nearest field.</p><label for="plantFieldName">Field Name</label><input id="plantFieldName" type="text" required><label for="plantHeading">Heading</label><input id="plantHeading" type="text" required inputmode="decimal"><div class="two"><div><label for="plantLat">Latitude</label><input id="plantLat" type="number" step="any" inputmode="decimal"></div><div><label for="plantLng">Longitude</label><input id="plantLng" type="number" step="any" inputmode="decimal"></div></div><label for="plantDate">Planting Date</label><input id="plantDate" type="date" required><label for="plantVariety">Variety</label><input id="plantVariety" type="text" placeholder="Enter variety"><label for="plantNotes">Notes</label><textarea id="plantNotes" rows="3" placeholder="Optional notes" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantCancelBtn">Cancel</button><button type="submit" class="save">Save</button></div></form></dialog>
+<dialog id="plantDlg"><form class="form" id="plantForm" method="dialog"><h2>🌱 Plant Field</h2><p>Start a planting record from an existing field.</p><label for="plantFieldSearch">Find Field</label><input id="plantFieldSearch" type="text" placeholder="Search existing fields…" autocomplete="off" autocapitalize="off" spellcheck="false"><label for="plantFieldSelect">Field Name</label><select id="plantFieldSelect" required><option value="">Select an existing field</option></select><label for="plantHeading">Heading</label><input id="plantHeading" type="text" readonly><div class="two"><div><label for="plantLat">Latitude</label><input id="plantLat" type="number" step="any" readonly></div><div><label for="plantLng">Longitude</label><input id="plantLng" type="number" step="any" readonly></div></div><label for="plantDate">Planting Date</label><input id="plantDate" type="date" required><label for="plantVariety">Variety</label><select id="plantVariety"><option value="">No variety</option><option value="__add__">+ Add new variety…</option></select><label for="plantNotes">Notes</label><textarea id="plantNotes" rows="3" placeholder="Optional notes" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantCancelBtn">Cancel</button><button type="submit" class="save">Save</button></div></form></dialog>
 <div id="toast" class="toast"></div>
 <script>
 const $=s=>document.querySelector(s);
 function showDialog(el){if(typeof el.showModal==='function')el.showModal();else{el.setAttribute('open','');el.setAttribute('role','dialog');el.setAttribute('aria-modal','true')}}
 function closeDialog(el){if(typeof el.close==='function')el.close();else el.removeAttribute('open')}
 let fields=[],tab='fields',editId=null,openIds=new Set(),user=localStorage.getItem('fieldUser')||'';
+let varieties=[];
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const api=async(path,options={})=>{
@@ -318,32 +318,30 @@ async function openPlantEdit(record){
 function showPlantEditDialog(record){
   return new Promise(resolve=>{
     $('#editPlantId').value=record.id;
-    $('#editPlantFieldName').value=record.field_name||'';
-    $('#editPlantHeading').value=record.heading||'';
-    $('#editPlantLat').value=record.latitude??'';
-    $('#editPlantLng').value=record.longitude??'';
+    renderFieldOptions('#editPlantFieldSelect','#editPlantFieldSearch',record.field_id);
+    const matchingField=fields.find(f=>Number(f.id)===Number(record.field_id))||fields.find(f=>String(f.name)===String(record.field_name));
+    if(matchingField){applyPlantField(matchingField,'editPlant');$('#editPlantFieldSearch').value='';}
     $('#editPlantDate').value=record.planting_date||'';
+    await loadVarieties();
     $('#editPlantVariety').value=record.variety||'';
     $('#editPlantNotes').value=record.notes||'';
     const dlg=$('#plantEditDlg');
     const done=()=>{
       dlg.removeEventListener('close',done);
       if(dlg.dataset.cancel==='1'){dlg.dataset.cancel='';resolve(null);return}
-      resolve({
-        field_id:record.field_id,
-        field_name:$('#editPlantFieldName').value.trim(),
-        heading:$('#editPlantHeading').value.trim(),
-        latitude:$('#editPlantLat').value,
-        longitude:$('#editPlantLng').value,
-        planting_date:$('#editPlantDate').value,
-        variety:$('#editPlantVariety').value.trim(),
-        notes:$('#editPlantNotes').value.trim()
-      });
+      const field=selectedField('editPlant');
+      resolve({field_id:field?.id||null,planting_date:$('#editPlantDate').value,variety:$('#editPlantVariety').value.trim(),notes:$('#editPlantNotes').value.trim()});
     };
     dlg.addEventListener('close',done);
     showDialog(dlg);
   });
 }
+
+const editFieldSearch=$('#editPlantFieldSearch');
+const editFieldSelect=$('#editPlantFieldSelect');
+if(editFieldSearch)editFieldSearch.oninput=()=>renderFieldOptions('#editPlantFieldSelect','#editPlantFieldSearch');
+if(editFieldSelect)editFieldSelect.onchange=()=>{const field=selectedField('editPlant');if(field)applyPlantField(field,'editPlant')};
+if($('#editPlantVariety'))$('#editPlantVariety').onchange=()=>handleVarietyChange('#editPlantVariety');
 
 let loginHistory=[];
 let loginHistoryShown=10;
@@ -416,7 +414,7 @@ function setTab(next){
 }
 $('#q').oninput=searchFields;
 $('#clearBtn').onclick=async()=>{$('#q').value='';$('#clearBtn').hidden=true;await load();$('#q').focus()};
-$('#addBtn').onclick=()=>openForm();
+if($('#activityAddFieldBtn'))$('#activityAddFieldBtn').onclick=()=>openForm();
 let plantFieldId=null;
 
 const localDate=()=>{
@@ -440,25 +438,17 @@ function openPlantField(f){
 }
 
 $('#plantBtn').onclick=()=>detectNearestField(openPlantField);
+$('#plantFieldSearch').oninput=()=>renderFieldOptions('#plantFieldSelect','#plantFieldSearch');
+$('#plantFieldSelect').onchange=()=>{const field=selectedField('plant');if(field)applyPlantField(field,'plant')};
+$('#plantVariety').onchange=()=>handleVarietyChange('#plantVariety');
 $('#plantCancelBtn').onclick=()=>closeDialog($('#plantDlg'));
 
 $('#plantForm').onsubmit=async e=>{
   e.preventDefault();
   ensureUser();
-  const record={
-    field_id:plantFieldId,
-    field_name:$('#plantFieldName').value.trim(),
-    heading:$('#plantHeading').value.trim(),
-    latitude:$('#plantLat').value,
-    longitude:$('#plantLng').value,
-    planting_date:$('#plantDate').value,
-    variety:$('#plantVariety').value.trim(),
-    notes:$('#plantNotes').value.trim()
-  };
-  if(!record.field_name||!record.heading||!record.planting_date){
-    toast('Field name, heading and planting date are required');
-    return;
-  }
+  const field=selectedField('plant');
+  const record={field_id:field?.id||null,planting_date:$('#plantDate').value,variety:$('#plantVariety').value.trim(),notes:$('#plantNotes').value.trim()};
+  if(!field||!record.planting_date){toast('Select an existing field and planting date');return;}
   try{
     await api('planting-records',{method:'POST',body:JSON.stringify(record)});
     closeDialog($('#plantDlg'));
@@ -513,7 +503,7 @@ $('#cancelBtn').onclick=()=>closeDialog($('#dlg'));
 $('#deleteBtn').onclick=remove;
 $('#fieldForm').onsubmit=e=>{e.preventDefault();save()};
 $('#fieldsTab').onclick=()=>setTab('fields');$('#activityTab').onclick=()=>setTab('activity');
-setUser();load();
+setUser();load();loadVarieties();
 setInterval(()=>tab==='fields'&&load(),30000);
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
