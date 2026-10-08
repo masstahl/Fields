@@ -1,7 +1,13 @@
-const CACHE='field-headings-static-v20261007-0900';
-const STATIC=['/index.html','/manifest.webmanifest?v=20261007-0900','/icon.svg'];
+const CACHE='field-headings-static-v20261007-standalone';
+const STATIC=['/manifest.webmanifest?v=20261007-0900','/icon.svg'];
 self.addEventListener('install',event=>{event.waitUntil((async()=>{
  const cache=await caches.open(CACHE);
+ const response=await fetch(new Request('/',{cache:'no-store',redirect:'follow'}));
+ if(!response.ok||response.type==='opaqueredirect'||new URL(response.url||'/',self.location.origin).origin!==self.location.origin)throw new Error('Unable to cache a same-origin app shell');
+ const headers=new Headers(response.headers);
+ headers.delete('content-length');
+ headers.delete('content-encoding');
+ await cache.put('/index.html',new Response(await response.text(),{status:200,headers}));
  await cache.addAll(STATIC).catch(()=>{});
  try{
    const response=await fetch('/api/fields',{cache:'no-store'});
@@ -34,13 +40,16 @@ self.addEventListener('fetch',event=>{
  }
  if(request.mode==='navigate'){
    event.respondWith((async()=>{
+     const cached=await caches.open(CACHE).then(cache=>cache.match('/index.html'));
+     if(cached&&cached.status===200&&!cached.redirected&&cached.type!=='opaqueredirect')return cached;
      try{
        const response=await fetch(new Request(url.href,{method:'GET',headers:request.headers,cache:'no-store',redirect:'error'}));
        if(response.type==='opaqueredirect'||response.redirected)throw new Error('redirected navigation');
        return response;
      }catch{
-       const cached=await caches.match('/index.html',{ignoreSearch:true});
-       return cached||new Response('The app is temporarily unavailable. Reconnect to the internet and try again.',{status:503,headers:{'content-type':'text/plain; charset=utf-8'}});
+       const fallback=await caches.match('/index.html',{ignoreSearch:true});
+       if(fallback&&fallback.status===200&&!fallback.redirected&&fallback.type!=='opaqueredirect')return fallback;
+       return new Response('The app is temporarily unavailable. Reconnect to the internet and try again.',{status:503,headers:{'content-type':'text/plain; charset=utf-8'}});
      }
    })());
    return;

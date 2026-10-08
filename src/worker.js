@@ -1,5 +1,23 @@
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v)) ? null : +v;
+function plantingCoordinates(payload, field) {
+  const parse = (key, fallback, min, max) => {
+    if (!Object.prototype.hasOwnProperty.call(payload, key)) return { value: fallback ?? null };
+    const raw = payload[key];
+    if (raw === null || (typeof raw === "string" && raw.trim() === "")) return { value: null };
+    if (typeof raw !== "number" && typeof raw !== "string") return { error: key };
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value < min || value > max) return { error: key };
+    return { value };
+  };
+  const latitude = parse("latitude", field.lat, -90, 90);
+  const longitude = parse("longitude", field.lng, -180, 180);
+  if (latitude.error || longitude.error) {
+    const coordinate = latitude.error || longitude.error;
+    return { error: `${coordinate === "latitude" ? "Latitude" : "Longitude"} must be a valid coordinate` };
+  }
+  return { latitude: latitude.value, longitude: longitude.value };
+}
 
 async function getVarieties(db) {
   const rows = (await db.prepare("SELECT DISTINCT variety FROM planting_records WHERE variety IS NOT NULL AND TRIM(variety)<>''").all()).results;
@@ -99,8 +117,9 @@ async function handle(request, env, a, b) {
       if (!field) return json({ error: "Selected field does not exist" }, 400);
       const fieldName = String(field.name || "").trim();
       const heading = String(field.heading || "").trim();
-      const latitude = field.lat ?? null;
-      const longitude = field.lng ?? null;
+      const coordinates = plantingCoordinates(p, field);
+      if (coordinates.error) return json({ error: coordinates.error }, 400);
+      const { latitude, longitude } = coordinates;
       const variety = String(p.variety || "").trim();
       const notes = String(p.notes || "").trim();
       if (variety) {
@@ -148,8 +167,9 @@ async function handle(request, env, a, b) {
       if (!field) return json({ error: "Selected field does not exist" }, 400);
       const fieldName = String(field.name || "").trim();
       const heading = String(field.heading || "").trim();
-      const latitude = field.lat ?? null;
-      const longitude = field.lng ?? null;
+      const coordinates = plantingCoordinates(p, field);
+      if (coordinates.error) return json({ error: coordinates.error }, 400);
+      const { latitude, longitude } = coordinates;
       const variety = String(p.variety || "").trim();
       const notes = String(p.notes || "").trim();
       if (variety) {

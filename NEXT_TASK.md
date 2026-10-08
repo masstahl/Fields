@@ -16,13 +16,15 @@ After deployment, verify:
 8. A crafted planting request with an invalid field ID is rejected.
 9. Variety dropdown contains current varieties.
 10. Add new variety works and the new variety appears in the dropdown.
-11. Variety Management can rename a variety.
-12. Used varieties cannot be deleted.
-13. Unused varieties can be deleted.
-14. Existing CSV export behavior is unchanged.
-15. Existing planting duplicate merge behavior is unchanged.
-16. GPS behavior remains unchanged.
-17. Existing field lookup behavior remains unchanged.
+11. Corrected Plant Field coordinates are range-validated and saved on the planting record without changing field coordinates.
+12. Variety Management can rename a variety.
+13. Used varieties cannot be deleted.
+14. Unused varieties can be deleted.
+15. Existing CSV export behavior is unchanged.
+16. Existing planting duplicate merge behavior is unchanged.
+17. GPS behavior remains unchanged.
+18. Existing field lookup behavior remains unchanged.
+19. Safari standalone navigation receives a status-200 cached shell, never a redirected cached response.
 
 ## Constraints
 
