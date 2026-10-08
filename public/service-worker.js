@@ -1,4 +1,4 @@
-const CACHE='field-headings-static-v20261007-0900';
+const CACHE='field-headings-static-v20261007-2136';
 const STATIC=['/index.html','/manifest.webmanifest?v=20261007-0900','/icon.svg'];
 self.addEventListener('install',event=>{event.waitUntil((async()=>{
  const cache=await caches.open(CACHE);
@@ -35,8 +35,7 @@ self.addEventListener('fetch',event=>{
  if(request.mode==='navigate'){
    event.respondWith((async()=>{
      try{
-       const response=await fetch(new Request(url.href,{method:'GET',headers:request.headers,cache:'no-store',redirect:'error'}));
-       if(response.type==='opaqueredirect'||response.redirected)throw new Error('redirected navigation');
+       const response=await fetch(new Request(url.href,{method:'GET',headers:request.headers,cache:'no-store',redirect:'follow'}));
        return response;
      }catch{
        const cached=await caches.match('/index.html',{ignoreSearch:true});
