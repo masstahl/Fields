@@ -33,10 +33,11 @@ Application source is operational as a Cloudflare Worker-backed D1 application. 
 - GPS nearest-field detection remains unchanged and runs immediately when Plant Field is tapped
 - Planting starts automatically on the GPS-detected existing field
 - Plant Field has one searchable Field Name control; typing filters existing fields only
+- Field suggestions are app-controlled to avoid Safari's native datalist/autofill suggestions
 - A later manual selection can override the GPS-detected field
 - Field name cannot be created or saved from Plant Field; a non-matching search shows “No matching field found” and blocks save
 - Heading, latitude, and longitude are automatically populated from the selected field
-- Heading, latitude, and longitude are read-only in the planting form
+- Planting latitude and longitude can be corrected and are validated/stored on the planting record without modifying the field's D1 coordinates
 - Planting save is server-validated against an existing D1 field ID
 - Planting workflow cannot create a new field
 
@@ -63,6 +64,7 @@ Application source is operational as a Cloudflare Worker-backed D1 application. 
 - Variety usage counts
 - Variety catalog changes recorded through the existing activity table
 - No new D1 table or schema migration
+- Variety add dialog accepts keyboard input, persists through the API, and refreshes both planting dropdowns
 
 ### Activity
 

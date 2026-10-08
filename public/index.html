@@ -38,6 +38,11 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
   border:1px solid var(--line);
   border-radius:12px;
 }
+.field-suggestions{max-height:180px;overflow:auto;margin-top:4px;border:1px solid var(--line);border-radius:10px;background:var(--paper);box-shadow:0 8px 20px rgba(24,63,42,.10)}
+.field-suggestions[hidden]{display:none}
+.field-suggestion{display:block;width:100%;padding:10px 12px;border:0;border-bottom:1px solid #e8ebe3;background:transparent;text-align:left;color:var(--ink)}
+.field-suggestion:last-child{border-bottom:0}
+.field-suggestion:hover,.field-suggestion[aria-selected="true"]{background:#edf0e9}
 
 </style>
 </head>
@@ -78,9 +83,10 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
    🔍 Find Nearest Field
   </button>
 </main>
-<dialog id="plantEditDlg" class="plant-edit-dialog"><form class="form" id="plantEditForm" method="dialog"><h2>Edit Planting Record</h2><p>Select an existing field and update the saved planting entry.</p><input id="editPlantId" type="hidden"><label for="editPlantFieldName">Field Name</label><input id="editPlantFieldName" type="text" list="editPlantFieldOptions" placeholder="Search existing fields…" autocomplete="off" autocapitalize="off" spellcheck="false" required><datalist id="editPlantFieldOptions"></datalist><div id="editPlantFieldMatchStatus" class="meta" hidden></div><label for="editPlantHeading">Heading</label><input id="editPlantHeading" type="text" readonly><div class="two"><div><label for="editPlantLat">Latitude</label><input id="editPlantLat" type="number" step="any" readonly></div><div><label for="editPlantLng">Longitude</label><input id="editPlantLng" type="number" step="any" readonly></div></div><label for="editPlantDate">Planting Date</label><input id="editPlantDate" type="date" required><label for="editPlantVariety">Variety</label><select id="editPlantVariety"><option value="">No variety</option><option value="__add__">+ Add new variety…</option></select><label for="editPlantNotes">Notes</label><textarea id="editPlantNotes" rows="4" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantEditCancelBtn">Cancel</button><button type="button" class="delete" id="plantEditDeleteBtn">Delete</button><button type="submit" class="save">Save</button></div></form></dialog>
+<dialog id="plantEditDlg" class="plant-edit-dialog"><form class="form" id="plantEditForm" method="dialog"><h2>Edit Planting Record</h2><p>Select an existing field and update the saved planting entry.</p><input id="editPlantId" type="hidden"><label for="editPlantFieldName">Field Name</label><input id="editPlantFieldName" type="text" placeholder="Search existing fields…" autocomplete="new-password" autocorrect="off" aria-autocomplete="list" aria-controls="editPlantFieldOptions" aria-expanded="false" autocapitalize="off" spellcheck="false" required><div id="editPlantFieldOptions" class="field-suggestions" role="listbox" aria-label="Matching fields" hidden></div><div id="editPlantFieldMatchStatus" class="meta" hidden></div><label for="editPlantHeading">Heading</label><input id="editPlantHeading" type="text" readonly><div class="two"><div><label for="editPlantLat">Latitude</label><input id="editPlantLat" type="number" step="any"></div><div><label for="editPlantLng">Longitude</label><input id="editPlantLng" type="number" step="any"></div></div><label for="editPlantDate">Planting Date</label><input id="editPlantDate" type="date" required><label for="editPlantVariety">Variety</label><select id="editPlantVariety"><option value="">No variety</option><option value="__add__">+ Add new variety…</option></select><label for="editPlantNotes">Notes</label><textarea id="editPlantNotes" rows="4" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantEditCancelBtn">Cancel</button><button type="button" class="delete" id="plantEditDeleteBtn">Delete</button><button type="submit" class="save">Save</button></div></form></dialog>
 <dialog id="dlg"><form class="form" id="fieldForm" method="dialog"><h2 id="formTitle">Add field</h2><p>Keep the field record clean and consistent for the crew.</p><label for="fn">Field name</label><input id="fn" type="text" required><label for="fh">Heading (degrees)</label><input id="fh" type="text" required inputmode="decimal"><label for="fd">Date planted</label><input id="fd" type="date"><div class="two"><div><label for="fa">Latitude</label><input id="fa" type="number" step="any" inputmode="decimal"></div><div><label for="fo">Longitude</label><input id="fo" type="number" step="any" inputmode="decimal"></div></div><div class="form-actions"><button type="button" class="cancel" id="cancelBtn">Cancel</button><button type="button" class="delete" id="deleteBtn" hidden>Delete</button><button type="submit" class="save">Save</button></div></form></dialog>
-<dialog id="plantDlg"><form class="form" id="plantForm" method="dialog"><h2>🌱 Plant Field</h2><p>Start a planting record from an existing field.</p><label for="plantFieldName">Field Name</label><input id="plantFieldName" type="text" list="plantFieldOptions" placeholder="Search existing fields…" autocomplete="off" autocapitalize="off" spellcheck="false" required><datalist id="plantFieldOptions"></datalist><div id="plantFieldMatchStatus" class="meta" hidden></div><label for="plantHeading">Heading</label><input id="plantHeading" type="text" readonly><div class="two"><div><label for="plantLat">Latitude</label><input id="plantLat" type="number" step="any" readonly></div><div><label for="plantLng">Longitude</label><input id="plantLng" type="number" step="any" readonly></div></div><label for="plantDate">Planting Date</label><input id="plantDate" type="date" required><label for="plantVariety">Variety</label><select id="plantVariety"><option value="">No variety</option><option value="__add__">+ Add new variety…</option></select><label for="plantNotes">Notes</label><textarea id="plantNotes" rows="3" placeholder="Optional notes" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantCancelBtn">Cancel</button><button type="submit" class="save">Save</button></div></form></dialog>
+<dialog id="plantDlg"><form class="form" id="plantForm" method="dialog"><h2>🌱 Plant Field</h2><p>Start a planting record from an existing field.</p><label for="plantFieldName">Field Name</label><input id="plantFieldName" type="text" placeholder="Search existing fields…" autocomplete="new-password" autocorrect="off" aria-autocomplete="list" aria-controls="plantFieldOptions" aria-expanded="false" autocapitalize="off" spellcheck="false" required><div id="plantFieldOptions" class="field-suggestions" role="listbox" aria-label="Matching fields" hidden></div><div id="plantFieldMatchStatus" class="meta" hidden></div><label for="plantHeading">Heading</label><input id="plantHeading" type="text" readonly><div class="two"><div><label for="plantLat">Latitude</label><input id="plantLat" type="number" step="any"></div><div><label for="plantLng">Longitude</label><input id="plantLng" type="number" step="any"></div></div><label for="plantDate">Planting Date</label><input id="plantDate" type="date" required><label for="plantVariety">Variety</label><select id="plantVariety"><option value="">No variety</option><option value="__add__">+ Add new variety…</option></select><label for="plantNotes">Notes</label><textarea id="plantNotes" rows="3" placeholder="Optional notes" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantCancelBtn">Cancel</button><button type="submit" class="save">Save</button></div></form></dialog>
+<dialog id="varietyAddDlg"><form class="form" id="varietyAddForm" method="dialog"><h2>Add variety</h2><p>Enter a variety name to add it to both planting lists.</p><label for="newVarietyName">Variety name</label><input id="newVarietyName" type="text" autocomplete="off" autocorrect="off" spellcheck="false" required><div class="form-actions"><button type="button" class="cancel" id="varietyAddCancelBtn">Cancel</button><button type="submit" class="save" id="varietyAddSaveBtn">Add variety</button></div></form></dialog>
 <div id="toast" class="toast"></div>
 <script>
 const $=s=>document.querySelector(s);
@@ -104,6 +110,74 @@ const api=async(path,options={})=>{
     if(e.name==='AbortError')throw new Error('The field database timed out. Tap Retry.');
     throw e;
   }finally{clearTimeout(timer)}
+};
+function renderVarieties(){
+  ['#plantVariety','#editPlantVariety'].forEach(selector=>{
+    const select=$(selector);
+    if(!select)return;
+    const selected=select.value;
+    select.innerHTML='<option value="">No variety</option>'+varieties.map(v=>'<option value="'+esc(v.name)+'">'+esc(v.name)+'</option>').join('')+'<option value="__add__">+ Add new variety…</option>';
+    select.value=varieties.some(v=>v.name===selected)?selected:'';
+    select.dataset.previous=select.value;
+  });
+  const list=$('#varietyManagement');
+  if(!list)return;
+  list.innerHTML=varieties.length?varieties.map(v=>'<div class="activity-variety-row"><div><strong>'+esc(v.name)+'</strong><div class="meta">'+v.used+' planting record'+(v.used===1?'':'s')+'</div></div><div class="actions"><button type="button" class="action" data-rename-variety="'+esc(v.name)+'">Rename</button><button type="button" class="action danger" data-delete-variety="'+esc(v.name)+'"'+(v.used?' disabled':'')+'>Delete</button></div></div>').join(''):'<div class="plant-empty">No varieties saved.</div>';
+  list.querySelectorAll('[data-rename-variety]').forEach(button=>button.onclick=async()=>{
+    const from=button.dataset.renameVariety;
+    const to=prompt('New name for '+from+':',from);
+    if(to===null)return;
+    const name=to.trim();
+    if(!name)return toast('Variety name is required');
+    try{await api('varieties/rename',{method:'POST',body:JSON.stringify({from,to:name})});await loadVarieties({plantVariety:name,editPlantVariety:name});toast('Variety renamed')}catch(e){toast(e.message)}
+  });
+  list.querySelectorAll('[data-delete-variety]').forEach(button=>button.onclick=async()=>{
+    const name=button.dataset.deleteVariety;
+    if(!confirm('Delete the unused variety "'+name+'"?'))return;
+    try{await api('varieties/delete',{method:'POST',body:JSON.stringify({name})});await loadVarieties();toast('Variety deleted')}catch(e){toast(e.message)}
+  });
+}
+async function loadVarieties(selected={}){
+  const status=$('#varietyStatus');
+  try{
+    varieties=await api('varieties');
+    if(!Array.isArray(varieties))throw new Error('Bad variety data from server');
+    renderVarieties();
+    Object.entries(selected).forEach(([selector,value])=>{const select=$('#'+selector);if(select){select.value=varieties.some(v=>v.name===value)?value:'';select.dataset.previous=select.value}});
+    if(status)status.textContent=varieties.length+' varieties';
+    return true;
+  }catch(e){
+    if(status)status.textContent='Unavailable';
+    if($('#varietyManagement'))$('#varietyManagement').innerHTML='<div class="plant-empty">'+esc(e.message)+'</div>';
+    toast(e.message);
+    return false;
+  }
+}
+async function handleVarietyChange(selector){
+  const select=$(selector);
+  if(!select)return;
+  if(select.value!=='__add__'){select.dataset.previous=select.value;return}
+  select.value=select.dataset.previous||'';
+  $('#newVarietyName').value='';
+  showDialog($('#varietyAddDlg'));
+  $('#newVarietyName').focus();
+}
+$('#varietyAddCancelBtn').onclick=()=>closeDialog($('#varietyAddDlg'));
+$('#varietyAddForm').onsubmit=async e=>{
+  e.preventDefault();
+  const save=$('#varietyAddSaveBtn');
+  const name=$('#newVarietyName').value.trim();
+  if(!name){$('#newVarietyName').focus();return}
+  save.disabled=true;
+  try{
+    const result=await api('varieties',{method:'POST',body:JSON.stringify({name})});
+    closeDialog($('#varietyAddDlg'));
+    if(await loadVarieties({plantVariety:result.name,editPlantVariety:result.name}))toast(result.existing?'Variety already exists':'Variety added');
+  }catch(e){
+    closeDialog($('#varietyAddDlg'));
+    toast(e.message);
+    await loadVarieties();
+  }finally{save.disabled=false}
 };
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),2200)}
 function direction(v){const n=parseFloat(v);if(!Number.isFinite(n))return '';return ['N','NE','E','SE','S','SW','W','NW'][Math.round(((n%360)+360)%360/45)%8]}
@@ -322,31 +396,24 @@ async function showPlantEditDialog(record){
     renderPlantFieldOptions('#editPlantFieldName','#editPlantFieldOptions');
     if(matchingField)applyPlantField(matchingField,'editPlant');
     $('#editPlantDate').value=record.planting_date||'';
+    $('#editPlantLat').value=record.latitude!==undefined?(record.latitude??''):(matchingField?.lat??'');
+    $('#editPlantLng').value=record.longitude!==undefined?(record.longitude??''):(matchingField?.lng??'');
     $('#editPlantVariety').value=record.variety||'';
+    $('#editPlantVariety').dataset.previous=$('#editPlantVariety').value;
     $('#editPlantNotes').value=record.notes||'';
     const dlg=$('#plantEditDlg');
     const done=()=>{
       dlg.removeEventListener('close',done);
       if(dlg.dataset.cancel==='1'){dlg.dataset.cancel='';resolve(null);return}
       const field=selectedField('editPlant');
-      resolve({field_id:field?.id||null,planting_date:$('#editPlantDate').value,variety:$('#editPlantVariety').value.trim(),notes:$('#editPlantNotes').value.trim()});
+      resolve({field_id:field?.id||null,planting_date:$('#editPlantDate').value,latitude:$('#editPlantLat').value,longitude:$('#editPlantLng').value,variety:$('#editPlantVariety').value.trim(),notes:$('#editPlantNotes').value.trim()});
     };
     dlg.addEventListener('close',done);
     showDialog(dlg);
   });
 }
 
-const editFieldName=$('#editPlantFieldName');
-if(editFieldName)editFieldName.oninput=()=>{
-  renderPlantFieldOptions('#editPlantFieldName','#editPlantFieldOptions');
-  const field=selectedField('editPlant');
-  if(field)applyPlantField(field,'editPlant');
-  else{
-    $('#editPlantHeading').value='';
-    $('#editPlantLat').value='';
-    $('#editPlantLng').value='';
-  }
-};
+bindPlantFieldPicker('#editPlantFieldName','#editPlantFieldOptions','editPlant');
 if($('#editPlantVariety'))$('#editPlantVariety').onchange=()=>handleVarietyChange('#editPlantVariety');
 
 let loginHistory=[];
@@ -431,7 +498,18 @@ function renderPlantFieldOptions(inputSelector,listSelector,value=''){
   if(!input||!list)return [];
   const q=normalize(value||input.value);
   const matches=fields.filter(f=>!q||normalize(f.name).includes(q)).slice(0,100);
-  list.innerHTML=matches.map(f=>'<option value="'+esc(f.name)+'"></option>').join('');
+  const exactMatch=fieldByName(input.value);
+  list.innerHTML=matches.map(f=>'<button type="button" class="field-suggestion" role="option" aria-selected="false" id="'+input.id+'-option-'+f.id+'" data-field-option="'+f.id+'">'+esc(f.name)+'</button>').join('');
+  list.hidden=!q||!matches.length||!!exactMatch;
+  list.dataset.active='-1';
+  input.setAttribute('aria-expanded',String(!list.hidden));
+  input.removeAttribute('aria-activedescendant');
+  list.querySelectorAll('[data-field-option]').forEach(button=>button.onclick=()=>{
+    const field=fields.find(f=>String(f.id)===button.dataset.fieldOption);
+    if(field)applyPlantField(field,inputSelector==='#plantFieldName'?'plant':'editPlant');
+    list.hidden=true;
+    input.setAttribute('aria-expanded','false');
+  });
   const status=$(inputSelector==='#plantFieldName'?'#plantFieldMatchStatus':'#editPlantFieldMatchStatus');
   if(status){
     status.textContent=q&&!matches.length?'No matching field found':'';
@@ -455,6 +533,39 @@ function selectedField(prefix='plant'){
   const input=prefix==='plant'?$('#plantFieldName'):$('#editPlantFieldName');
   return input?fieldByName(input.value):null;
 }
+function bindPlantFieldPicker(inputSelector,listSelector,prefix){
+  const input=$(inputSelector),list=$(listSelector);
+  input.oninput=()=>{
+    renderPlantFieldOptions(inputSelector,listSelector);
+    const field=selectedField(prefix);
+    if(field)applyPlantField(field,prefix);
+    else{
+      $(prefix==='plant'?'#plantHeading':'#editPlantHeading').value='';
+      $(prefix==='plant'?'#plantLat':'#editPlantLat').value='';
+      $(prefix==='plant'?'#plantLng':'#editPlantLng').value='';
+    }
+  };
+  input.onkeydown=e=>{
+    const options=Array.from(list.querySelectorAll('[role="option"]'));
+    if((e.key==='ArrowDown'||e.key==='ArrowUp')&&!list.hidden){
+      if(!options.length)return;
+      e.preventDefault();
+      let active=Number(list.dataset.active||-1);
+      active=e.key==='ArrowDown'?Math.min(active+1,options.length-1):(active<0?options.length-1:Math.max(active-1,0));
+      list.dataset.active=String(active);
+      options.forEach((option,index)=>option.setAttribute('aria-selected',String(index===active)));
+      input.setAttribute('aria-activedescendant',options[active].id);
+    }else if(e.key==='Enter'&&!list.hidden&&Number(list.dataset.active)>=0){
+      e.preventDefault();
+      options[Number(list.dataset.active)].click();
+    }else if(e.key==='Escape'&&!list.hidden){
+      e.preventDefault();
+      list.hidden=true;
+      input.setAttribute('aria-expanded','false');
+    }
+  };
+  input.onblur=()=>setTimeout(()=>{list.hidden=true;input.setAttribute('aria-expanded','false')},150);
+}
 const localDate=()=>{
   const d=new Date();
   const y=d.getFullYear();
@@ -477,16 +588,7 @@ function openPlantField(f){
 }
 
 $('#plantBtn').onclick=()=>detectNearestField(openPlantField);
-$('#plantFieldName').oninput=()=>{
-  renderPlantFieldOptions('#plantFieldName','#plantFieldOptions');
-  const field=selectedField('plant');
-  if(field)applyPlantField(field,'plant');
-  else{
-    $('#plantHeading').value='';
-    $('#plantLat').value='';
-    $('#plantLng').value='';
-  }
-};
+bindPlantFieldPicker('#plantFieldName','#plantFieldOptions','plant');
 $('#plantVariety').onchange=()=>handleVarietyChange('#plantVariety');
 $('#plantCancelBtn').onclick=()=>closeDialog($('#plantDlg'));
 
@@ -494,7 +596,7 @@ $('#plantForm').onsubmit=async e=>{
   e.preventDefault();
   ensureUser();
   const field=selectedField('plant');
-  const record={field_id:field?.id||null,planting_date:$('#plantDate').value,variety:$('#plantVariety').value.trim(),notes:$('#plantNotes').value.trim()};
+  const record={field_id:field?.id||null,planting_date:$('#plantDate').value,latitude:$('#plantLat').value,longitude:$('#plantLng').value,variety:$('#plantVariety').value.trim(),notes:$('#plantNotes').value.trim()};
   if(!field){toast('Select an existing field from the field list');return;}
   if(!record.planting_date){toast('Select a planting date');return;}
   try{
