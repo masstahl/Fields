@@ -1,6 +1,6 @@
 
 (function(){
-  const APP_VERSION='2026.10.07.2136';
+  const APP_VERSION='2026.10.07.2145';
   const bar=m=>{let b=document.getElementById('dbg');if(!b){b=document.createElement('div');b.id='dbg';b.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#9a514b;color:#fff;padding:10px 12px;border-radius:10px;font:12px system-ui;white-space:pre-wrap';document.body.appendChild(b)}b.textContent=m};
   addEventListener('error',e=>bar('Page error: '+e.message));
   addEventListener('unhandledrejection',e=>bar('Request error: '+((e.reason&&e.reason.message)||e.reason)));
