@@ -99,8 +99,8 @@ async function handle(request, env, a, b) {
       if (!field) return json({ error: "Selected field does not exist" }, 400);
       const fieldName = String(field.name || "").trim();
       const heading = String(field.heading || "").trim();
-      const latitude = field.lat ?? null;
-      const longitude = field.lng ?? null;
+      const latitude = num(p.latitude) ?? field.lat ?? null;
+      const longitude = num(p.longitude) ?? field.lng ?? null;
       const variety = String(p.variety || "").trim();
       const notes = String(p.notes || "").trim();
       if (variety) {
@@ -148,8 +148,8 @@ async function handle(request, env, a, b) {
       if (!field) return json({ error: "Selected field does not exist" }, 400);
       const fieldName = String(field.name || "").trim();
       const heading = String(field.heading || "").trim();
-      const latitude = field.lat ?? null;
-      const longitude = field.lng ?? null;
+      const latitude = num(p.latitude) ?? field.lat ?? null;
+      const longitude = num(p.longitude) ?? field.lng ?? null;
       const variety = String(p.variety || "").trim();
       const notes = String(p.notes || "").trim();
       if (variety) {
