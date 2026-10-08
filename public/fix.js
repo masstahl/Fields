@@ -1,5 +1,24 @@
+// One-time cleanup of service workers/caches left by older builds.
+(async()=>{
+  try{
+    if('serviceWorker' in navigator && !sessionStorage.getItem('field_sw_cleaned')){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      if(regs.length){
+        await Promise.all(regs.map(r=>r.unregister()));
+        if('caches' in window){
+          const keys=await caches.keys();
+          await Promise.all(keys.map(k=>caches.delete(k)));
+        }
+        sessionStorage.setItem('field_sw_cleaned','1');
+        location.reload();
+        return;
+      }
+      sessionStorage.setItem('field_sw_cleaned','1');
+    }
+  }catch(e){}
+})();
 
-// One-time cleanup of service workers/caches left by older builds.\n(async()=>{\n  try{\n    if('serviceWorker' in navigator && !sessionStorage.getItem('field_sw_cleaned')){\n      const regs=await navigator.serviceWorker.getRegistrations();\n      if(regs.length){\n        await Promise.all(regs.map(r=>r.unregister()));\n        if('caches' in window){\n          const keys=await caches.keys();\n          await Promise.all(keys.map(k=>caches.delete(k)));\n        }\n        sessionStorage.setItem('field_sw_cleaned','1');\n        location.reload();\n        return;\n      }\n      sessionStorage.setItem('field_sw_cleaned','1');\n    }\n  }catch(e){}\n})();\n\n(function(){
+(function(){
   const APP_VERSION='2026.10.05.0900';
   const bar=m=>{let b=document.getElementById('dbg');if(!b){b=document.createElement('div');b.id='dbg';b.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#9a514b;color:#fff;padding:10px 12px;border-radius:10px;font:12px system-ui;white-space:pre-wrap';document.body.appendChild(b)}b.textContent=m};
   addEventListener('error',e=>bar('Page error: '+e.message));
