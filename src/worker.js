@@ -92,6 +92,37 @@ async function handle(request, env, a, b) {
       return json({ok:true});
     }
 
+    if (a === "varieties" && m === "GET") return json(await getVarieties(db));
+    if (a === "varieties" && m === "POST") {
+      const p = await request.json(); const name = String(p.name || "").trim();
+      if (!name) return json({ error: "Variety name is required" }, 400);
+      const varieties = await getVarieties(db);
+      if (varieties.some(v => v.name === name)) return json({ name, existing: true });
+      await log("variety added", "variety:" + JSON.stringify({ name }));
+      return json({ name, existing: false });
+    }
+    if (a === "varieties" && b === "rename" && m === "POST") {
+      const p = await request.json(); const from = String(p.from || "").trim(); const to = String(p.to || "").trim();
+      if (!from || !to) return json({ error: "Current and new variety names are required" }, 400);
+      if (from === to) return json({ name: to });
+      const varieties = await getVarieties(db);
+      if (!varieties.some(v => v.name === from)) return json({ error: "Variety not found" }, 404);
+      if (varieties.some(v => v.name === to)) return json({ error: "That variety name already exists" }, 409);
+      await db.prepare("UPDATE planting_records SET variety=? WHERE variety=?").bind(to, from).run();
+      await log("variety renamed", "variety rename:" + JSON.stringify({ from, to }));
+      return json({ name: to });
+    }
+    if (a === "varieties" && b === "delete" && m === "POST") {
+      const p = await request.json(); const name = String(p.name || "").trim();
+      if (!name) return json({ error: "Variety name is required" }, 400);
+      const count = await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE variety=?").bind(name).first();
+      if (Number(count?.count || 0) > 0) return json({ error: "Only unused varieties can be deleted" }, 409);
+      const varieties = await getVarieties(db);
+      if (!varieties.some(v => v.name === name)) return json({ error: "Variety not found" }, 404);
+      await log("variety deleted", "variety:" + JSON.stringify({ name }));
+      return json({ ok: true });
+    }
+
     if (a === "planting-records" && m === "POST") {
       const p = await request.json();
       const fieldId = Number.isInteger(+p.field_id) ? +p.field_id : null;
