@@ -98,9 +98,66 @@ async function loadVarieties(){
       select.innerHTML='<option value="">No variety</option><option value="__add__">+ Add new variety…</option>'+varieties.map(v=>'<option value="'+esc(v.name)+'">'+esc(v.name)+'</option>').join('');
       if(current&&current!=='__add__')select.value=current;
     });
+    renderVarietyManagement();
   }catch(e){
     $('#varietyStatus').textContent='Unavailable';
+    $('#varietyManagement').innerHTML='<div class="plant-empty">Unable to load varieties.</div>';
   }
+}
+async function handleVarietyChange(selector){
+  const select=$(selector);
+  if(!select||select.value!=='__add__')return;
+  const name=prompt('Enter new variety:','');
+  select.value='';
+  if(!name||!name.trim())return;
+  try{
+    const result=await api('varieties',{method:'POST',body:JSON.stringify({name:name.trim()})});
+    await loadVarieties();
+    select.value=result.name;
+  }catch(e){toast(e.message)}
+}
+function renderVarietyManagement(){
+  const out=$('#varietyManagement');
+  const status=$('#varietyStatus');
+  if(!out)return;
+  status.textContent=varieties.length+' varieties';
+  if(!varieties.length){
+    out.innerHTML='<div class="plant-empty">No varieties have been added yet.</div>';
+    return;
+  }
+  out.innerHTML=varieties.map(v=>{
+    const used=Number(v.used||0);
+    return '<div class="activity-variety-row">'+
+      '<div><b>'+esc(v.name)+'</b><div class="meta">'+used+' planting record'+(used===1?'':'s')+'</div></div>'+
+      '<div class="actions">'+
+        '<button type="button" class="action" data-variety-rename="'+esc(v.name)+'">Rename</button>'+
+        '<button type="button" class="action danger" data-variety-delete="'+esc(v.name)+'"'+(used?' disabled title="Used by a planting record"':'')+'>Delete</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  out.querySelectorAll('[data-variety-rename]').forEach(btn=>{
+    btn.onclick=async()=>{
+      const from=btn.dataset.varietyRename;
+      const to=prompt('Rename variety:',from);
+      if(!to||!to.trim()||to.trim()===from)return;
+      try{
+        await api('varieties/rename',{method:'POST',body:JSON.stringify({from,to:to.trim()})});
+        await loadVarieties();
+        toast('Variety renamed');
+      }catch(e){toast(e.message)}
+    };
+  });
+  out.querySelectorAll('[data-variety-delete]').forEach(btn=>{
+    btn.onclick=async()=>{
+      const name=btn.dataset.varietyDelete;
+      if(btn.disabled||!confirm('Delete variety "'+name+'"?'))return;
+      try{
+        await api('varieties/delete',{method:'POST',body:JSON.stringify({name})});
+        await loadVarieties();
+        toast('Variety deleted');
+      }catch(e){toast(e.message)}
+    };
+  });
 }
 async function handleVarietyChange(selector){
   const select=$(selector);
@@ -373,6 +430,7 @@ if(editFieldName)editFieldName.oninput=()=>{
     $('#editPlantLng').value='';
   }
 };
+if($('#plantVariety'))$('#plantVariety').onchange=()=>handleVarietyChange('#plantVariety');
 if($('#editPlantVariety'))$('#editPlantVariety').onchange=()=>handleVarietyChange('#editPlantVariety');
 
 let loginHistory=[];
