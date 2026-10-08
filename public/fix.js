@@ -1,11 +1,11 @@
 
 (function(){
-  const APP_VERSION='2026.10.05.0900';
+  const APP_VERSION='2026.10.07.2136';
   const bar=m=>{let b=document.getElementById('dbg');if(!b){b=document.createElement('div');b.id='dbg';b.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#9a514b;color:#fff;padding:10px 12px;border-radius:10px;font:12px system-ui;white-space:pre-wrap';document.body.appendChild(b)}b.textContent=m};
   addEventListener('error',e=>bar('Page error: '+e.message));
   addEventListener('unhandledrejection',e=>bar('Request error: '+((e.reason&&e.reason.message)||e.reason)));
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/service-worker.js?v='+APP_VERSION,{scope:'/'}).catch(e=>bar('PWA offline service unavailable: '+e.message));
+    navigator.serviceWorker.register('/service-worker.js?v='+APP_VERSION,{scope:'/',updateViaCache:'none'}).catch(e=>bar('PWA offline service unavailable: '+e.message));
   }
   // The Worker recovery endpoint unregisters stale service workers. Keep new installs unregistered.
   setTimeout(async()=>{const stuck=typeof load!=='function'||document.getElementById('count').textContent.indexOf('Loading fields')===0;if(!stuck)return;try{const h=await(await fetch('/?x='+Date.now(),{cache:'no-store'})).text();const m=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)].pop();try{new Function(m[1]);bar('Main script is valid but did not start. Send me a screenshot of this page.')}catch(e){bar('Main script error: '+e.message)}}catch(e){bar('Could not re-read the page: '+e.message)}},3000);
