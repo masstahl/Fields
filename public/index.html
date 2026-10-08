@@ -578,7 +578,7 @@ $('#cancelBtn').onclick=()=>closeDialog($('#dlg'));
 $('#deleteBtn').onclick=remove;
 $('#fieldForm').onsubmit=e=>{e.preventDefault();save()};
 $('#fieldsTab').onclick=()=>setTab('fields');$('#activityTab').onclick=()=>setTab('activity');
-setUser();load();loadVarieties();
+setUser();loadVarieties();
 setInterval(()=>tab==='fields'&&load(),30000);
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
