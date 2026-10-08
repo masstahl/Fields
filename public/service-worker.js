@@ -34,12 +34,12 @@ self.addEventListener('fetch',event=>{
  }
  if(request.mode==='navigate'){
    event.respondWith((async()=>{
+     const cached=await caches.match('/index.html',{ignoreSearch:true});
+     if(cached)return cached;
      try{
-       const response=await fetch(new Request(url.href,{method:'GET',headers:request.headers,cache:'no-store',redirect:'follow'}));
-       return response;
+       return await fetch(request,{cache:'no-store'});
      }catch{
-       const cached=await caches.match('/index.html',{ignoreSearch:true});
-       return cached||new Response('The app is temporarily unavailable. Reconnect to the internet and try again.',{status:503,headers:{'content-type':'text/plain; charset=utf-8'}});
+       return new Response('The app is temporarily unavailable. Reconnect to the internet and try again.',{status:503,headers:{'content-type':'text/plain; charset=utf-8'}});
      }
    })());
    return;
