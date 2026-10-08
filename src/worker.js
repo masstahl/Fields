@@ -1,6 +1,22 @@
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v)) ? null : +v;
 
+async function getVarieties(db) {
+  const rows = (await db.prepare("SELECT DISTINCT variety FROM planting_records WHERE variety IS NOT NULL AND TRIM(variety)<>' '").all()).results;
+  const events = (await db.prepare("SELECT action,detail FROM activity WHERE action IN ('variety added','variety renamed','variety deleted') ORDER BY id").all()).results;
+  const active = new Set(rows.map(r => String(r.variety || '').trim()).filter(Boolean));
+  for (const event of events) {
+    try {
+      const detail = String(event.detail || '');
+      if (event.action === 'variety added' && detail.startsWith('variety:')) active.add(JSON.parse(detail.slice(8)).name);
+      else if (event.action === 'variety renamed' && detail.startsWith('variety rename:')) { const value=JSON.parse(detail.slice(15)); active.delete(value.from); active.add(value.to); }
+      else if (event.action === 'variety deleted' && detail.startsWith('variety:')) active.delete(JSON.parse(detail.slice(8)).name);
+    } catch {}
+  }
+  const names=[...active].filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  return Promise.all(names.map(async name=>{ const row=await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE variety=?").bind(name).first(); return {name,used:Number(row?.count||0)}; }));
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -9,9 +25,7 @@ export default {
       if (!asset.ok) return asset;
       let source = await asset.text();
       if (url.pathname === "/fix.js") {
-        source = source.replace(/  if\('serviceWorker' in navigator\)\{[\s\S]*?\n  \}/, "");
-      } else {
-        source = source.replace("a.href=url;a.download='planting-records.csv';", "a.href=url;a.download='potato-planting-records.csv';");
+        source = "\n(function(){\n  const APP_VERSION='2026.10.05.0900';\n  const bar=m=>{let b=document.getElementById('dbg');if(!b){b=document.createElement('div');b.id='dbg';b.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#9a514b;color:#fff;padding:10px 12px;border-radius:10px;font:12px system-ui;white-space:pre-wrap';document.body.appendChild(b)}b.textContent=m};\n  addEventListener('error',e=>bar('Page error: '+e.message));\n  addEventListener('unhandledrejection',e=>bar('Request error: '+((e.reason&&e.reason.message)||e.reason)));\n  // The Worker recovery endpoint unregisters stale service workers. Keep new installs unregistered.\n  setTimeout(async()=>{const stuck=typeof load!=='function'||document.getElementById('count').textContent.indexOf('Loading fields')===0;if(!stuck)return;try{const h=await(await fetch('/?x='+Date.now(),{cache:'no-store'})).text();const m=[...h.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)].pop();try{new Function(m[1]);bar('Main script is valid but did not start. Send me a screenshot of this page.')}catch(e){bar('Main script error: '+e.message)}}catch(e){bar('Could not re-read the page: '+e.message)}},3000);\n  window.load=async function(){const q=$('#q').value.trim();try{const data=await api(q?'fields?q='+encodeURIComponent(q):'fields');if(!Array.isArray(data))throw new Error('Bad data from server');fields=data;$('#count').textContent=q?data.length+(data.length===100?'+':'')+' matching fields':data.length+' fields available';$('#dot').classList.remove('bad');$('#statusText').textContent='Database connected';render()}catch(e){$('#count').textContent='Unable to load fields';$('#dot').classList.add('bad');$('#statusText').textContent='Connection error';if(!fields.length){$('#out').innerHTML='<div class=\"empty\"><strong>Could not load the field database</strong><div style=\"margin-top:8px\">'+esc(e.message)+'</div><div style=\"margin-top:16px\"><button class=\"action primary\" id=\"retryLoad\">Retry</button></div></div>';$('#retryLoad').onclick=load}}};\n  const hdr=()=>({'content-type':'application/json','x-user':encodeURIComponent(user)});if(!sessionStorage.getItem('opened')){if(!user){const n=prompt('Your name (used only for the activity log):','');user=(n||'Guest').trim()||'Guest';localStorage.setItem('fieldUser',user);$('#who').textContent=user+' � field reference'}fetch('/api/open',{method:'POST',headers:hdr(),body:'{\"event\":\"open\"}'}).catch(()=>{});sessionStorage.setItem('opened','1')}addEventListener('appinstalled',()=>fetch('/api/open',{method:'POST',headers:hdr(),body:'{\"event\":\"installed\"}'}).catch(()=>{}));\n})();";
       }
       const headers = new Headers(asset.headers);
       headers.delete("content-length");
@@ -47,18 +61,54 @@ async function handle(request, env, a, b) {
   };
 
   try {
+    if (a === "varieties" && m === "GET") return json(await getVarieties(db));
+    if (a === "varieties" && m === "POST") {
+      const p = await request.json(); const name = String(p.name || "").trim();
+      if (!name) return json({ error: "Variety name is required" }, 400);
+      const varieties = await getVarieties(db);
+      if (varieties.some(v => v.name === name)) return json({ name, existing:true });
+      await log("variety added", "variety:" + JSON.stringify({name}));
+      return json({ name, existing:false });
+    }
+    if (a === "varieties" && b === "rename" && m === "POST") {
+      const p = await request.json(); const from = String(p.from || "").trim(); const to = String(p.to || "").trim();
+      if (!from || !to) return json({ error: "Current and new variety names are required" }, 400);
+      if (from === to) return json({ name:to });
+      const varieties = await getVarieties(db);
+      if (!varieties.some(v=>v.name===from)) return json({ error:"Variety not found" },404);
+      if (varieties.some(v=>v.name===to)) return json({ error:"That variety name already exists" },409);
+      await db.prepare("UPDATE planting_records SET variety=? WHERE variety=?").bind(to,from).run();
+      await log("variety renamed","variety rename:"+JSON.stringify({from,to}));
+      return json({name:to});
+    }
+    if (a === "varieties" && b === "delete" && m === "POST") {
+      const p = await request.json(); const name = String(p.name || "").trim();
+      if (!name) return json({ error:"Variety name is required" },400);
+      const count = await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE variety=?").bind(name).first();
+      if (Number(count?.count||0)>0) return json({error:"Only unused varieties can be deleted"},409);
+      const varieties = await getVarieties(db);
+      if (!varieties.some(v=>v.name===name)) return json({error:"Variety not found"},404);
+      await log("variety deleted","variety:"+JSON.stringify({name}));
+      return json({ok:true});
+    }
+
     if (a === "planting-records" && m === "POST") {
       const p = await request.json();
-      const fieldName = String(p.field_name || "").trim();
-      const heading = String(p.heading || "").trim();
-      const plantingDate = String(p.planting_date || "").trim();
-      if (!fieldName || !heading || !plantingDate) return json({ error: "Field name, heading and planting date are required" }, 400);
-
       const fieldId = Number.isInteger(+p.field_id) ? +p.field_id : null;
-      const latitude = num(p.latitude);
-      const longitude = num(p.longitude);
+      const plantingDate = String(p.planting_date || "").trim();
+      if (!fieldId || !plantingDate) return json({ error: "An existing field and planting date are required" }, 400);
+      const field = await db.prepare("SELECT id,name,heading,lat,lng FROM fields WHERE id=?").bind(fieldId).first();
+      if (!field) return json({ error: "Selected field does not exist" }, 400);
+      const fieldName = String(field.name || "").trim();
+      const heading = String(field.heading || "").trim();
+      const latitude = num(p.latitude) ?? field.lat ?? null;
+      const longitude = num(p.longitude) ?? field.lng ?? null;
       const variety = String(p.variety || "").trim();
       const notes = String(p.notes || "").trim();
+      if (variety) {
+        const varieties = await getVarieties(db);
+        if (!varieties.some(v => v.name === variety)) return json({ error: "Select an existing variety or add the new variety first" }, 400);
+      }
 
       const existing = await db.prepare(
         "SELECT * FROM planting_records WHERE field_name=? AND planting_date=? ORDER BY id DESC LIMIT 1"
@@ -93,16 +143,21 @@ async function handle(request, env, a, b) {
       if (!existing) return json({ error: "Planting record not found" }, 404);
 
       const p = await request.json();
-      const fieldName = String(p.field_name || "").trim();
-      const heading = String(p.heading || "").trim();
-      const plantingDate = String(p.planting_date || "").trim();
-      if (!fieldName || !heading || !plantingDate) return json({ error: "Field name, heading and planting date are required" }, 400);
-
       const fieldId = Number.isInteger(+p.field_id) ? +p.field_id : null;
-      const latitude = num(p.latitude);
-      const longitude = num(p.longitude);
+      const plantingDate = String(p.planting_date || "").trim();
+      if (!fieldId || !plantingDate) return json({ error: "An existing field and planting date are required" }, 400);
+      const field = await db.prepare("SELECT id,name,heading,lat,lng FROM fields WHERE id=?").bind(fieldId).first();
+      if (!field) return json({ error: "Selected field does not exist" }, 400);
+      const fieldName = String(field.name || "").trim();
+      const heading = String(field.heading || "").trim();
+      const latitude = num(p.latitude) ?? field.lat ?? null;
+      const longitude = num(p.longitude) ?? field.lng ?? null;
       const variety = String(p.variety || "").trim();
       const notes = String(p.notes || "").trim();
+      if (variety) {
+        const varieties = await getVarieties(db);
+        if (!varieties.some(v => v.name === variety)) return json({ error: "Select an existing variety or add the new variety first" }, 400);
+      }
 
       const duplicate = await db.prepare(
         "SELECT * FROM planting_records WHERE field_name=? AND planting_date=? AND id<>? ORDER BY id DESC LIMIT 1"
@@ -177,7 +232,8 @@ async function handle(request, env, a, b) {
         return {
           ...row,
           last_modified_by: last?.user || row.created_by || "",
-          contributors
+          contributors,
+          history: events.map(x => ({at:x.at,user:x.user,action:x.action,detail:x.detail}))
         };
       }));
     }
@@ -214,16 +270,20 @@ async function handle(request, env, a, b) {
         "FALSE", row.field_name, excelDate(row.planting_date), row.latitude, row.longitude,
         row.heading, row.variety, row.notes, "", "", "", ""
       ]);
-      const cell = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
-      const csv = "\uFEFF" + [cols, ...exportRows].map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
+      const cell = v => {
+        const value = String(v ?? "");
+        return /[\",\r\n]/.test(value) ? '"' + value.replace(/"/g, '""') + '"' : value;
+      };
+      const csv = [cols, ...exportRows].map(row => row.map(cell).join(",")).join("\r\n") + "\r\n";
       return new Response(csv, {status:200,headers:{
         "content-type":"text/csv; charset=utf-8",
-        "content-disposition":'attachment; filename="potato-planting-records.csv"',
+        "content-disposition":'attachment; filename="planting-records.csv"',
         "cache-control":"no-store"
       }});
     }
 
     if (a === "planting-records" && b === "archive" && m === "POST") {
+      if (!env.ADMIN_KEY || request.headers.get("x-admin") !== env.ADMIN_KEY) return json({ error: "denied" }, 403);
       const r = await db.prepare("DELETE FROM planting_records").run();
       await log("archive season", `${r.meta?.changes ?? 0} planting records archived`);
       return json({ ok:true, removed:r.meta?.changes ?? 0 });
