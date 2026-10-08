@@ -1,17 +1,14 @@
-const CACHE='field-headings-static-v20261007-2136';
-const STATIC=['/index.html','/manifest.webmanifest?v=20261007-0900','/icon.svg'];
+const CACHE='field-headings-static-v20261008-1';
+const STATIC=[];
 self.addEventListener('install',event=>{event.waitUntil((async()=>{
  const cache=await caches.open(CACHE);
- await cache.addAll(STATIC).catch(()=>{});
- try{
-   const response=await fetch('/api/fields',{cache:'no-store'});
-   if(response.ok)await cache.put('/api/fields',response);
- }catch{}
+ for(const url of STATIC){try{await cache.add(url)}catch{}}
  await self.skipWaiting();
 })())});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('message',event=>{if(event.data&&event.data.type==='SKIP_WAITING')self.skipWaiting()});
 self.addEventListener('fetch',event=>{
+ if(event.request.mode==='navigate')return;
  const request=event.request,url=new URL(request.url);
  if(url.origin!==self.location.origin)return;
  if(request.method!=='GET')return;
@@ -30,18 +27,6 @@ self.addEventListener('fetch',event=>{
  }
  if(url.pathname.startsWith('/api/')){
    event.respondWith(fetch(request,{cache:'no-store'}).catch(()=>new Response(JSON.stringify({error:'Offline — reconnect and retry.'}),{status:503,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}})));
-   return;
- }
- if(request.mode==='navigate'){
-   event.respondWith((async()=>{
-     const cached=await caches.match('/index.html',{ignoreSearch:true});
-     if(cached)return cached;
-     try{
-       return await fetch(request,{cache:'no-store'});
-     }catch{
-       return new Response('The app is temporarily unavailable. Reconnect to the internet and try again.',{status:503,headers:{'content-type':'text/plain; charset=utf-8'}});
-     }
-   })());
    return;
  }
  event.respondWith(fetch(request).then(response=>{

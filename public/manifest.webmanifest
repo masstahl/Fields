@@ -1,7 +1,7 @@
 {
   "name": "Field Headings",
   "short_name": "Headings",
-  "start_url": "https://field-headings.stahlsays.workers.dev/?v=20261007-0900",
+  "start_url": "/",
   "scope": "https://field-headings.stahlsays.workers.dev/",
   "id": "https://field-headings.stahlsays.workers.dev/",
   "display": "standalone",
