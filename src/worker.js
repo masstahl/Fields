@@ -88,6 +88,7 @@ async function handle(request, env, a, b) {
       if (Number(count?.count||0)>0) return json({error:"Only unused varieties can be deleted"},409);
       const varieties = await getVarieties(db);
       if (!varieties.some(v=>v.name===name)) return json({error:"Variety not found"},404);
+      await db.prepare("DELETE FROM planting_records WHERE variety=?").bind(name).run();
       await log("variety deleted","variety:"+JSON.stringify({name}));
       return json({ok:true});
     }
@@ -292,14 +293,14 @@ async function handle(request, env, a, b) {
         current.created_by = current.created_by || row.created_by;
       }
 
-      const cols = ["", "Field", "Date", "Latitude", "Longitude ", "Heading", "Variety", "Notes", "Acres ", "Bags", "Bags per acre", "Avg OZ PER SEED"];
+      const cols = ["Field", "Date", "Latitude", "Longitude", "Heading", "Variety", "Notes"];
       const excelDate = value => {
         const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
         return match ? `${Number(match[2])}/${Number(match[3])}/${match[1].slice(-2)}` : value;
       };
       const exportRows = [...merged.values()].map(row => [
-        "FALSE", row.field_name, excelDate(row.planting_date), row.latitude, row.longitude,
-        row.heading, row.variety, row.notes, "", "", "", ""
+        row.field_name, excelDate(row.planting_date), row.latitude, row.longitude,
+        row.heading, row.variety, row.notes
       ]);
       const cell = v => {
         const value = String(v ?? "");
