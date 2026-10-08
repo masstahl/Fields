@@ -152,7 +152,8 @@ function renderVarietyManagement(){
       const name=btn.dataset.varietyDelete;
       if(btn.disabled||!confirm('Delete variety "'+name+'"?'))return;
       try{
-        await api('varieties/delete',{method:'POST',body:JSON.stringify({name})});
+        const result=await api('varieties/delete',{method:'POST',body:JSON.stringify({name})});
+        if(Array.isArray(result.varieties)) varieties=result.varieties;
         await loadVarieties();
         toast('Variety deleted');
       }catch(e){toast(e.message)}
