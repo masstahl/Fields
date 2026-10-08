@@ -1,4 +1,3 @@
-(async()=>{try{if("serviceWorker"in navigator){const regs=await navigator.serviceWorker.getRegistrations();if(regs.length){await Promise.all(regs.map(r=>r.unregister()));if("caches"in window){const keys=await caches.keys();await Promise.all(keys.map(k=>caches.delete(k)));}location.reload();return;}}}catch(e){}})();
 
 (function(){
   const APP_VERSION='2026.10.05.0900';
@@ -10,4 +9,3 @@
   window.load=async function(){const q=$('#q').value.trim();try{const data=await api(q?'fields?q='+encodeURIComponent(q):'fields');if(!Array.isArray(data))throw new Error('Bad data from server');fields=data;$('#count').textContent=q?data.length+(data.length===100?'+':'')+' matching fields':data.length+' fields available';$('#dot').classList.remove('bad');$('#statusText').textContent='Database connected';render()}catch(e){$('#count').textContent='Unable to load fields';$('#dot').classList.add('bad');$('#statusText').textContent='Connection error';if(!fields.length){$('#out').innerHTML='<div class="empty"><strong>Could not load the field database</strong><div style="margin-top:8px">'+esc(e.message)+'</div><div style="margin-top:16px"><button class="action primary" id="retryLoad">Retry</button></div></div>';$('#retryLoad').onclick=load}}};
   const hdr=()=>({'content-type':'application/json','x-user':encodeURIComponent(user)});if(!sessionStorage.getItem('opened')){if(!user){const n=prompt('Your name (used only for the activity log):','');user=(n||'Guest').trim()||'Guest';localStorage.setItem('fieldUser',user);$('#who').textContent=user+' � field reference'}fetch('/api/open',{method:'POST',headers:hdr(),body:'{"event":"open"}'}).catch(()=>{});sessionStorage.setItem('opened','1')}addEventListener('appinstalled',()=>fetch('/api/open',{method:'POST',headers:hdr(),body:'{"event":"installed"}'}).catch(()=>{}));
 })();
-setTimeout(()=>{if(typeof window.load==="function")window.load();},0);
