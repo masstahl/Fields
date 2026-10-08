@@ -3,18 +3,29 @@ const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v
 
 async function getVarieties(db) {
   const rows = (await db.prepare("SELECT DISTINCT variety FROM planting_records WHERE variety IS NOT NULL AND TRIM(variety)<>''").all()).results;
-  const events = (await db.prepare("SELECT action,detail FROM activity WHERE action IN ('variety added','variety renamed','variety deleted') ORDER BY id").all()).results;
   const active = new Set(rows.map(r => String(r.variety || '').trim()).filter(Boolean));
+  const events = (await db.prepare("SELECT id,action,detail FROM activity WHERE action IN ('variety added','variety renamed','variety deleted') ORDER BY id").all()).results;
   for (const event of events) {
     try {
       const detail = String(event.detail || '');
-      if (event.action === 'variety added' && detail.startsWith('variety:')) active.add(JSON.parse(detail.slice(8)).name);
-      else if (event.action === 'variety renamed' && detail.startsWith('variety rename:')) { const value=JSON.parse(detail.slice(15)); active.delete(value.from); active.add(value.to); }
-      else if (event.action === 'variety deleted' && detail.startsWith('variety:')) active.delete(JSON.parse(detail.slice(8)).name);
+      if (event.action === 'variety added' && detail.startsWith('variety:')) {
+        const value = JSON.parse(detail.slice(8));
+        if (value?.name) active.add(String(value.name).trim());
+      } else if (event.action === 'variety renamed' && detail.startsWith('variety rename:')) {
+        const value = JSON.parse(detail.slice(15));
+        if (value?.from) active.delete(String(value.from).trim());
+        if (value?.to) active.add(String(value.to).trim());
+      } else if (event.action === 'variety deleted' && detail.startsWith('variety:')) {
+        const value = JSON.parse(detail.slice(8));
+        if (value?.name) active.delete(String(value.name).trim());
+      }
     } catch {}
   }
   const names=[...active].filter(Boolean).sort((a,b)=>a.localeCompare(b));
-  return Promise.all(names.map(async name=>{ const row=await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE variety=?").bind(name).first(); return {name,used:Number(row?.count||0)}; }));
+  return Promise.all(names.map(async name=>{
+    const row=await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE variety=?").bind(name).first();
+    return {name,used:Number(row?.count||0)};
+  }));
 }
 
 export default {
@@ -63,34 +74,34 @@ async function handle(request, env, a, b) {
   try {
     if (a === "varieties" && m === "GET") return json(await getVarieties(db));
     if (a === "varieties" && m === "POST") {
-      const p = await request.json(); const name = String(p.name || "").trim();
-      if (!name) return json({ error: "Variety name is required" }, 400);
-      const varieties = await getVarieties(db);
-      if (varieties.some(v => v.name === name)) return json({ name, existing: true });
-      await log("variety added", "variety:" + JSON.stringify({ name }));
-      return json({ name, existing: false });
+      const p=await request.json(); const name=String(p.name||"").trim();
+      if(!name)return json({error:"Variety name is required"},400);
+      const varieties=await getVarieties(db);
+      if(varieties.some(v=>v.name===name))return json({name,existing:true,varieties});
+      await log("variety added","variety:"+JSON.stringify({name}));
+      return json({name,existing:false,varieties:await getVarieties(db)});
     }
     if (a === "varieties" && b === "rename" && m === "POST") {
-      const p = await request.json(); const from = String(p.from || "").trim(); const to = String(p.to || "").trim();
-      if (!from || !to) return json({ error: "Current and new variety names are required" }, 400);
-      if (from === to) return json({ name: to });
-      const varieties = await getVarieties(db);
-      if (!varieties.some(v => v.name === from)) return json({ error: "Variety not found" }, 404);
-      if (varieties.some(v => v.name === to)) return json({ error: "That variety name already exists" }, 409);
-      await db.prepare("UPDATE planting_records SET variety=? WHERE variety=?").bind(to, from).run();
-      await log("variety renamed", "variety rename:" + JSON.stringify({ from, to }));
-      return json({ name: to });
+      const p=await request.json(); const from=String(p.from||"").trim(); const to=String(p.to||"").trim();
+      if(!from||!to)return json({error:"Current and new variety names are required"},400);
+      if(from===to)return json({name:to,varieties:await getVarieties(db)});
+      const varieties=await getVarieties(db);
+      if(!varieties.some(v=>v.name===from))return json({error:"Variety not found"},404);
+      if(varieties.some(v=>v.name===to))return json({error:"That variety name already exists"},409);
+      await db.batch([
+        db.prepare("UPDATE planting_records SET variety=? WHERE variety=?").bind(to,from),
+        db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who,"variety renamed","variety rename:"+JSON.stringify({from,to}))
+      ]);
+      return json({name:to,varieties:await getVarieties(db)});
     }
     if (a === "varieties" && b === "delete" && m === "POST") {
-      const p = await request.json(); const name = String(p.name || "").trim();
-      if (!name) return json({ error: "Variety name is required" }, 400);
-      const count = await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE variety=?").bind(name).first();
-      if (Number(count?.count || 0) > 0) return json({ error: "Only unused varieties can be deleted" }, 409);
-      const varieties = await getVarieties(db);
-      if (!varieties.some(v => v.name === name)) return json({ error: "Variety not found" }, 404);
-      await log("variety deleted", "variety:" + JSON.stringify({ name }));
-      const updated = await getVarieties(db);
-      return json({ ok: true, name, varieties: updated });
+      const p=await request.json(); const name=String(p.name||"").trim();
+      if(!name)return json({error:"Variety name is required"},400);
+      const varieties=await getVarieties(db);
+      if(!varieties.some(v=>v.name===name))return json({error:"Variety not found"},404);
+      await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)")
+        .bind(who,"variety deleted","variety:"+JSON.stringify({name})).run();
+      return json({ok:true,name,varieties:await getVarieties(db)});
     }
 
     if (a === "planting-records" && m === "POST") {
