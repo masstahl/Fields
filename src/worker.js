@@ -21,7 +21,8 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/fix.js" || url.pathname === "/" || url.pathname === "/index.html") {
-      const asset = await env.ASSETS.fetch(request);
+      const assetRequest = url.pathname === "/" ? new Request(new URL("/index.html", request.url), request) : request;
+      const asset = await env.ASSETS.fetch(assetRequest);
       if (!asset.ok) return asset;
       let source = await asset.text();
 
