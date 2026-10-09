@@ -608,7 +608,7 @@ function openPlantField(f){
   showDialog($('#plantDlg'));
 }
 
-$('#plantBtn').onclick=()=>detectNearestField(openPlantField);
+$('#plantBtn').onclick=()=>openPlantField(fields[0]||null);
 $('#plantFieldName').oninput=()=>{
   renderPlantFieldOptions('#plantFieldName','#plantFieldOptions');
   const field=selectedField('plant');
