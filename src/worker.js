@@ -38,7 +38,9 @@ async function getGrowers(db) {
 async function getVarieties(db) {
   const rows = (await db.prepare("SELECT DISTINCT variety FROM planting_records WHERE variety IS NOT NULL AND TRIM(variety)<>''").all()).results;
   const active = new Set(rows.map(r => String(r.variety || '').trim()).filter(Boolean));
-  const events = (await db.prepare("SELECT id,action,detail FROM activity WHERE action IN ('variety added','variety renamed','variety deleted') ORDER BY id").all()).results;
+  const events = (await db.prepare("SELECT id,action,detail FROM activity WHERE action IN ('variety added','variety renamed','variety deleted') ORDER BY id ASC").all()).results;
+  // Replay the variety lifecycle in event order. A deletion is a tombstone:
+  // it must remove a name from the picker even when old planting rows remain.
   for (const event of events) {
     try {
       const detail = String(event.detail || '');
@@ -55,10 +57,10 @@ async function getVarieties(db) {
       }
     } catch {}
   }
-  const names=[...active].filter(Boolean).sort((a,b)=>a.localeCompare(b));
-  return Promise.all(names.map(async name=>{
-    const row=await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE variety=?").bind(name).first();
-    return {name,used:Number(row?.count||0)};
+  const names = [...active].filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  return Promise.all(names.map(async name => {
+    const row = await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE variety=?").bind(name).first();
+    return {name, used:Number(row?.count||0)};
   }));
 }
 
