@@ -1,6 +1,21 @@
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v)) ? null : +v;
 
+async function getGrowers(db) {
+  const active = new Set();
+  const rows=(await db.prepare("SELECT DISTINCT detail FROM activity WHERE action IN ('grower added','grower renamed','grower deleted','planting created','planting edited') ORDER BY id").all()).results;
+  for(const row of rows){
+    const detail=String(row.detail||'');
+    try{
+      if(detail.startsWith('grower:')){const v=JSON.parse(detail.slice(7));if(v?.name)active.add(String(v.name).trim())}
+      else if(detail.startsWith('grower rename:')){const v=JSON.parse(detail.slice(13));if(v?.from)active.delete(String(v.from).trim());if(v?.to)active.add(String(v.to).trim())}
+      else if(detail.includes(' grower=')){const match=detail.match(/(?:^|\s)grower=(.*?)(?:\s+contributors:|$)/);if(match&&match[1])active.add(match[1].trim())}
+    }catch{}
+  }
+  const names=[...active].filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  return names.map(name=>({name}));
+}
+
 async function getVarieties(db) {
   const rows = (await db.prepare("SELECT DISTINCT variety FROM planting_records WHERE variety IS NOT NULL AND TRIM(variety)<>''").all()).results;
   const active = new Set(rows.map(r => String(r.variety || '').trim()).filter(Boolean));
@@ -72,6 +87,36 @@ async function handle(request, env, a, b) {
   };
 
   try {
+    if (a === "growers" && m === "GET") return json(await getGrowers(db));
+    if (a === "growers" && m === "POST") {
+      const p=await request.json();const name=String(p.name||"").trim();
+      if(!name)return json({error:"Grower name is required"},400);
+      const growers=await getGrowers(db);
+      if(growers.some(g=>g.name===name))return json({name,existing:true,growers});
+      await log("grower added","grower:"+JSON.stringify({name}));
+      return json({name,existing:false,growers:await getGrowers(db)});
+    }
+    if (a === "growers" && b === "rename" && m === "POST") {
+      const p=await request.json();const from=String(p.from||"").trim(),to=String(p.to||"").trim();
+      if(!from||!to)return json({error:"Current and new grower names are required"},400);
+      if(from===to)return json({name:to,growers:await getGrowers(db)});
+      const growers=await getGrowers(db);
+      if(!growers.some(g=>g.name===from))return json({error:"Grower not found"},404);
+      if(growers.some(g=>g.name===to))return json({error:"That grower name already exists"},409);
+      await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who,"grower renamed","grower rename:"+JSON.stringify({from,to})).run();
+      return json({name:to,growers:await getGrowers(db)});
+    }
+    if (a === "growers" && b === "delete" && m === "POST") {
+      const p=await request.json();const name=String(p.name||"").trim();
+      if(!name)return json({error:"Grower name is required"},400);
+      const growers=await getGrowers(db);
+      if(!growers.some(g=>g.name===name))return json({error:"Grower not found"},404);
+      const records=(await db.prepare("SELECT detail FROM activity WHERE action IN ('planting created','planting edited')").all()).results;
+      const used=records.some(r=>String(r.detail||'').includes('grower='+name));
+      if(used)return json({error:"This grower is used by planting records"},409);
+      await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who,"grower deleted","grower:"+JSON.stringify({name})).run();
+      return json({ok:true,growers:await getGrowers(db)});
+    }
     if (a === "varieties" && m === "GET") return json(await getVarieties(db));
     if (a === "varieties" && m === "POST") {
       const p=await request.json(); const name=String(p.name||"").trim();
@@ -116,7 +161,9 @@ async function handle(request, env, a, b) {
       const latitude = num(p.latitude) ?? field.lat ?? null;
       const longitude = num(p.longitude) ?? field.lng ?? null;
       const variety = String(p.variety || "").trim();
+      const grower = String(p.grower || "").trim();
       const notes = String(p.notes || "").trim();
+      if(grower && !(await getGrowers(db)).some(g=>g.name===grower))return json({error:"Select an existing grower or add the grower first"},400);
       if (variety) {
         const varieties = await getVarieties(db);
         if (!varieties.some(v => v.name === variety)) return json({ error: "Select an existing variety or add the new variety first" }, 400);
@@ -135,7 +182,7 @@ async function handle(request, env, a, b) {
           "UPDATE planting_records SET field_id=?,field_name=?,heading=?,latitude=?,longitude=?,planting_date=?,variety=?,notes=? WHERE id=?"
         ).bind(fieldId, fieldName, heading, latitude, longitude, plantingDate, variety || null, mergedNotes, existing.id).run();
 
-        await log("planting edited", `planting_id:${existing.id} merged duplicate`);
+        await log("planting edited", `planting_id:${existing.id} merged duplicate grower=${grower}`);
         return json({ id: existing.id, merged: true });
       }
 
@@ -143,7 +190,7 @@ async function handle(request, env, a, b) {
         "INSERT INTO planting_records(field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by) VALUES(?,?,?,?,?,?,?,?,?)"
       ).bind(fieldId, fieldName, heading, latitude, longitude, plantingDate, variety || null, notes || null, who).run();
 
-      await log("planting created", `planting_id:${r.meta.last_row_id}`);
+      await log("planting created", `planting_id:${r.meta.last_row_id} grower=${grower}`);
       return json({ id: r.meta.last_row_id, merged: false });
     }
 
@@ -193,7 +240,7 @@ async function handle(request, env, a, b) {
         const contributorDetail = priorContributors.length
           ? ` contributors:${priorContributors.join("|")}`
           : "";
-        await log("planting edited", `planting_id:${duplicate.id} merged duplicate${contributorDetail}`);
+        await log("planting edited", `planting_id:${duplicate.id} merged duplicate grower=${grower}${contributorDetail}`);
         return json({ id: duplicate.id, merged: true });
       }
 
@@ -201,7 +248,7 @@ async function handle(request, env, a, b) {
         "UPDATE planting_records SET field_id=?,field_name=?,heading=?,latitude=?,longitude=?,planting_date=?,variety=?,notes=? WHERE id=?"
       ).bind(fieldId, fieldName, heading, latitude, longitude, plantingDate, variety || null, notes || null, id).run();
 
-      await log("planting edited", `planting_id:${id}`);
+      await log("planting edited", `planting_id:${id} grower=${grower}`);
       return json({ id, merged: false });
     }
 
@@ -224,6 +271,11 @@ async function handle(request, env, a, b) {
         "SELECT id,at,user,action,detail FROM activity WHERE action IN ('planting created','planting edited') ORDER BY id"
       ).all()).results;
 
+      const growerByRecord = new Map();
+      for(const item of history){
+        const match=String(item.detail||'').match(/(?:^|\\s)grower=(.*?)(?:\\s+contributors:|$)/);
+        if(match)growerByRecord.set(Number(String(item.detail||'').match(/planting_id:(\\d+)/)?.[1]),match[1].trim());
+      }
       const byRecord = new Map();
       for (const item of history) {
         const match = String(item.detail || "").match(/planting_id:(\d+)/);
@@ -243,6 +295,7 @@ async function handle(request, env, a, b) {
         const last = events.length ? events[events.length - 1] : null;
         return {
           ...row,
+          grower: growerByRecord.get(row.id) || "",
           last_modified_by: last?.user || row.created_by || "",
           contributors,
           history: events.map(x => ({at:x.at,user:x.user,action:x.action,detail:x.detail}))
