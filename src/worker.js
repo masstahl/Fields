@@ -158,8 +158,13 @@ async function handle(request, env, a, b) {
       const plantingIds = new Set((await db.prepare("SELECT id FROM planting_records").all()).results.map(row => Number(row.id)));
       const usedCount = [...assignments].filter(([id, value]) => plantingIds.has(id) && nameKey(value) === nameKey(grower.name)).length;
       if (usedCount) return json({ error: "Used by " + usedCount + " planting records", count: usedCount }, 409);
-      await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who,"grower deleted","grower:"+JSON.stringify({name:grower.name})).run();
-      return json({ok:true,growers:await getGrowers(db)});
+      const deleteDetail = "grower:" + JSON.stringify({ name: grower.name });
+      await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who, "grower deleted", deleteDetail).run();
+      const event = await db.prepare("SELECT id FROM activity WHERE action=? AND detail=? ORDER BY id DESC LIMIT 1").bind("grower deleted", deleteDetail).first();
+      const updatedGrowers = await getGrowers(db);
+      const stillListed = updatedGrowers.some(value => nameKey(value.name) === nameKey(grower.name));
+      if (!event || stillListed) return json({ error: "Grower deletion verification failed", diagnostic: { build: APP_BUILD, eventPersisted: !!event, stillListed } }, 500);
+      return json({ ok: true, name: grower.name, growers: updatedGrowers, diagnostic: { build: APP_BUILD, eventPersisted: true, stillListed: false } });
     }
     if (a === "varieties" && m === "GET") return json(await getVarieties(db));
     if (a === "varieties" && m === "POST") {
