@@ -1,7 +1,7 @@
 const APP_BUILD = "delete-verify-preview-2026-10-09";
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-app-build": APP_BUILD } });
 const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v)) ? null : +v;
-const nameKey = value => String(value ?? "").trim().toLowerCase();
+const norm = v => String(v || "").trim().toLowerCase();
 
 async function getCurrentGrowerAssignments(db) {
   const rows = (await db.prepare("SELECT id,action,detail FROM activity WHERE action IN ('planting created','planting edited','grower renamed') ORDER BY id").all()).results;
@@ -12,7 +12,7 @@ async function getCurrentGrowerAssignments(db) {
       try {
         const v = JSON.parse(detail.slice(14));
         for (const [id, name] of assignments) {
-          if (nameKey(name) === nameKey(v.from)) assignments.set(id, String(v.to || "").trim());
+          if (norm(name) === norm(v.from)) assignments.set(id, String(v.to || "").trim());
         }
       } catch {}
       continue;
@@ -26,27 +26,30 @@ async function getCurrentGrowerAssignments(db) {
 
 async function getGrowers(db) {
   const active = new Map();
-  const rows = (await db.prepare("SELECT id,action,detail FROM activity WHERE action IN ('grower added','grower renamed','grower deleted','planting created','planting edited') ORDER BY id").all()).results;
+  const rows = (await db.prepare(
+    "SELECT id,action,detail FROM activity WHERE action IN ('grower added','grower renamed','grower deleted') ORDER BY id ASC"
+  ).all()).results;
+
   for (const row of rows) {
     const detail = String(row.detail || "");
     try {
-      if (detail.startsWith("grower:")) {
+      if ((row.action === "grower added" || row.action === "grower deleted") && detail.startsWith("grower:")) {
         const value = JSON.parse(detail.slice(7));
         const name = String(value?.name || "").trim();
-        if (!name) continue;
-        if (row.action === "grower deleted") active.delete(nameKey(name));
-        else active.set(nameKey(name), name);
-      } else if (detail.startsWith("grower rename:")) {
+        const key = norm(name);
+        if (!key) continue;
+        if (row.action === "grower deleted") active.delete(key);
+        else active.set(key, name);
+      } else if (row.action === "grower renamed" && detail.startsWith("grower rename:")) {
         const value = JSON.parse(detail.slice(14));
-        if (value?.from) active.delete(nameKey(value.from));
-        if (value?.to) active.set(nameKey(value.to), String(value.to).trim());
-      } else if (detail.includes(" grower=")) {
-        const match = detail.match(/(?:^|\s)grower=(.*?)(?:\s+contributors:|$)/);
-        const name = String(match?.[1] || "").trim();
-        if (name) active.set(nameKey(name), name);
+        const fromKey = norm(value?.from);
+        const to = String(value?.to || "").trim();
+        if (fromKey) active.delete(fromKey);
+        if (norm(to)) active.set(norm(to), to);
       }
     } catch {}
   }
+
   return [...active.values()].filter(Boolean).sort((a, b) => a.localeCompare(b)).map(name => ({ name }));
 }
 
@@ -54,7 +57,7 @@ async function getVarieties(db) {
   const rows = (await db.prepare("SELECT DISTINCT variety FROM planting_records WHERE variety IS NOT NULL AND TRIM(variety)<>''").all()).results;
   const active = new Map(rows.map(row => {
     const name = String(row.variety || "").trim();
-    return [nameKey(name), name];
+    return [norm(name), name];
   }).filter(([key, name]) => key && name));
   const events = (await db.prepare("SELECT id,action,detail FROM activity WHERE action IN ('variety added','variety renamed','variety deleted') ORDER BY id ASC").all()).results;
   for (const event of events) {
@@ -64,18 +67,18 @@ async function getVarieties(db) {
         const value = JSON.parse(detail.slice(8));
         const name = String(value?.name || "").trim();
         if (!name) continue;
-        if (event.action === "variety deleted") active.delete(nameKey(name));
-        else active.set(nameKey(name), name);
+        if (event.action === "variety deleted") active.delete(norm(name));
+        else active.set(norm(name), name);
       } else if (event.action === "variety renamed" && detail.startsWith("variety rename:")) {
         const value = JSON.parse(detail.slice(15));
-        if (value?.from) active.delete(nameKey(value.from));
-        if (value?.to) active.set(nameKey(value.to), String(value.to).trim());
+        if (value?.from) active.delete(norm(value.from));
+        if (value?.to) active.set(norm(value.to), String(value.to).trim());
       }
     } catch {}
   }
   const names = [...active.values()].filter(Boolean).sort((a, b) => a.localeCompare(b));
   return Promise.all(names.map(async name => {
-    const row = await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE LOWER(TRIM(variety))=LOWER(?)").bind(name).first();
+    const row = await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE LOWER(TRIM(variety))=?").bind(name).first();
     return { name, used: Number(row?.count || 0) };
   }));
 }
@@ -134,7 +137,7 @@ async function handle(request, env, a, b) {
       const p=await request.json();const name=String(p.name||"").trim();
       if(!name)return json({error:"Grower name is required"},400);
       const growers=await getGrowers(db);
-      if(growers.some(g=>nameKey(g.name)===nameKey(name)))return json({name,existing:true,growers});
+      if(growers.some(g=>norm(g.name)===norm(name)))return json({name,existing:true,growers});
       await log("grower added","grower:"+JSON.stringify({name}));
       return json({name,existing:false,growers:await getGrowers(db)});
     }
@@ -143,8 +146,8 @@ async function handle(request, env, a, b) {
       if(!from||!to)return json({error:"Current and new grower names are required"},400);
       if(from===to)return json({name:to,growers:await getGrowers(db)});
       const growers=await getGrowers(db);
-      if(!growers.some(g=>nameKey(g.name)===nameKey(from)))return json({error:"Grower not found"},404);
-      if(growers.some(g=>nameKey(g.name)===nameKey(to)))return json({error:"That grower name already exists"},409);
+      if(!growers.some(g=>norm(g.name)===norm(from)))return json({error:"Grower not found"},404);
+      if(growers.some(g=>norm(g.name)===norm(to)))return json({error:"That grower name already exists"},409);
       await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who,"grower renamed","grower rename:"+JSON.stringify({from,to})).run();
       return json({name:to,growers:await getGrowers(db)});
     }
@@ -152,17 +155,17 @@ async function handle(request, env, a, b) {
       const p=await request.json();const name=String(p.name||"").trim();
       if(!name)return json({error:"Grower name is required"},400);
       const growers=await getGrowers(db);
-      const grower=growers.find(value=>nameKey(value.name)===nameKey(name));
+      const grower=growers.find(value=>norm(value.name)===norm(name));
       if(!grower)return json({error:"Grower not found"},404);
       const assignments = await getCurrentGrowerAssignments(db);
       const plantingIds = new Set((await db.prepare("SELECT id FROM planting_records").all()).results.map(row => Number(row.id)));
-      const usedCount = [...assignments].filter(([id, value]) => plantingIds.has(id) && nameKey(value) === nameKey(grower.name)).length;
+      const usedCount = [...assignments].filter(([id, value]) => plantingIds.has(id) && norm(value) === norm(grower.name)).length;
       if (usedCount) return json({ error: "Used by " + usedCount + " planting records", count: usedCount }, 409);
       const deleteDetail = "grower:" + JSON.stringify({ name: grower.name });
       await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who, "grower deleted", deleteDetail).run();
       const event = await db.prepare("SELECT id FROM activity WHERE action=? AND detail=? ORDER BY id DESC LIMIT 1").bind("grower deleted", deleteDetail).first();
       const updatedGrowers = await getGrowers(db);
-      const stillListed = updatedGrowers.some(value => nameKey(value.name) === nameKey(grower.name));
+      const stillListed = updatedGrowers.some(value => norm(value.name) === norm(grower.name));
       if (!event || stillListed) return json({ error: "Grower deletion verification failed", diagnostic: { build: APP_BUILD, eventPersisted: !!event, stillListed } }, 500);
       return json({ ok: true, name: grower.name, growers: updatedGrowers, diagnostic: { build: APP_BUILD, eventPersisted: true, stillListed: false } });
     }
@@ -171,7 +174,7 @@ async function handle(request, env, a, b) {
       const p=await request.json(); const name=String(p.name||"").trim();
       if(!name)return json({error:"Variety name is required"},400);
       const varieties=await getVarieties(db);
-      if(varieties.some(v=>nameKey(v.name)===nameKey(name)))return json({name,existing:true,varieties});
+      if(varieties.some(v=>norm(v.name)===norm(name)))return json({name,existing:true,varieties});
       await log("variety added","variety:"+JSON.stringify({name}));
       return json({name,existing:false,varieties:await getVarieties(db)});
     }
@@ -180,10 +183,10 @@ async function handle(request, env, a, b) {
       if(!from||!to)return json({error:"Current and new variety names are required"},400);
       if(from===to)return json({name:to,varieties:await getVarieties(db)});
       const varieties=await getVarieties(db);
-      if(!varieties.some(v=>nameKey(v.name)===nameKey(from)))return json({error:"Variety not found"},404);
-      if(varieties.some(v=>nameKey(v.name)===nameKey(to)))return json({error:"That variety name already exists"},409);
+      if(!varieties.some(v=>norm(v.name)===norm(from)))return json({error:"Variety not found"},404);
+      if(varieties.some(v=>norm(v.name)===norm(to)))return json({error:"That variety name already exists"},409);
       await db.batch([
-        db.prepare("UPDATE planting_records SET variety=? WHERE variety=?").bind(to,from),
+        db.prepare("UPDATE planting_records SET variety=? WHERE LOWER(TRIM(variety))=?").bind(to,norm(from)),
         db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who,"variety renamed","variety rename:"+JSON.stringify({from,to}))
       ]);
       return json({name:to,varieties:await getVarieties(db)});
@@ -192,16 +195,16 @@ async function handle(request, env, a, b) {
       const p=await request.json(); const name=String(p.name||"").trim();
       if(!name)return json({error:"Variety name is required"},400);
       const varieties = await getVarieties(db);
-      const variety = varieties.find(value => nameKey(value.name) === nameKey(name));
+      const variety = varieties.find(value => norm(value.name) === norm(name));
       if (!variety) return json({ error: "Variety not found" }, 404);
-      const usedCount = Number((await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE LOWER(TRIM(variety))=LOWER(?)").bind(name).first())?.count || 0);
+      const usedCount = Number((await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE LOWER(TRIM(variety))=LOWER(?)").bind(norm(name)).first())?.count || 0);
       if (usedCount) return json({ error: "Used by " + usedCount + " planting records", count: usedCount }, 409);
       await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)")
         .bind(who, "variety deleted", "variety:" + JSON.stringify({ name: variety.name })).run();
       const event = await db.prepare("SELECT id FROM activity WHERE action='variety deleted' AND detail=? ORDER BY id DESC LIMIT 1")
         .bind("variety:" + JSON.stringify({ name: variety.name })).first();
       const updatedVarieties = await getVarieties(db);
-      const stillListed = updatedVarieties.some(value => nameKey(value.name) === nameKey(variety.name));
+      const stillListed = updatedVarieties.some(value => norm(value.name) === norm(variety.name));
       if (!event || stillListed) {
         return json({ error: "Deletion verification failed", diagnostic: { build: APP_BUILD, eventPersisted: !!event, stillListed, deleteEventCount: Number((await db.prepare("SELECT COUNT(*) AS count FROM activity WHERE action='variety deleted'").first())?.count || 0) } }, 500);
       }
@@ -222,10 +225,10 @@ async function handle(request, env, a, b) {
       const variety = String(p.variety || "").trim();
       const grower = String(p.grower || "").trim();
       const notes = String(p.notes || "").trim();
-      if(grower && !(await getGrowers(db)).some(g=>g.name===grower))return json({error:"Select an existing grower or add the grower first"},400);
+      if(grower && !(await getGrowers(db)).some(g=>norm(g.name)===norm(grower)))return json({error:"Select an existing grower or add the grower first"},400);
       if (variety) {
         const varieties = await getVarieties(db);
-        if (!varieties.some(v => v.name === variety)) return json({ error: "Select an existing variety or add the new variety first" }, 400);
+        if (!varieties.some(v => norm(v.name) === norm(variety))) return json({ error: "Select an existing variety or add the new variety first" }, 400);
       }
 
       const existing = await db.prepare(
