@@ -151,7 +151,7 @@ function renderGrowerManagement(){
   out.querySelectorAll('[data-grower-delete]').forEach(btn=>btn.onclick=async()=>{
     const name=btn.dataset.growerDelete;
     if(!confirm('Delete grower "'+name+'"?'))return;
-    try{const result=await api('growers/delete',{method:'POST',body:JSON.stringify({name})});if(!result?.ok)throw new Error('Server did not confirm grower deletion');const lists=await refreshLists();if(lists.growers.some(g=>String(g.name||'').trim().toLowerCase()===name.trim().toLowerCase()))throw new Error('Grower is still listed by the server; deletion was not confirmed');toast('Grower deleted and verified')}catch(e){await refreshLists().catch(()=>{});toast(e.message)}
+    try{const result=await api('growers/delete',{method:'POST',body:JSON.stringify({name})});const lists=await refreshLists();if(lists.growers.some(g=>String(g.name||'').trim().toLowerCase()===name.trim().toLowerCase()))throw new Error(result?.error||result?.diagnostic?.error||'Grower is still listed by the server; deletion was not confirmed');toast('Grower deleted and verified')}catch(e){await refreshLists().catch(()=>{});toast(e.message)}
   });
 }
 $('#addGrowerBtn').onclick=async()=>{
@@ -219,7 +219,8 @@ $('#varietyDeleteBtn').onclick=async()=>{
   if(!confirm('Delete variety "'+name+'"? Names used by existing planting records cannot be deleted.'))return;
   try{
     const result=await api('varieties/delete',{method:'POST',body:JSON.stringify({name})});
-    if(!result?.ok)throw new Error('Server did not confirm variety deletion');
+    const verifyLists=await refreshLists();
+    if(verifyLists.varieties.some(v=>String(v.name||'').trim().toLowerCase()===name.trim().toLowerCase()))throw new Error(result?.error||result?.diagnostic?.error||'Variety is still listed by the server; deletion was not confirmed');
     if(activeVarietyFilter===name)activeVarietyFilter=null;
     closeDialog($('#varietyOptionsDlg'));
     const lists=await refreshLists();
