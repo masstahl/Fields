@@ -19,7 +19,7 @@ main{max-width:940px;margin:auto;padding:16px 16px 55px}.hero{position:relative;
 .search-panel{position:relative;margin-top:-3px;margin-bottom:14px}.search{width:100%;height:54px;border:1px solid rgba(24,63,42,.12);border-radius:16px;background:rgba(255,253,248,.96);padding:0 76px 0 46px;outline:0;font-size:16px;color:var(--ink);box-shadow:0 10px 28px rgba(24,63,42,.075);transition:border-color .18s,box-shadow .18s}.search:focus{border-color:#a9b8a7;box-shadow:0 0 0 4px rgba(120,148,111,.14)}.search-icon{position:absolute;left:16px;top:17px;color:#748078;pointer-events:none}.clear{position:absolute;right:9px;top:9px;height:36px;border:0;border-radius:10px;background:#edf0e9;color:#647067;padding:0 10px;font-size:12px;font-weight:750}
 .summary{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 9px;font-size:11px;color:var(--muted)}.status{display:flex;align-items:center;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:#6d956b}.dot.bad{background:#a95a53}
 .list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.card{background:var(--paper);border:1px solid rgba(24,63,42,.095);border-radius:18px;box-shadow:var(--shadow);overflow:hidden;transition:transform .18s,box-shadow .18s,border-color .18s}.card:hover{transform:translateY(-1px);box-shadow:0 20px 48px rgba(24,63,42,.13);border-color:rgba(24,63,42,.15)}.card-main{display:flex;align-items:center;justify-content:space-between;gap:13px;padding:16px;min-height:88px;position:relative}.card-main:after{content:"";width:6px;height:6px;border-right:1.5px solid #839087;border-bottom:1.5px solid #839087;transform:rotate(45deg);transition:transform .18s,opacity .18s;opacity:.65}.card.expanded .card-main:after{transform:rotate(225deg);opacity:.85}.card-main:active{background:#f8f7f0}.name{font-size:16px;font-weight:760;letter-spacing:-.02em}.meta{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.35}.heading{text-align:right;min-width:67px}.degrees{font-size:22px;font-weight:800;letter-spacing:-.05em;color:var(--forest);font-variant-numeric:tabular-nums}.direction{font-size:10px;color:var(--sage);font-weight:750;text-transform:uppercase;letter-spacing:.08em}.location-preview{position:relative;min-height:250px;overflow:hidden;border-top:1px solid #e8ebe3;background:#dfe5dc;animation:reveal .22s ease-out}@keyframes reveal{from{opacity:.35;transform:translateY(-4px)}to{opacity:1;transform:none}}.location-map{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(.9) contrast(.94);transform:scale(1.015)}.location-map::after{content:"";position:absolute;inset:0;background:rgba(244,244,237,.34)}.location-overlay{position:relative;margin:14px;z-index:1;background:rgba(250,249,243,.88);border:1px solid rgba(255,255,255,.8);border-radius:15px;padding:13px;box-shadow:0 10px 28px rgba(24,63,42,.13);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}.location-pin{position:absolute;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);border-radius:50% 50% 50% 0;background:var(--forest);border:3px solid rgba(255,255,255,.95);box-shadow:0 3px 12px rgba(0,0,0,.28);rotate:-45deg;z-index:2}.location-pin::after{content:"";position:absolute;inset:4px;border-radius:50%;background:#fff}.details{border-top:1px solid #e8ebe3;padding:13px 15px 15px;background:#faf9f3}.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}.detail{background:rgba(255,255,255,.84);border:1px solid rgba(24,63,42,.09);border-radius:10px;padding:9px;box-shadow:0 2px 8px rgba(24,63,42,.025)}.detail label{display:block;text-transform:uppercase;letter-spacing:.08em;font-size:8px;font-weight:800;color:#89928b;margin-bottom:4px}.detail b{font-size:12px;font-weight:700}.actions{display:flex;gap:7px;flex-wrap:wrap}.action{border:1px solid #d7ddd4;background:rgba(255,255,255,.92);color:#3e4c43;border-radius:9px;padding:8px 11px;font-size:11px;font-weight:750;text-decoration:none;transition:background .15s,transform .15s,border-color .15s}.action:hover{background:#f5f6f0;border-color:#c8d0c7}.action:active{transform:scale(.98)}.action.primary{background:var(--forest);color:white;border-color:var(--forest)}.action.danger{color:var(--danger)}
-.empty{background:rgba(255,253,248,.72);border:1px dashed #cbd3c8;border-radius:18px;text-align:center;padding:43px 20px;color:var(--muted);grid-column:1/-1;box-shadow:var(--shadow-soft)}.empty strong{display:block;color:#334239;font-size:15px;margin-bottom:5px}.activity-tools{display:flex;gap:8px;margin:10px 0 14px}.activity-tools button{flex:1}.activity-section{margin-top:14px}.activity-tabs{display:flex;gap:4px;margin-bottom:10px;border-bottom:1px solid #e8ebe3;padding-bottom:5px}.activity-tab{flex:1;border:0;background:transparent;color:#6d776f;border-radius:9px;padding:9px 6px;font-size:11px;font-weight:750}.activity-tab.active{background:#fffdf8;color:var(--forest);box-shadow:0 2px 8px rgba(24,63,42,.08)}.activity-panel{min-height:44px}.activity-inline-actions{display:flex;gap:8px}.activity-inline-actions button{flex:1}.activity-variety-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border-bottom:1px solid #e8ebe3;font-size:12px}.activity-variety-row:last-child{border-bottom:0}.activity-variety-row .meta{font-size:10px;color:var(--muted);margin-top:3px}.activity-variety-row .actions{display:flex;gap:6px}.activity-variety-row button{white-space:nowrap}.form select{width:100%;height:46px;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:0 12px;outline:0;color:var(--ink)}.form select:focus{border-color:#9eb09d;box-shadow:0 0 3px rgba(120,148,111,.14)}.activity-heading{display:flex;justify-content:space-between;align-items:center;margin:0 0 7px;font-size:12px;color:var(--muted)}.activity-heading strong{color:var(--ink);font-size:13px}.plant-record{padding:12px 14px;border-bottom:1px solid #e8ebe3;font-size:12px}.plant-record:last-child{border-bottom:0}.plant-record .top{display:flex;justify-content:space-between;gap:10px}.plant-record .field{font-weight:800}.plant-record .meta{color:var(--muted);font-size:10px;margin-top:4px;line-height:1.45}.plant-record .notes{margin-top:6px;white-space:pre-wrap}.plant-record button{margin-top:8px;width:100%}.plant-empty{padding:16px;color:var(--muted);font-size:12px}.plant-edit-dialog .form{padding-top:18px}
+.empty{background:rgba(255,253,248,.72);border:1px dashed #cbd3c8;border-radius:18px;text-align:center;padding:43px 20px;color:var(--muted);grid-column:1/-1;box-shadow:var(--shadow-soft)}.empty strong{display:block;color:#334239;font-size:15px;margin-bottom:5px}.activity-tools{display:flex;gap:8px;margin:10px 0 14px}.activity-tools button{flex:1}.activity-section{margin-top:14px}.activity-tools-nav{display:flex;gap:5px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;margin:10px -2px 14px;padding:4px 2px 9px;border-bottom:1px solid #e2e7de;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}.activity-tools-nav::-webkit-scrollbar{display:none}.tool-tab{flex:0 0 auto;white-space:nowrap;border:1px solid transparent;background:transparent;color:#68756c;border-radius:11px;padding:10px 13px;font-size:12px;font-weight:750;scroll-snap-align:start;transition:background .16s,color .16s,border-color .16s}.tool-tab.active{background:#fffdf8;color:var(--forest);border-color:#dfe5dc;box-shadow:0 3px 10px rgba(24,63,42,.07)}.tool-panel{margin-top:4px}.admin-card{padding:16px}.admin-key-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:end;padding:3px}.admin-key-form label{grid-column:1/-1;margin:0 0 -3px}.admin-key-form input,.management-add input{height:42px;min-width:0;border:1px solid var(--line);border-radius:10px;background:#faf9f3;padding:0 11px;color:var(--ink)}.admin-key-form button{height:42px;white-space:nowrap}.management-add{display:flex;gap:8px;margin:0 0 10px}.management-add input{flex:1;width:100%}.management-add button{white-space:nowrap}.tool-card{padding:16px;background:var(--paper);border:1px solid rgba(24,63,42,.1);border-radius:16px;box-shadow:var(--shadow-soft)}.tool-card p{font-size:12px;color:var(--muted);margin:0 0 14px}.more-actions{display:flex;gap:8px;flex-wrap:wrap}.activity-inline-actions{display:flex;gap:8px}.activity-inline-actions button{flex:1}.management-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border-bottom:1px solid #e8ebe3;font-size:12px}.management-row:last-child{border-bottom:0}.management-row .item-name{font-weight:750;min-width:0;overflow-wrap:anywhere}.management-row .meta{font-size:10px;margin-top:3px}.management-row .actions{flex-shrink:0}.management-row button{padding:7px 9px}.tool-empty{padding:16px;color:var(--muted);font-size:12px}@media(max-width:430px){.admin-key-form{grid-template-columns:1fr}.admin-key-form button{width:100%}.management-add{align-items:stretch}.management-add button{padding:8px 10px}.tool-tab{padding:10px 12px}}.activity-variety-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border-bottom:1px solid #e8ebe3;font-size:12px}.activity-variety-row:last-child{border-bottom:0}.activity-variety-row .meta{font-size:10px;color:var(--muted);margin-top:3px}.activity-variety-row .actions{display:flex;gap:6px}.activity-variety-row button{white-space:nowrap}.form select{width:100%;height:46px;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:0 12px;outline:0;color:var(--ink)}.form select:focus{border-color:#9eb09d;box-shadow:0 0 3px rgba(120,148,111,.14)}.activity-heading{display:flex;justify-content:space-between;align-items:center;margin:0 0 7px;font-size:12px;color:var(--muted)}.activity-heading strong{color:var(--ink);font-size:13px}.plant-record{padding:12px 14px;border-bottom:1px solid #e8ebe3;font-size:12px}.plant-record:last-child{border-bottom:0}.plant-record .top{display:flex;justify-content:space-between;gap:10px}.plant-record .field{font-weight:800}.plant-record .meta{color:var(--muted);font-size:10px;margin-top:4px;line-height:1.45}.plant-record .notes{margin-top:6px;white-space:pre-wrap}.plant-record button{margin-top:8px;width:100%}.plant-empty{padding:16px;color:var(--muted);font-size:12px}.plant-edit-dialog .form{padding-top:18px}
 .activity{background:var(--paper);border:1px solid rgba(24,63,42,.10);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}.log{padding:13px 15px;border-bottom:1px solid #e8ebe3;font-size:12px}.log:last-child{border-bottom:0}.log b{font-weight:800}.log small{display:block;color:var(--muted);margin-top:4px;font-size:10px}
 dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:0;margin:auto;max-height:calc(100% - 32px);overflow:auto}dialog{width:min(450px,calc(100% - 28px));border:0;border-radius:22px;padding:0;background:var(--paper);box-shadow:0 28px 80px rgba(0,0,0,.25);color:var(--ink)}dialog::backdrop{background:rgba(12,35,22,.48);backdrop-filter:blur(4px)}.form{padding:21px}.form h2{margin:0;font-size:21px;letter-spacing:-.04em}.form p{margin:5px 0 17px;color:var(--muted);font-size:11px}label{display:block;color:#68736b;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin:12px 0 6px}input[type=text],input[type=date],input[type=number]{width:100%;height:46px;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:0 12px;outline:0;color:var(--ink)}input:focus{border-color:#9eb09d;box-shadow:0 0 0 3px rgba(120,148,111,.14)}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.form-actions{display:flex;gap:8px;margin-top:20px}.form-actions button{flex:1;height:44px;border-radius:11px;border:1px solid var(--line);font-weight:700}.save{background:var(--forest);border-color:var(--forest)!important;color:#fff}.delete{background:#fff;color:var(--danger)}.cancel{background:#f0f1eb}.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;background:var(--forest);color:white;border-radius:12px;padding:11px 15px;font-size:12px;font-weight:750;transition:.2s;z-index:50;box-shadow:0 12px 35px rgba(0,0,0,.22)}.toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:650px){.list{grid-template-columns:1fr}.hero{min-height:182px}.hero-copy{max-width:62%}.hero h2{font-size:25px}.hero-art{width:57%}.detail-grid{grid-template-columns:1fr 1fr}.brand .sub{display:none}}
@@ -48,27 +48,53 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
 <section class="hero"><div class="hero-copy"><div class="kicker">FIELD REFERENCE</div><h2>Know the field.<br>Plant with confidence.</h2><p>Quickly confirm heading and location before you go.</p></div><div class="hero-art" aria-hidden="true"><svg viewBox="0 0 420 190" preserveAspectRatio="none"><path d="M190 0h230v190H0c75-24 125-54 148-88 18-27 25-61 42-102Z" fill="#28583b"/><g opacity=".42" stroke="#b8cdb3" stroke-width="3" fill="none"><path d="M182 190C230 148 246 72 260 0"/><path d="M215 190C263 145 280 67 292 0"/><path d="M248 190C294 141 311 63 323 0"/><path d="M281 190C325 138 342 61 354 0"/><path d="M314 190C356 136 373 60 384 0"/></g><path d="M319 155c0-25 18-44 40-44 14 0 27 8 34 21-4-1-8-2-12-2-22 0-40 11-62 25Z" fill="#89a77e"/><circle cx="359" cy="102" r="4" fill="#c49a4a"/></svg></div></section>
 <section id="fieldsView"><div class="search-panel"><svg class="search-icon" width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="q" class="search" placeholder="Search by field name…" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="clear" id="clearBtn" hidden>Clear</button></div><div class="summary"><span id="count">Loading fields…</span><span class="status"><span id="dot" class="dot"></span><span id="statusText">Connecting</span></span></div><div id="out" class="list"></div></section>
 <section id="activityView" hidden>
-  <div class="summary"><span>Activity</span><span id="activityStatus"></span></div>
-  <div class="activity-section">
-    <div class="activity-tabs" role="tablist" aria-label="Activity tools">
-      <button type="button" class="activity-tab" data-activity-panel="login">Login Activity</button>
-      <button type="button" class="activity-tab" data-activity-panel="export">Export CSV</button>
-      <button type="button" class="activity-tab" data-activity-panel="archive" hidden>Archive Season</button>
-    </div>
-    <div id="activityPanelLogin" class="activity-panel" hidden>
-      <div id="activity" class="activity"></div>
-      <div style="padding-top:8px"><button type="button" class="action" id="viewMoreLoginsBtn" hidden>View More</button></div>
-    </div>
-    <div id="activityPanelExport" class="activity-panel" hidden>
-      <button type="button" class="action" id="exportPlantingBtn">Export CSV</button>
-    </div>
-    <div id="activityPanelArchive" class="activity-panel" hidden>
-      <button type="button" class="delete" id="archivePlantingBtn">Archive Season</button>
-    </div>
+  <div class="summary"><span>Activities & tools</span><span id="activityStatus"></span></div>
+  <div class="activity-tools-nav" role="tablist" aria-label="Activity tools">
+    <button type="button" class="tool-tab active" data-tool-panel="admin">Admin</button>
+    <button type="button" class="tool-tab" data-tool-panel="varieties">Varieties</button>
+    <button type="button" class="tool-tab" data-tool-panel="growers">Growers</button>
+    <button type="button" class="tool-tab" data-tool-panel="export">Export CSV</button>
+    <button type="button" class="tool-tab" data-tool-panel="records">Records</button>
+    <button type="button" class="tool-tab" data-tool-panel="logins">Login Activity</button>
+    <button type="button" class="tool-tab" data-tool-panel="more">More</button>
   </div>
-  <div class="activity-section"><div class="activity-inline-actions"><button type="button" class="action" id="activityAddFieldBtn">+ Add Field</button></div></div>
-  <div class="activity-section"><div class="activity-heading"><strong>Planting Records</strong><span id="plantingStatus"></span></div><div id="plantingRecords" class="activity"></div></div>
-  <div class="activity-section"><div class="activity-heading"><strong>Variety Management</strong><span id="varietyStatus"></span></div><div id="varietyManagement" class="activity"></div></div>
+  <section id="toolPanelAdmin" class="tool-panel">
+    <div class="activity-heading"><strong>Administrator access</strong><span id="adminAccessStatus">Access required</span></div>
+    <div class="activity admin-card" id="adminPanelContent">
+      <form id="adminKeyForm" class="admin-key-form">
+        <label for="adminKey">Admin key</label>
+        <input id="adminKey" type="password" autocomplete="current-password" placeholder="Enter admin key" required>
+        <button type="submit" class="action primary">Unlock admin tools</button>
+      </form>
+    </div>
+  </section>
+  <section id="toolPanelVarieties" class="tool-panel" hidden>
+    <div class="activity-heading"><strong>Variety Management</strong><span id="varietyStatus"></span></div>
+    <div class="management-add"><input id="newVarietyName" type="text" placeholder="Add a variety" aria-label="New variety name"><button type="button" class="action primary" id="addVarietyBtn">Add Variety</button></div>
+    <div id="varietyManagement" class="activity"></div>
+  </section>
+  <section id="toolPanelGrowers" class="tool-panel" hidden>
+    <div class="activity-heading"><strong>Grower Management</strong><span id="growerStatus"></span></div>
+    <div class="management-add"><input id="newGrowerName" type="text" placeholder="Add a grower" aria-label="New grower name"><button type="button" class="action primary" id="addGrowerBtn">Add Grower</button></div>
+    <div id="growerManagement" class="activity"></div>
+  </section>
+  <section id="toolPanelExport" class="tool-panel" hidden>
+    <div class="activity-heading"><strong>Export planting records</strong><span>CSV · Apple Numbers compatible</span></div>
+    <div class="tool-card"><p>Download planting records in the established eight-column format.</p><button type="button" class="action primary" id="exportPlantingBtn">Export CSV</button></div>
+  </section>
+  <section id="toolPanelRecords" class="tool-panel" hidden>
+    <div class="activity-heading"><strong>Planting Records</strong><span id="plantingStatus"></span></div>
+    <div id="plantingRecords" class="activity"></div>
+  </section>
+  <section id="toolPanelLogins" class="tool-panel" hidden>
+    <div class="activity-heading"><strong>Login Activity</strong><span id="loginAccessNote">Admin access required</span></div>
+    <div id="activity" class="activity"></div>
+    <div style="padding-top:8px"><button type="button" class="action" id="viewMoreLoginsBtn" hidden>View More</button></div>
+  </section>
+  <section id="toolPanelMore" class="tool-panel" hidden>
+    <div class="activity-heading"><strong>Additional tools</strong><span>Less-used actions</span></div>
+    <div class="tool-card more-actions"><button type="button" class="action" id="activityAddFieldBtn">+ Add Field</button><button type="button" class="delete" id="archivePlantingBtn">Archive Season</button></div>
+  </section>
 </section>
   <button
     id="gpsBtn"
@@ -351,23 +377,26 @@ async function loadActivity(accessKey){
     const response=await fetch('/api/log',{cache:'no-store',headers:{'x-admin':key,'x-user':encodeURIComponent(user)}});
     const data=await response.json().catch(()=>null);
     if(response.status===403){
-      $('[data-activity-panel="archive"]').hidden=true;
-      $('#activityStatus').textContent=accessKey===undefined?'Access required':'Code not accepted';
-      $('#activity').innerHTML='<div class="empty"><strong>Administrator access required</strong><form id="adminKeyForm"><label for="adminKey">Access code</label><input id="adminKey" type="password" autocomplete="current-password" required style="width:100%;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:10px"><button type="submit" class="action primary">Unlock activity</button></form></div>';
+      $('#activityStatus').textContent='Admin key required';
+      $('#adminAccessStatus').textContent=accessKey===undefined?'Access required':'Key not accepted';
+      $('#adminPanelContent').innerHTML='<form id="adminKeyForm" class="admin-key-form"><label for="adminKey">Admin key</label><input id="adminKey" type="password" autocomplete="current-password" placeholder="Enter admin key" required><button type="submit" class="action primary">Unlock admin tools</button></form>';
       $('#adminKeyForm').onsubmit=e=>{e.preventDefault();loadActivity($('#adminKey').value)};
-      $('#adminKey').focus();
       return;
     }
     if(!response.ok||!Array.isArray(data))throw new Error((data&&data.error)||'Unable to load activity');
     if(key)localStorage.setItem('fieldAdmin',key);
-    $('[data-activity-panel="archive"]').hidden=false;
+    $('#adminAccessStatus').textContent='Unlocked';
+    $('#adminPanelContent').innerHTML='<div class="tool-card"><strong>Administrator access is active</strong><p style="margin:6px 0 12px">Administrative tools are available from the tabs above. Your key is stored on this device.</p><button type="button" class="action" id="changeAdminKeyBtn">Change admin key</button></div>';
+    $('#changeAdminKeyBtn').onclick=()=>{localStorage.removeItem('fieldAdmin');$('#adminAccessStatus').textContent='Access required';$('#adminPanelContent').innerHTML='<form id="adminKeyForm" class="admin-key-form"><label for="adminKey">Admin key</label><input id="adminKey" type="password" autocomplete="current-password" placeholder="Enter admin key" required><button type="submit" class="action primary">Unlock admin tools</button></form>';$('#adminKeyForm').onsubmit=e=>{e.preventDefault();loadActivity($('#adminKey').value)}};
+    $('#loginAccessNote').textContent='Admin access active';
     loginHistory=data.filter(x=>x.action==='opened app'||x.action==='installed app');
     loginHistoryShown=10;
     renderLoginHistory();
   }catch(e){
-    $('[data-activity-panel="archive"]').hidden=true;
     $('#activityStatus').textContent='Unavailable';
-    $('#activity').innerHTML='<div class="empty"><strong>Activity log</strong>'+esc(e.message)+'</div>';
+    $('#adminAccessStatus').textContent='Unavailable';
+    $('#adminPanelContent').innerHTML='<div class="tool-empty">'+esc(e.message)+'</div>';
+    $('#activity').innerHTML='<div class="empty"><strong>Activity log unavailable</strong>'+esc(e.message)+'</div>';
     $('#viewMoreLoginsBtn').hidden=true;
   }
 }
@@ -380,28 +409,47 @@ function renderLoginHistory(){
   const more=$('#viewMoreLoginsBtn');
   more.hidden=loginHistoryShown>=loginHistory.length;
 }
-document.querySelectorAll('[data-activity-panel]').forEach(btn => {
-  btn.onclick = () => {
-    const wasActive = btn.classList.contains('active');
-
-    // deactivate all buttons
-    document.querySelectorAll('[data-activity-panel]')
-      .forEach(x => x.classList.remove('active'));
-
-    // hide all panels
-    ['login', 'export', 'archive'].forEach(name => {
-      $('#activityPanel' + name.charAt(0).toUpperCase() + name.slice(1)).hidden = true;
-    });
-
-    // if it wasn't active, open it
-    if (!wasActive) {
-      btn.classList.add('active');
-
-      const panelName = btn.dataset.activityPanel;
-      $('#activityPanel' + panelName.charAt(0).toUpperCase() + panelName.slice(1)).hidden = false;
-    }
+document.querySelectorAll('[data-tool-panel]').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('[data-tool-panel]').forEach(x=>x.classList.toggle('active',x===btn));
+    document.querySelectorAll('.tool-panel').forEach(panel=>panel.hidden=panel.id!=='toolPanel'+btn.dataset.toolPanel.charAt(0).toUpperCase()+btn.dataset.toolPanel.slice(1));
+    const panel=btn.dataset.toolPanel;
+    if(panel==='admin'||panel==='logins')loadActivity();
+    if(panel==='varieties')loadVarieties();
+    if(panel==='growers')loadGrowers();
+    if(panel==='records')loadPlantingRecords();
   };
 });
+
+async function loadVarieties(){
+  const out=$('#varietyManagement'),status=$('#varietyStatus');
+  if(!out)return;
+  status.textContent='Loading…';
+  try{
+    const rows=await api('varieties');
+    status.textContent=rows.length+' varieties';
+    out.innerHTML=rows.length?rows.map(v=>'<div class="management-row"><div><div class="item-name">'+esc(v.name)+'</div><div class="meta">'+Number(v.used||0)+' planting records</div></div><div class="actions"><button type="button" class="action" data-rename-variety="'+esc(v.name)+'">Rename</button><button type="button" class="action danger" data-delete-variety="'+esc(v.name)+'">Delete</button></div></div>').join(''):'<div class="tool-empty">No varieties yet. Add the first one above.</div>';
+    out.querySelectorAll('[data-rename-variety]').forEach(b=>b.onclick=async()=>{const from=b.dataset.renameVariety;const to=prompt('Rename variety:',from);if(!to||!to.trim()||to.trim()===from)return;try{await api('varieties/rename',{method:'POST',body:JSON.stringify({from,to:to.trim()})});await loadVarieties();toast('Variety renamed')}catch(e){toast(e.message)}});
+    out.querySelectorAll('[data-delete-variety]').forEach(b=>b.onclick=async()=>{const name=b.dataset.deleteVariety;if(!confirm('Delete variety "'+name+'"?'))return;try{await api('varieties/delete',{method:'POST',body:JSON.stringify({name})});await loadVarieties();toast('Variety deleted')}catch(e){toast(e.message)}});
+  }catch(e){status.textContent='Unavailable';out.innerHTML='<div class="tool-empty">'+esc(e.message)+'</div>'}
+}
+async function loadGrowers(){
+  const out=$('#growerManagement'),status=$('#growerStatus');
+  if(!out)return;
+  status.textContent='Loading…';
+  try{
+    const rows=await api('growers');
+    status.textContent=rows.length+' growers';
+    out.innerHTML=rows.length?rows.map(g=>'<div class="management-row"><div><div class="item-name">'+esc(g.name)+'</div><div class="meta">'+Number(g.used||0)+' planting records</div></div><div class="actions"><button type="button" class="action" data-rename-grower="'+esc(g.name)+'">Rename</button><button type="button" class="action danger" data-delete-grower="'+esc(g.name)+'">Delete</button></div></div>').join(''):'<div class="tool-empty">No growers yet. Add the first one above.</div>';
+    out.querySelectorAll('[data-rename-grower]').forEach(b=>b.onclick=async()=>{const from=b.dataset.renameGrower;const to=prompt('Rename grower:',from);if(!to||!to.trim()||to.trim()===from)return;try{await api('growers/rename',{method:'POST',body:JSON.stringify({from,to:to.trim()})});await loadGrowers();toast('Grower renamed')}catch(e){toast(e.message)}});
+    out.querySelectorAll('[data-delete-grower]').forEach(b=>b.onclick=async()=>{const name=b.dataset.deleteGrower;if(!confirm('Delete grower "'+name+'"?'))return;try{await api('growers/delete',{method:'POST',body:JSON.stringify({name})});await loadGrowers();toast('Grower deleted')}catch(e){toast(e.message)}});
+  }catch(e){status.textContent='Unavailable';out.innerHTML='<div class="tool-empty">'+esc(e.message)+'</div>'}
+}
+$('#addVarietyBtn').onclick=async()=>{const input=$('#newVarietyName'),name=input.value.trim();if(!name)return toast('Enter a variety name');try{await api('varieties',{method:'POST',body:JSON.stringify({name})});input.value='';await loadVarieties();toast('Variety added')}catch(e){toast(e.message)}};
+$('#newVarietyName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#addVarietyBtn').click()}};
+$('#addGrowerBtn').onclick=async()=>{const input=$('#newGrowerName'),name=input.value.trim();if(!name)return toast('Enter a grower name');try{await api('growers',{method:'POST',body:JSON.stringify({name})});input.value='';await loadGrowers();toast('Grower added')}catch(e){toast(e.message)}};
+$('#newGrowerName').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('#addGrowerBtn').click()}};
+
 $('#viewMoreLoginsBtn').onclick=()=>{
   loginHistoryShown+=10;
   renderLoginHistory();
@@ -409,7 +457,7 @@ $('#viewMoreLoginsBtn').onclick=()=>{
 function setTab(next){
   tab=next;$('#fieldsTab').classList.toggle('active',next==='fields');$('#activityTab').classList.toggle('active',next==='activity');
   $('#fieldsView').hidden=next!=='fields';$('#activityView').hidden=next!=='activity';
-  if(next==='activity')loadActivity();
+  if(next==='activity'){const first=document.querySelector('[data-tool-panel="admin"]');if(first)first.click();}
 }
 $('#q').oninput=searchFields;
 $('#clearBtn').onclick=async()=>{$('#q').value='';$('#clearBtn').hidden=true;await load();$('#q').focus()};
@@ -502,7 +550,7 @@ $('#cancelBtn').onclick=()=>closeDialog($('#dlg'));
 $('#deleteBtn').onclick=remove;
 $('#fieldForm').onsubmit=e=>{e.preventDefault();save()};
 $('#fieldsTab').onclick=()=>setTab('fields');$('#activityTab').onclick=()=>setTab('activity');
-setUser();load();loadVarieties();
+setUser();load();
 setInterval(()=>tab==='fields'&&load(),30000);
 </script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
