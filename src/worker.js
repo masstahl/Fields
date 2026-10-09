@@ -276,10 +276,10 @@ async function handle(request, env, a, b) {
       const variety = String(p.variety || "").trim();
       const grower = String(p.grower || "").trim();
       const notes = String(p.notes || "").trim();
-      if(grower && !(await getGrowers(db)).some(g=>g.name===grower))return json({error:"Select an existing grower or add the grower first"},400);
+      if(grower && !(await getGrowers(db)).some(g=>norm(g.name)===norm(grower)))return json({error:"Select an existing grower or add the grower first"},400);
       if (variety) {
         const varieties = await getVarieties(db);
-        if (!varieties.some(v => v.name === variety)) return json({ error: "Select an existing variety or add the new variety first" }, 400);
+        if (!varieties.some(v => norm(v.name) === norm(variety))) return json({ error: "Select an existing variety or add the new variety first" }, 400);
       }
 
       const duplicate = await db.prepare(
