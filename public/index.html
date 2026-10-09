@@ -143,7 +143,7 @@ function renderGrowerManagement(){
   const out=$('#growerManagement');if(!out)return;
   $('#growerStatus').textContent=growers.length+' growers · tap to show fields · hold for options';
   if(!growers.length){out.innerHTML='<div class="plant-empty">No growers added yet. Add a grower from the Grower field in a planting record.</div>';return}
-  out.innerHTML=growers.map(g=>{const used=Number(g.used||0),selected=activeGrowerFilter===g.name;return '<div class="activity-variety-row'+(selected?' selected':'')+'" data-grower="'+esc(g.name)+'" role="button" tabindex="0" aria-label="'+esc(g.name)+', '+used+' planting records. Tap to show fields or press and hold for options"><div><b>'+esc(g.name)+'</b><div class="meta">'+used+' planting record'+(used===1?'':'s')+(selected?' · showing fields':'')+'</div></div><span class="meta" aria-hidden="true">'+(selected?'✓':'›')+'</span></div>'}).join('');
+  out.innerHTML=growers.map(g=>{const key=String(g.name||'').trim().toLocaleLowerCase();const used=plantingRecordsCache.filter(r=>String(r.grower||'').trim().toLocaleLowerCase()===key).length;const selected=activeGrowerFilter===g.name;return '<div class="activity-variety-row'+(selected?' selected':'')+'" data-grower="'+esc(g.name)+'" role="button" tabindex="0" aria-label="'+esc(g.name)+', '+used+' planting records. Tap to show fields or press and hold for options"><div><b>'+esc(g.name)+'</b><div class="meta">'+used+' planting record'+(used===1?'':'s')+(selected?' · showing fields':'')+'</div></div><span class="meta" aria-hidden="true">'+(selected?'✓':'›')+'</span></div>'}).join('');
   bindPressHoldRows(out,'[data-grower]',row=>{const name=row.dataset.grower;activeGrowerFilter=activeGrowerFilter===name?null:name;activeVarietyFilter=null;renderGrowerManagement();renderVarietyManagement();showFilteredFields()},row=>{const name=row.dataset.grower,g=growers.find(x=>x.name===name);$('#growerOptionsName').value=name;$('#growerOptionsTitle').textContent=name;$('#growerOptionsInfo').textContent=Number(g?.used||0)+' planting record'+(Number(g?.used||0)===1?'':'s');showDialog($('#growerOptionsDlg'))});
 }
 $('#growerOptionsCancel').onclick=()=>closeDialog($('#growerOptionsDlg'));
@@ -182,6 +182,7 @@ async function handleVarietyChange(selector){
 }
 let activeVarietyFilter=null;
 let activeGrowerFilter=null;
+let plantingRecordsCache=[];
 let longPressTimer=null;
 function bindPressHoldRows(out,selector,onTap,onHold){
   out.querySelectorAll(selector).forEach(row=>{
@@ -428,6 +429,8 @@ async function loadPlantingRecords(){
   const out=$('#plantingRecords');
   try{
     const allRecords=await api('planting-records');
+    plantingRecordsCache=Array.isArray(allRecords)?allRecords:[];
+    renderGrowerManagement();
     const records=allRecords.filter(r=>(activeVarietyFilter===null||r.variety===activeVarietyFilter)&&(activeGrowerFilter===null||r.grower===activeGrowerFilter));
     const filterLabel=activeVarietyFilter!==null?'variety '+activeVarietyFilter:activeGrowerFilter!==null?'grower '+activeGrowerFilter:null;
     status.textContent=records.length+' records'+(filterLabel?' · showing '+filterLabel+' · tap the selected item again to clear':'');
