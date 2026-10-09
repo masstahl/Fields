@@ -173,3 +173,8 @@ The current Worker does not implement a special service-worker recovery route; `
 - API/service-worker/front-end paths that run through the Worker first
 
 GitHub source and live Cloudflare deployment are separate states.
+
+
+## Grower and Variety Workflow Additions
+
+Growers use an audit-backed catalog derived from `activity` events, avoiding a new D1 table. Planting create/edit actions record the selected grower against the planting record ID. The Plant Field dialog displays its date compactly in the top-right and offers a Grower dropdown. Activity's Grower Management supports adding names, editing spelling, and deletion. Variety management is a clickable list: click a variety to filter planting records, click it again to clear the filter, and long-press a zero-use variety to reveal a confirmation before deletion. Counts refresh after planting record changes. No schema migration is included.
