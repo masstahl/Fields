@@ -371,7 +371,7 @@ async function handle(request, env, a, b) {
 
     if (a === "planting-records" && b === "export" && m === "GET") {
       const rows = (await db.prepare(
-        "SELECT id,field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by,created_at FROM planting_records ORDER BY id"
+        "SELECT id,field_id,field_name,heading,latitude,longitude,planting_date,variety,notes FROM planting_records ORDER BY id"
       ).all()).results;
       const growerByRecord = await getCurrentGrowerAssignments(db);
 
@@ -392,7 +392,6 @@ async function handle(request, env, a, b) {
         current.notes = current.notes && row.notes
           ? (String(current.notes).includes(String(row.notes)) ? current.notes : String(current.notes) + "\n" + row.notes)
           : (row.notes || current.notes || null);
-        current.created_by = current.created_by || row.created_by;
       }
 
       const cols = ["Field", "Date", "Lat", "Long", "Heading", "Variety", "Grower", "Notes"];
