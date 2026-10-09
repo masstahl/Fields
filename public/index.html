@@ -51,25 +51,19 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
   <div class="summary"><span>Activity</span><span id="activityStatus"></span></div>
   <div class="activity-section">
     <div class="activity-tabs" role="tablist" aria-label="Activity tools">
-      <button type="button" class="activity-tab" data-activity-panel="login">Login Activity</button>
-      <button type="button" class="activity-tab" data-activity-panel="export">Export CSV</button>
-      <button type="button" class="activity-tab" data-activity-panel="archive" hidden>Archive Season</button>
+      <button type="button" class="activity-tab active" data-activity-panel="varieties" aria-selected="true">Varieties</button>
+      <button type="button" class="activity-tab" data-activity-panel="growers" aria-selected="false">Growers</button>
+      <button type="button" class="activity-tab" data-activity-panel="export" aria-selected="false">Export CSV</button>
+      <button type="button" class="activity-tab" data-activity-panel="more" aria-selected="false">More</button>
+      <button type="button" class="activity-tab" data-activity-panel="login" aria-selected="false">Admin</button>
     </div>
-    <div id="activityPanelLogin" class="activity-panel" hidden>
-      <div id="activity" class="activity"></div>
-      <div style="padding-top:8px"><button type="button" class="action" id="viewMoreLoginsBtn" hidden>View More</button></div>
-    </div>
-    <div id="activityPanelExport" class="activity-panel" hidden>
-      <button type="button" class="action" id="exportPlantingBtn">Export CSV</button>
-    </div>
-    <div id="activityPanelArchive" class="activity-panel" hidden>
-      <button type="button" class="delete" id="archivePlantingBtn">Archive Season</button>
-    </div>
+    <div id="activityPanelVarieties" class="activity-panel"><div class="activity-heading"><strong>Variety Management</strong><span id="varietyStatus"></span></div><div id="varietyManagement" class="activity"></div></div>
+    <div id="activityPanelGrowers" class="activity-panel" hidden><div class="activity-heading"><strong>Grower Management</strong><span id="growerStatus"></span></div><div id="growerManagement" class="activity"></div></div>
+    <div id="activityPanelExport" class="activity-panel" hidden><div class="activity-heading"><strong>Export planting records</strong><span>CSV</span></div><button type="button" class="action" id="exportPlantingBtn">Export CSV</button></div>
+    <div id="activityPanelMore" class="activity-panel" hidden><div class="activity-heading"><strong>More tools</strong></div><div class="activity-inline-actions"><button type="button" class="action" id="activityAddFieldBtn">+ Add Field</button></div><div style="padding-top:8px"><button type="button" class="delete" id="archivePlantingBtn" hidden>Archive Season</button></div></div>
+    <div id="activityPanelLogin" class="activity-panel" hidden><div class="activity-heading"><strong>Admin access & login activity</strong></div><div id="activity" class="activity"></div><div style="padding-top:8px"><button type="button" class="action" id="viewMoreLoginsBtn" hidden>View More</button></div></div>
   </div>
-  <div class="activity-section"><div class="activity-inline-actions"><button type="button" class="action" id="activityAddFieldBtn">+ Add Field</button></div></div>
   <div class="activity-section"><div class="activity-heading"><strong>Planting Records</strong><span id="plantingStatus"></span></div><div id="plantingRecords" class="activity"></div></div>
-  <div class="activity-section"><div class="activity-heading"><strong>Variety Management</strong><span id="varietyStatus"></span></div><div id="varietyManagement" class="activity"></div></div>
-  <div class="activity-section"><div class="activity-heading"><strong>Grower Management</strong><span id="growerStatus"></span></div><div id="growerManagement" class="activity"></div></div>
 </section>
   <button
     id="gpsBtn"
@@ -521,7 +515,7 @@ async function loadActivity(accessKey){
     const response=await fetch('/api/log',{cache:'no-store',headers:{'x-admin':key,'x-user':encodeURIComponent(user)}});
     const data=await response.json().catch(()=>null);
     if(response.status===403){
-      $('[data-activity-panel="archive"]').hidden=true;
+      $('#archivePlantingBtn').hidden=true;
       $('#activityStatus').textContent=accessKey===undefined?'Access required':'Code not accepted';
       $('#activity').innerHTML='<div class="empty"><strong>Administrator access required</strong><form id="adminKeyForm"><label for="adminKey">Access code</label><input id="adminKey" type="password" autocomplete="current-password" required style="width:100%;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:10px"><button type="submit" class="action primary">Unlock activity</button></form></div>';
       $('#adminKeyForm').onsubmit=e=>{e.preventDefault();loadActivity($('#adminKey').value)};
@@ -530,12 +524,12 @@ async function loadActivity(accessKey){
     }
     if(!response.ok||!Array.isArray(data))throw new Error((data&&data.error)||'Unable to load activity');
     if(key)localStorage.setItem('fieldAdmin',key);
-    $('[data-activity-panel="archive"]').hidden=false;
+    $('#archivePlantingBtn').hidden=false;
     loginHistory=data.filter(x=>x.action==='opened app'||x.action==='installed app');
     loginHistoryShown=10;
     renderLoginHistory();
   }catch(e){
-    $('[data-activity-panel="archive"]').hidden=true;
+    $('#archivePlantingBtn').hidden=true;
     $('#activityStatus').textContent='Unavailable';
     $('#activity').innerHTML='<div class="empty"><strong>Activity log</strong>'+esc(e.message)+'</div>';
     $('#viewMoreLoginsBtn').hidden=true;
@@ -552,24 +546,18 @@ function renderLoginHistory(){
 }
 document.querySelectorAll('[data-activity-panel]').forEach(btn => {
   btn.onclick = () => {
-    const wasActive = btn.classList.contains('active');
-
-    // deactivate all buttons
-    document.querySelectorAll('[data-activity-panel]')
-      .forEach(x => x.classList.remove('active'));
-
-    // hide all panels
-    ['login', 'export', 'archive'].forEach(name => {
-      $('#activityPanel' + name.charAt(0).toUpperCase() + name.slice(1)).hidden = true;
+    const panelName = btn.dataset.activityPanel;
+    document.querySelectorAll('[data-activity-panel]').forEach(x => {
+      x.classList.toggle('active', x === btn);
+      x.setAttribute('aria-selected', x === btn ? 'true' : 'false');
     });
-
-    // if it wasn't active, open it
-    if (!wasActive) {
-      btn.classList.add('active');
-
-      const panelName = btn.dataset.activityPanel;
-      $('#activityPanel' + panelName.charAt(0).toUpperCase() + panelName.slice(1)).hidden = false;
-    }
+    ['varieties', 'growers', 'export', 'more', 'login'].forEach(name => {
+      const panel = $('#activityPanel' + name.charAt(0).toUpperCase() + name.slice(1));
+      if (panel) panel.hidden = name !== panelName;
+    });
+    if (panelName === 'login') loadActivity();
+    else if (panelName === 'varieties' || panelName === 'growers') loadVarieties();
+    else if (panelName === 'export' || panelName === 'more') loadPlantingRecords();
   };
 });
 $('#viewMoreLoginsBtn').onclick=()=>{
@@ -579,7 +567,7 @@ $('#viewMoreLoginsBtn').onclick=()=>{
 function setTab(next){
   tab=next;$('#fieldsTab').classList.toggle('active',next==='fields');$('#activityTab').classList.toggle('active',next==='activity');
   $('#fieldsView').hidden=next!=='fields';$('#activityView').hidden=next!=='activity';
-  if(next==='activity')loadActivity();
+  if(next==='activity'){loadPlantingRecords();loadVarieties();}
 }
 $('#q').oninput=searchFields;
 $('#clearBtn').onclick=async()=>{$('#q').value='';$('#clearBtn').hidden=true;await load();$('#q').focus()};
