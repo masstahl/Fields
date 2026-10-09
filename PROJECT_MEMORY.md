@@ -136,3 +136,13 @@ There is no separate emergency service-worker recovery endpoint in the current W
 - D1 binding: `DB`
 
 Current source should be treated as authoritative. Production deployment status must be verified separately from GitHub source.
+
+
+## Grower and Variety Workflow — 2026-10-08
+
+- Plant Field shows planting date in a compact top-right control and includes a Grower dropdown using an audit-backed catalog; no new D1 table is added.
+- Activity includes Grower Management for adding growers, editing spelling, and deleting growers.
+- Variety management no longer shows Rename/Delete buttons. Tapping a variety filters Planting Records to records with that exact variety; tapping it again clears the filter.
+- A variety with zero current records can be deleted by long-pressing its row for about one second and confirming. Varieties with current records cannot be deleted.
+- Variety usage counts must refresh after planting records change.
+- Grower values are stored in activity audit events associated with planting record IDs to avoid changing the D1 schema.
