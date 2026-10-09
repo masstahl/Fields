@@ -151,7 +151,7 @@ function renderGrowerManagement(){
   out.querySelectorAll('[data-grower-delete]').forEach(btn=>btn.onclick=async()=>{
     const name=btn.dataset.growerDelete;
     if(!confirm('Delete grower "'+name+'"?'))return;
-    try{await api('growers/delete',{method:'POST',body:JSON.stringify({name})});await refreshLists();toast('Grower deleted')}catch(e){toast(e.message)}
+    try{const result=await api('growers/delete',{method:'POST',body:JSON.stringify({name})});if(!result?.ok)throw new Error('Server did not confirm grower deletion');const lists=await refreshLists();if(lists.growers.some(g=>String(g.name||'').trim().toLowerCase()===name.trim().toLowerCase()))throw new Error('Grower is still listed by the server; deletion was not confirmed');toast('Grower deleted and verified')}catch(e){await refreshLists().catch(()=>{});toast(e.message)}
   });
 }
 $('#addGrowerBtn').onclick=async()=>{
@@ -218,10 +218,12 @@ $('#varietyDeleteBtn').onclick=async()=>{
   if(!name)return toast('Choose a variety first');
   if(!confirm('Delete variety "'+name+'"? Names used by existing planting records cannot be deleted.'))return;
   try{
-    await api('varieties/delete',{method:'POST',body:JSON.stringify({name})});
+    const result=await api('varieties/delete',{method:'POST',body:JSON.stringify({name})});
+    if(!result?.ok)throw new Error('Server did not confirm variety deletion');
     if(activeVarietyFilter===name)activeVarietyFilter=null;
     closeDialog($('#varietyOptionsDlg'));
-    await refreshLists();
+    const lists=await refreshLists();
+    if(lists.varieties.some(v=>String(v.name||'').trim().toLowerCase()===name.trim().toLowerCase()))throw new Error('Variety is still listed by the server; deletion was not confirmed');
     await loadPlantingRecords();
     toast('Variety deleted and verified');
   }catch(e){
