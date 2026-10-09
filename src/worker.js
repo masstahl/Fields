@@ -134,7 +134,7 @@ async function handle(request, env, a, b) {
       const p=await request.json();const name=String(p.name||"").trim();
       if(!name)return json({error:"Grower name is required"},400);
       const growers=await getGrowers(db);
-      if(growers.some(g=>g.name===name))return json({name,existing:true,growers});
+      if(growers.some(g=>nameKey(g.name)===nameKey(name)))return json({name,existing:true,growers});
       await log("grower added","grower:"+JSON.stringify({name}));
       return json({name,existing:false,growers:await getGrowers(db)});
     }
@@ -143,8 +143,8 @@ async function handle(request, env, a, b) {
       if(!from||!to)return json({error:"Current and new grower names are required"},400);
       if(from===to)return json({name:to,growers:await getGrowers(db)});
       const growers=await getGrowers(db);
-      if(!growers.some(g=>g.name===from))return json({error:"Grower not found"},404);
-      if(growers.some(g=>g.name===to))return json({error:"That grower name already exists"},409);
+      if(!growers.some(g=>nameKey(g.name)===nameKey(from)))return json({error:"Grower not found"},404);
+      if(growers.some(g=>nameKey(g.name)===nameKey(to)))return json({error:"That grower name already exists"},409);
       await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who,"grower renamed","grower rename:"+JSON.stringify({from,to})).run();
       return json({name:to,growers:await getGrowers(db)});
     }
@@ -152,12 +152,13 @@ async function handle(request, env, a, b) {
       const p=await request.json();const name=String(p.name||"").trim();
       if(!name)return json({error:"Grower name is required"},400);
       const growers=await getGrowers(db);
-      if(!growers.some(g=>g.name===name))return json({error:"Grower not found"},404);
+      const grower=growers.find(value=>nameKey(value.name)===nameKey(name));
+      if(!grower)return json({error:"Grower not found"},404);
       const assignments = await getCurrentGrowerAssignments(db);
       const plantingIds = new Set((await db.prepare("SELECT id FROM planting_records").all()).results.map(row => Number(row.id)));
-      const usedCount = [...assignments].filter(([id, value]) => plantingIds.has(id) && nameKey(value) === nameKey(name)).length;
+      const usedCount = [...assignments].filter(([id, value]) => plantingIds.has(id) && nameKey(value) === nameKey(grower.name)).length;
       if (usedCount) return json({ error: "Used by " + usedCount + " planting records", count: usedCount }, 409);
-      await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who,"grower deleted","grower:"+JSON.stringify({name})).run();
+      await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who,"grower deleted","grower:"+JSON.stringify({name:grower.name})).run();
       return json({ok:true,growers:await getGrowers(db)});
     }
     if (a === "varieties" && m === "GET") return json(await getVarieties(db));
@@ -165,7 +166,7 @@ async function handle(request, env, a, b) {
       const p=await request.json(); const name=String(p.name||"").trim();
       if(!name)return json({error:"Variety name is required"},400);
       const varieties=await getVarieties(db);
-      if(varieties.some(v=>v.name===name))return json({name,existing:true,varieties});
+      if(varieties.some(v=>nameKey(v.name)===nameKey(name)))return json({name,existing:true,varieties});
       await log("variety added","variety:"+JSON.stringify({name}));
       return json({name,existing:false,varieties:await getVarieties(db)});
     }
@@ -174,8 +175,8 @@ async function handle(request, env, a, b) {
       if(!from||!to)return json({error:"Current and new variety names are required"},400);
       if(from===to)return json({name:to,varieties:await getVarieties(db)});
       const varieties=await getVarieties(db);
-      if(!varieties.some(v=>v.name===from))return json({error:"Variety not found"},404);
-      if(varieties.some(v=>v.name===to))return json({error:"That variety name already exists"},409);
+      if(!varieties.some(v=>nameKey(v.name)===nameKey(from)))return json({error:"Variety not found"},404);
+      if(varieties.some(v=>nameKey(v.name)===nameKey(to)))return json({error:"That variety name already exists"},409);
       await db.batch([
         db.prepare("UPDATE planting_records SET variety=? WHERE variety=?").bind(to,from),
         db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who,"variety renamed","variety rename:"+JSON.stringify({from,to}))
