@@ -332,7 +332,7 @@ async function handle(request, env, a, b) {
       return json({ ok: true });
     }
 
-    if (a === "planting-records" && m === "GET") {
+    if (a === "planting-records" && !b && m === "GET") {
       const rows = (await db.prepare(
         "SELECT id,field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by,created_at FROM planting_records ORDER BY id"
       ).all()).results;
