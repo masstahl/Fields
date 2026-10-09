@@ -373,12 +373,14 @@ async function handle(request, env, a, b) {
       const rows = (await db.prepare(
         "SELECT id,field_id,field_name,heading,latitude,longitude,planting_date,variety,notes,created_by,created_at FROM planting_records ORDER BY id"
       ).all()).results;
+      const growerByRecord = await getCurrentGrowerAssignments(db);
 
       const merged = new Map();
       for (const row of rows) {
         const key = String(row.field_name) + "\u0000" + String(row.planting_date);
+        const grower = growerByRecord.get(row.id) || "";
         if (!merged.has(key)) {
-          merged.set(key, {...row});
+          merged.set(key, {...row, grower});
           continue;
         }
         const current = merged.get(key);
@@ -386,20 +388,21 @@ async function handle(request, env, a, b) {
         current.latitude = row.latitude;
         current.longitude = row.longitude;
         current.variety = row.variety;
+        current.grower = grower;
         current.notes = current.notes && row.notes
           ? (String(current.notes).includes(String(row.notes)) ? current.notes : String(current.notes) + "\n" + row.notes)
           : (row.notes || current.notes || null);
         current.created_by = current.created_by || row.created_by;
       }
 
-      const cols = ["Field", "Date", "Latitude", "Longitude", "Heading", "Variety", "Notes"];
+      const cols = ["Field", "Date", "Lat", "Long", "Heading", "Variety", "Grower", "Notes"];
       const excelDate = value => {
         const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
         return match ? `${Number(match[2])}/${Number(match[3])}/${match[1].slice(-2)}` : value;
       };
       const exportRows = [...merged.values()].map(row => [
         row.field_name, excelDate(row.planting_date), row.latitude, row.longitude,
-        row.heading, row.variety, row.notes
+        row.heading, row.variety, row.grower, row.notes
       ]);
       const cell = v => {
         const value = String(v ?? "");
