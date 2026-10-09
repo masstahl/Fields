@@ -141,23 +141,10 @@ async function handleGrowerChange(selector){
 }
 function renderGrowerManagement(){
   const out=$('#growerManagement');if(!out)return;
-  $('#growerStatus').textContent=growers.length+' growers · tap a grower for options';
+  $('#growerStatus').textContent=growers.length+' growers · tap to show fields · hold for options';
   if(!growers.length){out.innerHTML='<div class="plant-empty">No growers added yet. Add a grower from the Grower field in a planting record.</div>';return}
-  out.innerHTML=growers.map(g=>{
-    const used=Number(g.used||0);
-    return '<div class="activity-variety-row" data-grower="'+esc(g.name)+'" role="button" tabindex="0"><div><b>'+esc(g.name)+'</b><div class="meta">'+used+' planting record'+(used===1?'':'s')+'</div></div><span class="meta" aria-hidden="true">›</span></div>';
-  }).join('');
-  out.querySelectorAll('[data-grower]').forEach(row=>{
-    const open=()=>{
-      const name=row.dataset.grower,g=growers.find(x=>x.name===name);
-      $('#growerOptionsName').value=name;
-      $('#growerOptionsTitle').textContent=name;
-      $('#growerOptionsInfo').textContent=Number(g?.used||0)+' planting record'+(Number(g?.used||0)===1?'':'s');
-      showDialog($('#growerOptionsDlg'));
-    };
-    row.onclick=open;
-    row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
-  });
+  out.innerHTML=growers.map(g=>{const used=Number(g.used||0),selected=activeGrowerFilter===g.name;return '<div class="activity-variety-row'+(selected?' selected':'')+'" data-grower="'+esc(g.name)+'" role="button" tabindex="0" aria-label="'+esc(g.name)+', '+used+' planting records. Tap to show fields or press and hold for options"><div><b>'+esc(g.name)+'</b><div class="meta">'+used+' planting record'+(used===1?'':'s')+(selected?' · showing fields':'')+'</div></div><span class="meta" aria-hidden="true">'+(selected?'✓':'›')+'</span></div>'}).join('');
+  bindPressHoldRows(out,'[data-grower]',row=>{const name=row.dataset.grower;activeGrowerFilter=activeGrowerFilter===name?null:name;activeVarietyFilter=null;renderGrowerManagement();renderVarietyManagement();showFilteredFields()},row=>{const name=row.dataset.grower,g=growers.find(x=>x.name===name);$('#growerOptionsName').value=name;$('#growerOptionsTitle').textContent=name;$('#growerOptionsInfo').textContent=Number(g?.used||0)+' planting record'+(Number(g?.used||0)===1?'':'s');showDialog($('#growerOptionsDlg'))});
 }
 $('#growerOptionsCancel').onclick=()=>closeDialog($('#growerOptionsDlg'));
 $('#growerRenameBtn').onclick=async()=>{
@@ -165,7 +152,8 @@ $('#growerRenameBtn').onclick=async()=>{
   if(!to||!to.trim()||to.trim()===from)return;
   try{
     await api('growers/rename',{method:'POST',body:JSON.stringify({from,to:to.trim()})});
-    closeDialog($('#growerOptionsDlg'));await refreshLists();toast('Grower name updated');
+    if(activeGrowerFilter===from)activeGrowerFilter=to.trim();
+    closeDialog($('#growerOptionsDlg'));await refreshLists();await loadPlantingRecords();toast('Grower name updated');
   }catch(e){toast(e.message)}
 };
 $('#growerDeleteBtn').onclick=async()=>{
@@ -176,7 +164,8 @@ $('#growerDeleteBtn').onclick=async()=>{
     const result=await api('growers/delete',{method:'POST',body:JSON.stringify({name})});
     const lists=await refreshLists();
     if(lists.growers.some(g=>String(g.name||'').trim().toLowerCase()===name.trim().toLowerCase()))throw new Error(result?.error||result?.diagnostic?.error||'Grower is still listed by the server; deletion was not confirmed');
-    closeDialog($('#growerOptionsDlg'));toast('Grower deleted and verified');
+    if(activeGrowerFilter===name)activeGrowerFilter=null;
+    closeDialog($('#growerOptionsDlg'));await loadPlantingRecords();toast('Grower deleted and verified');
   }catch(e){await refreshLists().catch(()=>{});toast(e.message)}
 };
 async function handleVarietyChange(selector){
@@ -192,36 +181,32 @@ async function handleVarietyChange(selector){
   }catch(e){toast(e.message)}
 }
 let activeVarietyFilter=null;
+let activeGrowerFilter=null;
 let longPressTimer=null;
+function bindPressHoldRows(out,selector,onTap,onHold){
+  out.querySelectorAll(selector).forEach(row=>{
+    let timer=null,suppressClick=false;
+    const cancel=()=>{if(timer!==null){clearTimeout(timer);timer=null}};
+    row.addEventListener("pointerdown",()=>{suppressClick=false;cancel();timer=setTimeout(()=>{timer=null;suppressClick=true;onHold(row)},1000)});
+    row.addEventListener("pointerup",cancel);row.addEventListener("pointercancel",cancel);row.addEventListener("pointerleave",cancel);
+    row.addEventListener("click",e=>{if(suppressClick){e.preventDefault();e.stopPropagation();suppressClick=false;return}onTap(row)});
+    row.addEventListener("keydown",e=>{if((e.key==="F10"&&e.shiftKey)||e.key==="ContextMenu"){e.preventDefault();onHold(row)}});
+  });
+}
+function showFilteredFields(){loadPlantingRecords().then(()=>$("#plantingRecords")?.scrollIntoView({behavior:"smooth",block:"start"}));}
+
 function clearVarietyFilter(){
   activeVarietyFilter=null;
   $('#varietyManagement').querySelectorAll('[data-variety]').forEach(row=>row.classList.remove('selected'));
   loadPlantingRecords();
 }
 function renderVarietyManagement(){
-  const out=$('#varietyManagement'),status=$('#varietyStatus');
-  if(!out)return;
-  status.textContent=varieties.length+' varieties · tap a variety for options';
-  if(!varieties.length){out.innerHTML='<div class="plant-empty">No varieties have been added yet.</div>';return;}
-  out.innerHTML=varieties.map(v=>{
-    const used=Number(v.used||0);
-    return '<div class="activity-variety-row'+(activeVarietyFilter===v.name?' selected':'')+'" data-variety="'+esc(v.name)+'" role="button" tabindex="0"><div><b>'+esc(v.name)+'</b><div class="meta">'+used+' planting record'+(used===1?'':'s')+(activeVarietyFilter===v.name?' · showing fields':'')+'</div></div><span class="meta" aria-hidden="true">›</span></div>';
-  }).join('');
-  out.querySelectorAll('[data-variety]').forEach(row=>{
-    const open=()=>{
-      const name=row.dataset.variety,v=varieties.find(x=>x.name===name);
-      $('#varietyOptionsName').value=name;
-      $('#varietyOptionsTitle').textContent=name;
-      $('#varietyOptionsInfo').textContent=Number(v?.used||0)+' planting record'+(Number(v?.used||0)===1?'':'s');
-      $('#varietyFilterBtn').textContent=activeVarietyFilter===name?'Clear field filter':'Show fields';
-      showDialog($('#varietyOptionsDlg'));
-    };
-    row.onclick=open;
-    row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
-  });
+  const out=$('#varietyManagement'),status=$('#varietyStatus');if(!out)return;
+  status.textContent=varieties.length+' varieties · tap to show fields · hold for options';
+  if(!varieties.length){out.innerHTML='<div class="plant-empty">No varieties have been added yet.</div>';return}
+  out.innerHTML=varieties.map(v=>{const used=Number(v.used||0),selected=activeVarietyFilter===v.name;return '<div class="activity-variety-row'+(selected?' selected':'')+'" data-variety="'+esc(v.name)+'" role="button" tabindex="0" aria-label="'+esc(v.name)+', '+used+' planting records. Tap to show fields or press and hold for options"><div><b>'+esc(v.name)+'</b><div class="meta">'+used+' planting record'+(used===1?'':'s')+(selected?' · showing fields':'')+'</div></div><span class="meta" aria-hidden="true">'+(selected?'✓':'›')+'</span></div>'}).join('');
+  bindPressHoldRows(out,'[data-variety]',row=>{const name=row.dataset.variety;activeVarietyFilter=activeVarietyFilter===name?null:name;activeGrowerFilter=null;renderVarietyManagement();renderGrowerManagement();showFilteredFields()},row=>{const name=row.dataset.variety,v=varieties.find(x=>x.name===name);$('#varietyOptionsName').value=name;$('#varietyOptionsTitle').textContent=name;$('#varietyOptionsInfo').textContent=Number(v?.used||0)+' planting record'+(Number(v?.used||0)===1?'':'s');$('#varietyFilterBtn').textContent=activeVarietyFilter===name?'Clear field filter':'Show fields';showDialog($('#varietyOptionsDlg'))});
 }
-
-
 $('#varietyOptionsCancel').onclick=()=>closeDialog($('#varietyOptionsDlg'));
 $('#varietyFilterBtn').onclick=()=>{
   const name=$('#varietyOptionsName').value;
@@ -443,10 +428,11 @@ async function loadPlantingRecords(){
   const out=$('#plantingRecords');
   try{
     const allRecords=await api('planting-records');
-    const records=activeVarietyFilter===null?allRecords:allRecords.filter(r=>r.variety===activeVarietyFilter);
-    status.textContent=records.length+' records'+(activeVarietyFilter===null?'':' · variety '+activeVarietyFilter+' · tap variety again to clear');
+    const records=allRecords.filter(r=>(activeVarietyFilter===null||r.variety===activeVarietyFilter)&&(activeGrowerFilter===null||r.grower===activeGrowerFilter));
+    const filterLabel=activeVarietyFilter!==null?'variety '+activeVarietyFilter:activeGrowerFilter!==null?'grower '+activeGrowerFilter:null;
+    status.textContent=records.length+' records'+(filterLabel?' · showing '+filterLabel+' · tap the selected item again to clear':'');
     if(!records.length){
-      out.innerHTML=activeVarietyFilter!==null?'<div class="plant-empty">No fields currently use this variety. Tap the variety again to show all fields.</div>':'<div class="plant-empty">No planting records saved.</div>';
+      out.innerHTML=filterLabel?'<div class="plant-empty">No fields currently use this '+(activeVarietyFilter!==null?'variety':'grower')+'. Tap the selected item again to show all fields.</div>':'<div class="plant-empty">No planting records saved.</div>';
       return;
     }
     out.innerHTML=records.map(r=>{
