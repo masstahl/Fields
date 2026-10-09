@@ -194,6 +194,8 @@ function renderVarietyManagement(){
     row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
   });
 }
+
+
 $('#varietyOptionsCancel').onclick=()=>closeDialog($('#varietyOptionsDlg'));
 $('#varietyFilterBtn').onclick=()=>{
   const name=$('#varietyOptionsName').value;
@@ -210,3 +212,489 @@ $('#varietyDeleteBtn').onclick=async()=>{
   if(!confirm('Delete variety "'+name+'"? It will be removed from the Plant Field dropdown. Existing planting records will be preserved.'))return;
   try{const result=await api('varieties/delete',{method:'POST',body:JSON.stringify({name})});if(activeVarietyFilter===name)activeVarietyFilter=null;closeDialog($('#varietyOptionsDlg'));applyVarietyList(result.varieties);loadPlantingRecords();toast('Variety deleted')}catch(e){toast(e.message)}
 };
+
+
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const api=async(path,options={})=>{
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),10000);
+  const headers={...(options.method&&options.method!=='GET'?{'content-type':'application/json'}:{}),...(options.headers||{})};
+  if(user)headers['x-user']=encodeURIComponent(user);
+  try{
+    const r=await fetch('/api/'+path,{...options,headers,cache:'no-store',signal:controller.signal});
+    let data=null; try{data=await r.json()}catch{}
+    if(!r.ok)throw new Error(data?.error||('Request failed ('+r.status+')'));
+    return data;
+  }catch(e){
+    if(e.name==='AbortError')throw new Error('The field database timed out. Tap Retry.');
+    throw e;
+  }finally{clearTimeout(timer)}
+};
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),2200)}
+function direction(v){const n=parseFloat(v);if(!Number.isFinite(n))return '';return ['N','NE','E','SE','S','SW','W','NW'][Math.round(((n%360)+360)%360/45)%8]}
+function normalize(v){return String(v??'').toLowerCase().normalize('NFKD').replace(/['']/g,"'").replace(/[--]/g,'-').replace(/\s+/g,' ').trim()}
+function visibleFields(){
+  const q=normalize($('#q').value);
+  if(!q)return fields.slice(0,80);
+  const terms=q.split(' ').filter(Boolean);
+  return fields.filter(f=>terms.every(t=>normalize(f.name).includes(t))).slice(0,80);
+}
+function render(){
+  const q=$('#q').value.trim();
+  $('#clearBtn').hidden=!q;
+  if(!q){$('#out').innerHTML='<div class="empty"><strong>Search your field list</strong>Start typing a field name to see its heading, planting date and location.</div>';return}
+  const list=visibleFields();
+  if(!list.length){$('#out').innerHTML='<div class="empty"><strong>No matching field</strong>Try a shorter name or check the spelling.</div>';return}
+  $('#out').innerHTML=list.map(f=>{
+    const open=openIds.has(f.id);
+    const hasCoords=f.lat!=null&&f.lng!=null&&Number.isFinite(+f.lat)&&Number.isFinite(+f.lng);
+    const coords=hasCoords?f.lat.toFixed(5)+', '+f.lng.toFixed(5):'Not saved';
+    const details='<div class="location-preview">'+(hasCoords?'<div class="map-shell"><div class="leaflet-map" id="map-'+f.id+'"></div><div class="map-toolbar"><button type="button" data-map-mode="sat" data-map="'+f.id+'">Satellite</button><button type="button" data-map-mode="map" data-map="'+f.id+'">Map</button></div><button type="button" class="map-recenter" data-recenter="'+f.id+'" aria-label="Recenter map">?</button></div>':'')+'<div class="location-overlay"><div class="detail-grid"><div class="detail"><label>Heading</label><b>'+esc(f.heading)+(Number.isFinite(+f.heading)?'°':'')+'</b></div><div class="detail"><label>Planted</label><b>'+esc(f.planted||'-')+'</b></div><div class="detail"><label>Coordinates</label><b>'+esc(coords)+'</b></div></div><div class="actions">'+(hasCoords?'<a class="action" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(f.lat+','+f.lng)+'">Open map</a>':'')+'<button class="action primary" data-edit="'+f.id+'">Edit</button></div>'+(f.updated_by?'<div class="meta" style="margin-top:9px">Last changed by '+esc(f.updated_by)+'</div>':'')+'</div></div>';
+    return '<article class="card'+(open?' expanded':'')+'"><div class="card-main" data-open="'+f.id+'"><div><div class="name">'+esc(f.name)+'</div><div class="meta">'+esc(f.planted||'No planting date')+' · '+esc(coords)+'</div></div><div class="heading"><div class="degrees">'+esc(f.heading)+(Number.isFinite(+f.heading)?'°':'')+'</div><div class="direction">'+esc(direction(f.heading))+'</div></div></div>'+(open?details:'')+'</article>'
+  }).join('');
+  document.querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>{const id=+el.dataset.open;openIds.has(id)?openIds.delete(id):openIds.add(id);render()});
+  document.querySelectorAll('[data-edit]').forEach(el=>el.onclick=e=>{e.stopPropagation();openForm(+el.dataset.edit)});
+  requestAnimationFrame(initVisibleMaps);
+  document.querySelectorAll('[data-map-mode]').forEach(el=>el.onclick=e=>{e.stopPropagation();mapMode=el.dataset.mapMode;localStorage.setItem('mapMode',mapMode);const id=+el.dataset.map;const obj=maps.get(id);if(obj){obj.layers.sat.remove();obj.layers.map.remove();obj.layers[mapMode].addTo(obj.map)}document.querySelectorAll('[data-map="'+id+'"]').forEach(b=>b.classList.toggle('active',b.dataset.mapMode===mapMode))});
+  document.querySelectorAll('[data-recenter]').forEach(el=>el.onclick=e=>{e.stopPropagation();const id=+el.dataset.recenter;const f=fields.find(x=>x.id===id);const obj=maps.get(id);if(f&&obj){obj.map.setView([+f.lat,+f.lng],17,{animate:true});saveMapState(id,obj.map)}});
+}
+
+const MAP_STATE_KEY='fieldMapStates';
+const getMapStates=()=>{try{return JSON.parse(localStorage.getItem(MAP_STATE_KEY)||'{}')}catch{return{}}};
+const saveMapState=(id,map)=>{const s=getMapStates();const c=map.getCenter();s[id]={lat:c.lat,lng:c.lng,zoom:map.getZoom(),updated:Date.now()};localStorage.setItem(MAP_STATE_KEY,JSON.stringify(s))};
+const getMapState=id=>getMapStates()[id]||null;
+const maps=new Map();
+let mapMode=localStorage.getItem('mapMode')||'sat';
+const makeLayers=()=>({
+  sat:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Esri'}),
+  map:L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Esri'})
+});
+function initFieldMap(f){
+  const el=document.getElementById('map-'+f.id); if(!el||maps.has(f.id))return;
+  if(!window.L)return;
+  const state=getMapState(f.id), center=state?[state.lat,state.lng]:[+f.lat,+f.lng], zoom=state?.zoom||17;
+  const map=L.map(el,{zoomControl:true,scrollWheelZoom:true,dragging:true,doubleClickZoom:true,touchZoom:true}).setView(center,zoom);
+  const layers=makeLayers(); layers[mapMode].addTo(map);
+  const icon=L.divIcon({className:'',html:'<div class="heading-marker" style="transform:rotate('+((parseFloat(f.heading)||0))+'deg)"><div class="ring"></div><div class="arrow"></div><div class="core"></div></div>',iconSize:[42,42],iconAnchor:[21,21]});
+  L.marker([+f.lat,+f.lng],{icon}).addTo(map).bindTooltip(esc(f.name)+' · '+esc(f.heading)+'°',{direction:'top',offset:[0,-18]});
+  map.on('moveend zoomend',()=>saveMapState(f.id,map));
+  maps.set(f.id,{map,layers});
+  requestAnimationFrame(()=>map.invalidateSize());
+}
+function destroyClosedMaps(){for(const [id,obj] of maps){if(!document.getElementById('map-'+id)){obj.map.remove();maps.delete(id)}}}
+function initVisibleMaps(){for(const f of fields){if(openIds.has(f.id)&&f.lat!=null&&f.lng!=null)initFieldMap(f)}destroyClosedMaps()}
+async function load(){
+  $('#count').textContent='Connecting to database.';
+  $('#dot').classList.remove('bad');$('#statusText').textContent='Connecting';
+  $('#out').innerHTML='<div class="empty"><strong>Connecting to the field database.</strong><div style="margin-top:8px">Please wait.</div></div>';
+  try{
+    const data=await api('fields');
+    if(!Array.isArray(data))throw new Error('The server returned an invalid field list.');
+    fields=data;
+    $('#count').textContent=data.length>80?'Showing first 80 of '+data.length+' fields':data.length+' fields available';
+    $('#dot').classList.remove('bad');$('#statusText').textContent='Database connected';
+    render();
+
+  }catch(e){
+        console.error(e);
+    $('#count').textContent='Unable to load fields';
+    $('#dot').classList.add('bad');$('#statusText').textContent='Connection error';
+    $('#out').innerHTML='<div class="empty"><strong>Could not load the field database</strong><div style="margin-top:8px">'+esc(e.message)+'</div><div style="margin-top:16px"><button class="action primary" id="retryLoad">Retry</button></div></div>';
+    $('#retryLoad').onclick=load;
+  }
+}
+function searchFields(){
+  const q=$('#q').value.trim();
+  $('#clearBtn').hidden=!q;
+  $('#dot').classList.remove('bad');
+  $('#statusText').textContent='Database connected';
+  if(!q){
+    $('#count').textContent='Ready to search';
+    render();
+    return;
+  }
+  $('#count').textContent=visibleFields().length+' matching fields';
+  render();
+}
+function setUser(){
+  user=localStorage.getItem('fieldUser')||'';
+  $('#who').textContent=user?user+' · field reference':'Field reference · planting & orientation';
+}
+function ensureUser(){
+  if(user)return true;
+  const n=prompt('Your name (used only for the activity log):','');
+  user=(n||'Guest').trim()||'Guest';
+  localStorage.setItem('fieldUser',user);
+  $('#who').textContent=user+' · field reference';
+  return true;
+}
+function openForm(id=null){
+  editId=id;
+  const f=fields.find(x=>x.id===id)||{};
+  $('#formTitle').textContent=id?'Edit field':'Add field';
+  $('#fn').value=f.name||$('#q').value.trim()||'';
+  $('#fh').value=f.heading??'';
+  $('#fd').value=f.planted||new Date().toISOString().slice(0,10);
+  $('#fa').value=f.lat??'';$('#fo').value=f.lng??'';
+  $('#deleteBtn').hidden=!id;showDialog($('#dlg'));
+}
+async function save(){
+  ensureUser();
+  const body={name:$('#fn').value.trim(),heading:$('#fh').value.trim(),planted:$('#fd').value,lat:$('#fa').value,lng:$('#fo').value};
+  if(!body.name||!body.heading)return toast('Field name and heading are required');
+  try{
+    await api(editId?'fields/'+editId:'fields',{method:editId?'PUT':'POST',body:JSON.stringify(body)});
+    closeDialog($('#dlg'));await load();toast(editId?'Field updated':'Field added');
+  }catch(e){toast(e.message)}
+}
+async function remove(){
+  if(!editId||!confirm('Delete this field? The deletion will remain in the activity log.'))return;
+  ensureUser();
+  try{await api('fields/'+editId,{method:'DELETE'});closeDialog($('#dlg'));await load();toast('Field deleted')}catch(e){toast(e.message)}
+}// GPS FIELD DETECTION
+const gpsDistanceMeters=(lat1,lng1,lat2,lng2)=>{
+  const R=6371000;
+  const toRad=v=>v*Math.PI/180;
+  const dLat=toRad(lat2-lat1);
+  const dLng=toRad(lng2-lng1);
+  const a=Math.sin(dLat/2)**2+
+    Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+};
+
+function detectNearestField(callback){
+  if(!navigator.geolocation)return toast('Location is not available on this device');
+  if(!fields.length)return toast('Field database is not loaded');
+
+  navigator.geolocation.getCurrentPosition(
+    position=>{
+      const {latitude,longitude}=position.coords;
+      let nearest=null;
+      let nearestDistance=Infinity;
+
+      for(const field of fields){
+        const lat=Number(field.lat);
+        const lng=Number(field.lng);
+        if(!Number.isFinite(lat)||!Number.isFinite(lng))continue;
+
+        const distance=gpsDistanceMeters(latitude,longitude,lat,lng);
+        if(distance<nearestDistance){
+          nearest=field;
+          nearestDistance=distance;
+        }
+      }
+
+      if(!nearest)return toast('No field with saved coordinates was found nearby');
+      if(callback)callback(nearest);
+      else{$('#q').value=nearest.name||'';searchFields();}
+    },
+    error=>{
+      const message=error?.code===1
+        ?'Location permission is required to find the nearest field'
+        :'Unable to get your current location';
+      toast(message);
+    },
+    {enableHighAccuracy:true,maximumAge:30000,timeout:10000}
+  );
+}
+async function loadPlantingRecords(){
+  const status=$('#plantingStatus');
+  const out=$('#plantingRecords');
+  try{
+    const allRecords=await api('planting-records');
+    const records=activeVarietyFilter===null?allRecords:allRecords.filter(r=>r.variety===activeVarietyFilter);
+    status.textContent=records.length+' records'+(activeVarietyFilter===null?'':' · variety '+activeVarietyFilter+' · tap variety again to clear');
+    if(!records.length){
+      out.innerHTML=activeVarietyFilter!==null?'<div class="plant-empty">No fields currently use this variety. Tap the variety again to show all fields.</div>':'<div class="plant-empty">No planting records saved.</div>';
+      return;
+    }
+    out.innerHTML=records.map(r=>{
+      const contributors=(r.contributors||[]).join(', ')||'—';
+      return '<div class="plant-record" data-edit-plant="'+r.id+'" role="button" tabindex="0">'+
+        '<div class="top"><span class="field">'+esc(r.field_name)+'</span><span>'+esc(r.planting_date)+'</span></div>'+
+        '<div class="meta">Grower: '+esc(r.grower||'—')+'</div>'+
+        '<div class="meta">Variety: '+esc(r.variety||'—')+'</div>'+
+        '<div class="meta">Notes: '+esc(r.notes||'—')+'</div>'+
+        '<div class="meta">Created by '+esc(r.created_by||'—')+' · Last modified by '+esc(r.last_modified_by||r.created_by||'—')+'</div>'+
+      
+        '</div>';}).join('');
+    out.querySelectorAll('[data-edit-plant]').forEach(row=>{
+      const open=()=>openPlantEdit(records.find(r=>String(r.id)===row.dataset.editPlant));
+      row.onclick=open;
+      row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
+    });
+  }catch(e){
+    status.textContent='Unavailable';
+    out.innerHTML='<div class="plant-empty">'+esc(e.message)+'</div>';
+  }
+}
+
+async function openPlantEdit(record){
+  if(!record)return;
+  const value=await showPlantEditDialog(record);
+  if(!value)return;
+  try{
+    ensureUser();
+    await api('planting-records/'+record.id,{method:'PUT',body:JSON.stringify(value)});
+    closeDialog($('#plantEditDlg'));
+    await loadPlantingRecords();
+    await loadVarieties();
+    await loadGrowers();
+    toast('Planting record updated');
+  }catch(e){toast(e.message)}
+}
+
+async function showPlantEditDialog(record){
+  return new Promise(resolve=>{
+    $('#editPlantId').value=record.id;
+    const matchingField=fields.find(f=>Number(f.id)===Number(record.field_id))||fieldByName(record.field_name);
+    renderPlantFieldOptions('#editPlantFieldName','#editPlantFieldOptions');
+    if(matchingField)applyPlantField(matchingField,'editPlant');
+    $('#editPlantDate').value=record.planting_date||'';
+    $('#editPlantGrower').value=record.grower||'';
+    $('#editPlantVariety').value=record.variety||'';
+    $('#editPlantNotes').value=record.notes||'';
+    const dlg=$('#plantEditDlg');
+    const done=()=>{
+      dlg.removeEventListener('close',done);
+      if(dlg.dataset.cancel==='1'){dlg.dataset.cancel='';resolve(null);return}
+      const field=selectedField('editPlant');
+      resolve({field_id:field?.id||null,latitude:$('#editPlantLat').value,longitude:$('#editPlantLng').value,planting_date:$('#editPlantDate').value,grower:$('#editPlantGrower').value.trim(),variety:$('#editPlantVariety').value.trim(),notes:$('#editPlantNotes').value.trim()});
+    };
+    dlg.addEventListener('close',done);
+    showDialog(dlg);
+  });
+}
+
+const editFieldName=$('#editPlantFieldName');
+if(editFieldName)editFieldName.oninput=()=>{
+  renderPlantFieldOptions('#editPlantFieldName','#editPlantFieldOptions');
+  const field=selectedField('editPlant');
+  if(field)applyPlantField(field,'editPlant');
+  else{
+    $('#editPlantHeading').value='';
+    $('#editPlantLat').value='';
+    $('#editPlantLng').value='';
+  }
+};
+if($('#plantVariety'))$('#plantVariety').onchange=()=>handleVarietyChange('#plantVariety');
+if($('#editPlantVariety'))$('#editPlantVariety').onchange=()=>handleVarietyChange('#editPlantVariety');
+if($('#plantGrower'))$('#plantGrower').onchange=()=>handleGrowerChange('#plantGrower');
+if($('#editPlantGrower'))$('#editPlantGrower').onchange=()=>handleGrowerChange('#editPlantGrower');
+
+let loginHistory=[];
+let loginHistoryShown=10;
+async function loadActivity(accessKey){
+  await loadPlantingRecords();
+  const key=accessKey===undefined?(localStorage.getItem('fieldAdmin')||''):accessKey;
+  try{
+    const response=await fetch('/api/log',{cache:'no-store',headers:{'x-admin':key,'x-user':encodeURIComponent(user)}});
+    const data=await response.json().catch(()=>null);
+    if(response.status===403){
+      $('[data-activity-panel="archive"]').hidden=true;
+      $('#activityStatus').textContent=accessKey===undefined?'Access required':'Code not accepted';
+      $('#activity').innerHTML='<div class="empty"><strong>Administrator access required</strong><form id="adminKeyForm"><label for="adminKey">Access code</label><input id="adminKey" type="password" autocomplete="current-password" required style="width:100%;margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:10px"><button type="submit" class="action primary">Unlock activity</button></form></div>';
+      $('#adminKeyForm').onsubmit=e=>{e.preventDefault();loadActivity($('#adminKey').value)};
+      $('#adminKey').focus();
+      return;
+    }
+    if(!response.ok||!Array.isArray(data))throw new Error((data&&data.error)||'Unable to load activity');
+    if(key)localStorage.setItem('fieldAdmin',key);
+    $('[data-activity-panel="archive"]').hidden=false;
+    loginHistory=data.filter(x=>x.action==='opened app'||x.action==='installed app');
+    loginHistoryShown=10;
+    renderLoginHistory();
+  }catch(e){
+    $('[data-activity-panel="archive"]').hidden=true;
+    $('#activityStatus').textContent='Unavailable';
+    $('#activity').innerHTML='<div class="empty"><strong>Activity log</strong>'+esc(e.message)+'</div>';
+    $('#viewMoreLoginsBtn').hidden=true;
+  }
+}
+function renderLoginHistory(){
+  const shown=loginHistory.slice(0,loginHistoryShown);
+  $('#activityStatus').textContent=loginHistory.length+' login events';
+  $('#activity').innerHTML=shown.length
+    ?shown.map(x=>'<div class="log"><b>'+esc(x.user)+'</b> '+esc(x.action)+'<small>'+new Date(String(x.at).replace(' ','T')+'Z').toLocaleString()+'</small></div>').join('')
+    :'<div class="empty">No login history recorded yet.</div>';
+  const more=$('#viewMoreLoginsBtn');
+  more.hidden=loginHistoryShown>=loginHistory.length;
+}
+document.querySelectorAll('[data-activity-panel]').forEach(btn => {
+  btn.onclick = () => {
+    const wasActive = btn.classList.contains('active');
+
+    // deactivate all buttons
+    document.querySelectorAll('[data-activity-panel]')
+      .forEach(x => x.classList.remove('active'));
+
+    // hide all panels
+    ['login', 'export', 'archive'].forEach(name => {
+      $('#activityPanel' + name.charAt(0).toUpperCase() + name.slice(1)).hidden = true;
+    });
+
+    // if it wasn't active, open it
+    if (!wasActive) {
+      btn.classList.add('active');
+
+      const panelName = btn.dataset.activityPanel;
+      $('#activityPanel' + panelName.charAt(0).toUpperCase() + panelName.slice(1)).hidden = false;
+    }
+  };
+});
+$('#viewMoreLoginsBtn').onclick=()=>{
+  loginHistoryShown+=10;
+  renderLoginHistory();
+}
+function setTab(next){
+  tab=next;$('#fieldsTab').classList.toggle('active',next==='fields');$('#activityTab').classList.toggle('active',next==='activity');
+  $('#fieldsView').hidden=next!=='fields';$('#activityView').hidden=next!=='activity';
+  if(next==='activity')loadActivity();
+}
+$('#q').oninput=searchFields;
+$('#clearBtn').onclick=async()=>{$('#q').value='';$('#clearBtn').hidden=true;await load();$('#q').focus()};
+if($('#activityAddFieldBtn'))$('#activityAddFieldBtn').onclick=()=>openForm();
+function fieldByName(value){
+  const target=normalize(value);
+  if(!target)return null;
+  return fields.find(f=>normalize(f.name)===target)||null;
+}
+function renderPlantFieldOptions(inputSelector,listSelector,value=''){
+  const input=$(inputSelector), list=$(listSelector);
+  if(!input||!list)return [];
+  const q=normalize(value||input.value);
+  const matches=fields.filter(f=>(!q||normalize(f.name).includes(q))&&normalize(f.name)!==q).slice(0,100);
+  list.innerHTML=matches.map(f=>'<option value="'+esc(f.name)+'"></option>').join('');
+  const status=$(inputSelector==='#plantFieldName'?'#plantFieldMatchStatus':'#editPlantFieldMatchStatus');
+  if(status){
+    status.textContent=q&&!matches.length?'No matching field found':'';
+    status.hidden=!(q&&!matches.length);
+  }
+  return matches;
+}
+function applyPlantField(field,prefix){
+  if(!field)return;
+  const nameInput=prefix==='plant'?'#plantFieldName':'#editPlantFieldName';
+  const heading=prefix==='plant'?'#plantHeading':'#editPlantHeading';
+  const lat=prefix==='plant'?'#plantLat':'#editPlantLat';
+  const lng=prefix==='plant'?'#plantLng':'#editPlantLng';
+  $(nameInput).value=field.name||'';
+  $(heading).value=field.heading??'';
+  $(lat).value=field.lat??'';
+  $(lng).value=field.lng??'';
+  renderPlantFieldOptions(nameInput,prefix==='plant'?'#plantFieldOptions':'#editPlantFieldOptions',field.name||'');
+}
+function selectedField(prefix='plant'){
+  const input=prefix==='plant'?$('#plantFieldName'):$('#editPlantFieldName');
+  return input?fieldByName(input.value):null;
+}
+const localDate=()=>{
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+};
+
+function openPlantField(f){
+  $('#plantFieldName').value='';
+  $('#plantHeading').value='';
+  $('#plantLat').value='';
+  $('#plantLng').value='';
+  renderPlantFieldOptions('#plantFieldName','#plantFieldOptions');
+  if(f)applyPlantField(f,'plant');
+  $('#plantDate').value=localDate();
+  $('#plantDateDisplay').textContent=new Date(localDate()+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});
+  $('#plantVariety').value='';
+  $('#plantNotes').value='';
+  showDialog($('#plantDlg'));
+}
+
+$('#plantBtn').onclick=()=>openPlantField(fields[0]||null);
+$('#plantFieldName').oninput=()=>{
+  renderPlantFieldOptions('#plantFieldName','#plantFieldOptions');
+  const field=selectedField('plant');
+  if(field)applyPlantField(field,'plant');
+  else{
+    $('#plantHeading').value='';
+    $('#plantLat').value='';
+    $('#plantLng').value='';
+  }
+};
+$('#plantVariety').onchange=()=>handleVarietyChange('#plantVariety');
+$('#plantGrower').onchange=()=>handleGrowerChange('#plantGrower');
+$('#editPlantGrower').onchange=()=>handleGrowerChange('#editPlantGrower');
+$('#plantCancelBtn').onclick=()=>closeDialog($('#plantDlg'));
+
+$('#plantForm').onsubmit=async e=>{
+  e.preventDefault();
+  ensureUser();
+  const field=selectedField('plant');
+  const record={field_id:field?.id||null,latitude:$('#plantLat').value,longitude:$('#plantLng').value,planting_date:$('#plantDate').value,grower:$('#plantGrower').value.trim(),variety:$('#plantVariety').value.trim(),notes:$('#plantNotes').value.trim()};
+  if(!field){toast('Select an existing field from the field list');return;}
+  if(!record.planting_date){toast('Select a planting date');return;}
+  try{
+    await api('planting-records',{method:'POST',body:JSON.stringify(record)});
+    closeDialog($('#plantDlg'));
+    await loadPlantingRecords();
+    await loadVarieties();
+    await loadGrowers();
+    toast('Planting record saved');
+  }catch(e){
+    toast(e.message);
+  }
+};
+
+$('#exportPlantingBtn').onclick=async()=>{
+  try{
+    const r=await fetch('/api/planting-records/export',{cache:'no-store',headers:{'x-user':encodeURIComponent(user)}});
+    if(!r.ok)throw new Error('Unable to export planting records');
+    const csv=await r.text();
+    const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='planting-records.csv';
+    document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  }catch(e){toast(e.message)}
+};
+
+$('#archivePlantingBtn').onclick=async()=>{
+  if(!confirm('Archive this season? This removes planting records only. Fields will not be changed.'))return;
+  try{
+    const r=await api('planting-records/archive',{method:'POST',headers:{'x-admin':localStorage.getItem('fieldAdmin')||''},body:JSON.stringify({})});
+    await loadPlantingRecords();
+    toast((r.removed||0)+' planting records archived');
+  }catch(e){toast(e.message)}
+};
+
+$('#plantEditCancelBtn').onclick=()=>{
+  const dlg=$('#plantEditDlg');
+  dlg.dataset.cancel='1';
+  closeDialog(dlg);
+};
+$('#plantEditDeleteBtn').onclick=async()=>{
+  const id=$('#editPlantId').value;
+  if(!id||!confirm('Delete this planting record? The field will not be deleted.'))return;
+  try{
+    ensureUser();
+    await api('planting-records/'+id,{method:'DELETE'});
+    closeDialog($('#plantEditDlg'));
+    await loadPlantingRecords();
+    await loadVarieties();
+    await loadGrowers();
+    toast('Planting record deleted');
+  }catch(e){toast(e.message)}
+};
+$('#plantEditForm').onsubmit=e=>{
+  e.preventDefault();
+  $('#plantEditDlg').close();
+};
+$('#cancelBtn').onclick=()=>closeDialog($('#dlg'));
+$('#deleteBtn').onclick=remove;
+$('#fieldForm').onsubmit=e=>{e.preventDefault();save()};
+$('#fieldsTab').onclick=()=>setTab('fields');$('#activityTab').onclick=()=>setTab('activity');
+setUser();loadVarieties();load();
+setInterval(()=>tab==='fields'&&load(),30000);
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="/fix.js?v=20261007-2145"></script></body></html
