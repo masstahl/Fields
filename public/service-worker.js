@@ -1,4 +1,4 @@
-const CACHE='field-headings-static-v20261008-1';
+const CACHE='field-headings-static-v20261009-restore1';
 const STATIC=[];
 self.addEventListener('install',event=>{event.waitUntil((async()=>{
  const cache=await caches.open(CACHE);
