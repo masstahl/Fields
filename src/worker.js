@@ -170,7 +170,7 @@ async function handle(request, env, a, b) {
       return json({ ok: true, name: grower.name, growers: updatedGrowers, diagnostic: { build: APP_BUILD, eventPersisted: true, stillListed: false } });
     }
     if (a === "varieties" && m === "GET") return json(await getVarieties(db));
-    if (a === "varieties" && m === "POST") {
+    if (a === "varieties" && !b && m === "POST") {
       const p=await request.json(); const name=String(p.name||"").trim();
       if(!name)return json({error:"Variety name is required"},400);
       const varieties=await getVarieties(db);
