@@ -144,7 +144,7 @@ async function handle(request, env, a, b) {
     if (a === "growers" && b === "rename" && m === "POST") {
       const p=await request.json();const from=String(p.from||"").trim(),to=String(p.to||"").trim();
       if(!from||!to)return json({error:"Current and new grower names are required"},400);
-      if(from===to)return json({name:to,growers:await getGrowers(db)});
+      if(norm(from)===norm(to))return json({name:to,growers:await getGrowers(db)});
       const growers=await getGrowers(db);
       if(!growers.some(g=>norm(g.name)===norm(from)))return json({error:"Grower not found"},404);
       if(growers.some(g=>norm(g.name)===norm(to)))return json({error:"That grower name already exists"},409);
@@ -181,7 +181,7 @@ async function handle(request, env, a, b) {
     if (a === "varieties" && b === "rename" && m === "POST") {
       const p=await request.json(); const from=String(p.from||"").trim(); const to=String(p.to||"").trim();
       if(!from||!to)return json({error:"Current and new variety names are required"},400);
-      if(from===to)return json({name:to,varieties:await getVarieties(db)});
+      if(norm(from)===norm(to))return json({name:to,varieties:await getVarieties(db)});
       const varieties=await getVarieties(db);
       if(!varieties.some(v=>norm(v.name)===norm(from)))return json({error:"Variety not found"},404);
       if(varieties.some(v=>norm(v.name)===norm(to)))return json({error:"That variety name already exists"},409);
