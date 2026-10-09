@@ -209,8 +209,28 @@ $('#varietyRenameBtn').onclick=async()=>{
 };
 $('#varietyDeleteBtn').onclick=async()=>{
   const name=$('#varietyOptionsName').value;
+  if(!name)return toast('Choose a variety first');
   if(!confirm('Delete variety "'+name+'"? It will be removed from the Plant Field dropdown. Existing planting records will be preserved.'))return;
-  try{const result=await api('varieties/delete',{method:'POST',body:JSON.stringify({name})});if(activeVarietyFilter===name)activeVarietyFilter=null;closeDialog($('#varietyOptionsDlg'));applyVarietyList(result.varieties);loadPlantingRecords();toast('Variety deleted')}catch(e){toast(e.message)}
+  try{
+    const result=await api('varieties/delete',{method:'POST',body:JSON.stringify({name})});
+    if(!Array.isArray(result?.varieties)||result.varieties.some(v=>v.name===name)){
+      throw new Error('The delete endpoint did not confirm removal from its returned list.');
+    }
+    const fresh=await api('varieties');
+    if(!Array.isArray(fresh)||fresh.some(v=>v.name===name)){
+      const build=result?.diagnostic?.build||'unreported';
+      throw new Error('The server still lists "'+name+'" after deletion (server build: '+build+').');
+    }
+    if(activeVarietyFilter===name)activeVarietyFilter=null;
+    closeDialog($('#varietyOptionsDlg'));
+    applyVarietyList(fresh);
+    await loadPlantingRecords();
+    toast('Variety deleted and verified');
+  }catch(e){
+    await loadVarieties();
+    await loadPlantingRecords();
+    toast('Deletion not verified: '+e.message);
+  }
 };
 
 
@@ -223,7 +243,7 @@ const api=async(path,options={})=>{
   try{
     const r=await fetch('/api/'+path,{...options,headers,cache:'no-store',signal:controller.signal});
     let data=null; try{data=await r.json()}catch{}
-    if(!r.ok)throw new Error(data?.error||('Request failed ('+r.status+')'));
+    if(!r.ok){const build=r.headers.get('x-app-build');throw new Error((data?.error||('Request failed ('+r.status+')'))+(build?' [server build: '+build+']':''));}
     return data;
   }catch(e){
     if(e.name==='AbortError')throw new Error('The field database timed out. Tap Retry.');
