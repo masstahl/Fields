@@ -35,11 +35,13 @@ The repository contains a functional field-reference and planting PWA backed by 
 
 ### Varieties
 
-- Variety selection.
-- Add variety.
-- Rename variety.
-- Delete unused variety.
-- Usage counts.
+- Variety selection and add-new-variety workflow.
+- Variety counts refresh after planting records are created, edited, or deleted.
+- Tap a variety in Activity to filter planting records/fields to that variety; tap again to show all records.
+- Long-press an unused (zero-record) variety for about one second to confirm deletion; no permanent Rename/Delete buttons are shown.
+- Grower dropdown in Plant Field and Edit Planting Record.
+- Grower Management in Activity supports adding, correcting spelling, and deleting growers.
+- Planting date is displayed in a compact control at the top-right of Plant Field.
 - Variety changes logged in Activity.
 - No variety table.
 
@@ -48,6 +50,7 @@ The repository contains a functional field-reference and planting PWA backed by 
 - Login activity.
 - Planting records.
 - Variety management.
+- Grower management.
 - Add Field.
 - CSV export.
 - Administrator-only season archive.
