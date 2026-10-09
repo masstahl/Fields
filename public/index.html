@@ -69,7 +69,7 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
   <div class="activity-section"><div class="activity-inline-actions"><button type="button" class="action" id="activityAddFieldBtn">+ Add Field</button></div></div>
   <div class="activity-section"><div class="activity-heading"><strong>Planting Records</strong><span id="plantingStatus"></span></div><div id="plantingRecords" class="activity"></div></div>
   <div class="activity-section"><div class="activity-heading"><strong>Variety Management</strong><span id="varietyStatus"></span></div><div id="varietyManagement" class="activity"></div></div>
-  <div class="activity-section"><div class="activity-heading"><strong>Grower Management</strong><span id="growerStatus"></span></div><div class="activity-inline-actions"><button type="button" class="action" id="addGrowerBtn">+ Add Grower</button></div><div id="growerManagement" class="activity" style="margin-top:8px"></div></div>
+  <div class="activity-section"><div class="activity-heading"><strong>Grower Management</strong><span id="growerStatus"></span></div><div id="growerManagement" class="activity"></div></div>
 </section>
   <button
     id="gpsBtn"
@@ -83,6 +83,7 @@ dialog:not([open]){display:none}dialog[open]{display:block;position:fixed;inset:
 <dialog id="dlg"><form class="form" id="fieldForm" method="dialog"><h2 id="formTitle">Add field</h2><p>Keep the field record clean and consistent for the crew.</p><label for="fn">Field name</label><input id="fn" type="text" required><label for="fh">Heading (degrees)</label><input id="fh" type="text" required inputmode="decimal"><label for="fd">Date planted</label><input id="fd" type="date"><div class="two"><div><label for="fa">Latitude</label><input id="fa" type="number" step="any" inputmode="decimal"></div><div><label for="fo">Longitude</label><input id="fo" type="number" step="any" inputmode="decimal"></div></div><div class="form-actions"><button type="button" class="cancel" id="cancelBtn">Cancel</button><button type="button" class="delete" id="deleteBtn" hidden>Delete</button><button type="submit" class="save">Save</button></div></form></dialog>
 <dialog id="plantDlg"><form class="form" id="plantForm" method="dialog"><p>Start a planting record from an existing field.</p><div class="plant-form-heading"><h2>🌱 Plant Field</h2><div class="plant-date-compact"><span id="plantDateDisplay"></span><input id="plantDate" type="hidden" required></div></div><p>Start a planting record from an existing field.</p><label for="plantFieldName">Field Name</label><input id="plantFieldName" type="text" list="plantFieldOptions" placeholder="Search existing fields…" autocomplete="off" autocapitalize="off" spellcheck="false" required><datalist id="plantFieldOptions"></datalist><div id="plantFieldMatchStatus" class="meta" hidden></div><label for="plantHeading">Heading</label><input id="plantHeading" type="text" readonly><div class="two"><div><label for="plantLat">Latitude</label><input id="plantLat" type="number" step="any" inputmode="decimal"></div><div><label for="plantLng">Longitude</label><input id="plantLng" type="number" step="any" inputmode="decimal"></div></div><label for="plantGrower">Grower</label><select id="plantGrower"><option value="">No grower selected</option><option value="__add__">+ Add new grower…</option></select><label for="plantVariety">Variety</label><select id="plantVariety"><option value="">No variety</option><option value="__add__">+ Add new variety…</option></select><label for="plantNotes">Notes</label><textarea id="plantNotes" rows="3" placeholder="Optional notes" style="width:100%;border:1px solid var(--line);border-radius:11px;background:#faf9f3;padding:11px 12px;outline:0;resize:vertical;color:var(--ink);font:inherit"></textarea><div class="form-actions"><button type="button" class="cancel" id="plantCancelBtn">Cancel</button><button type="submit" class="save">Save</button></div></form></dialog>
 <dialog id="varietyOptionsDlg" class="plant-edit-dialog"><form class="form" method="dialog"><h2 id="varietyOptionsTitle">Variety</h2><p id="varietyOptionsInfo" class="meta"></p><input id="varietyOptionsName" type="hidden"><div class="form-actions" style="flex-wrap:wrap"><button type="button" class="action" id="varietyFilterBtn">Show fields</button><button type="button" class="action" id="varietyRenameBtn">Rename</button><button type="button" class="action danger" id="varietyDeleteBtn">Delete</button><button type="button" class="cancel" id="varietyOptionsCancel">Cancel</button></div></form></dialog>
+<dialog id="growerOptionsDlg" class="plant-edit-dialog"><form class="form" method="dialog"><h2 id="growerOptionsTitle">Grower</h2><p id="growerOptionsInfo" class="meta"></p><input id="growerOptionsName" type="hidden"><div class="form-actions" style="flex-wrap:wrap"><button type="button" class="action" id="growerRenameBtn">Edit spelling</button><button type="button" class="action danger" id="growerDeleteBtn">Delete</button><button type="button" class="cancel" id="growerOptionsCancel">Cancel</button></div></form></dialog>
 <div id="toast" class="toast"></div>
 <script>
 const $=s=>document.querySelector(s);
@@ -140,25 +141,44 @@ async function handleGrowerChange(selector){
 }
 function renderGrowerManagement(){
   const out=$('#growerManagement');if(!out)return;
-  $('#growerStatus').textContent=growers.length+' growers';
-  if(!growers.length){out.innerHTML='<div class="plant-empty">No growers added yet.</div>';return}
-  out.innerHTML=growers.map(g=>'<div class="activity-variety-row"><div><b>'+esc(g.name)+'</b></div><div class="actions"><button type="button" class="action" data-grower-rename="'+esc(g.name)+'">Edit spelling</button><button type="button" class="action danger" data-grower-delete="'+esc(g.name)+'">Delete</button></div></div>').join('');
-  out.querySelectorAll('[data-grower-rename]').forEach(btn=>btn.onclick=async()=>{
-    const from=btn.dataset.growerRename,to=prompt('Edit grower name:',from);
-    if(!to||!to.trim()||to.trim()===from)return;
-    try{await api('growers/rename',{method:'POST',body:JSON.stringify({from,to:to.trim()})});await refreshLists();toast('Grower name updated')}catch(e){toast(e.message)}
-  });
-  out.querySelectorAll('[data-grower-delete]').forEach(btn=>btn.onclick=async()=>{
-    const name=btn.dataset.growerDelete;
-    if(!confirm('Delete grower "'+name+'"?'))return;
-    try{const result=await api('growers/delete',{method:'POST',body:JSON.stringify({name})});const lists=await refreshLists();if(lists.growers.some(g=>String(g.name||'').trim().toLowerCase()===name.trim().toLowerCase()))throw new Error(result?.error||result?.diagnostic?.error||'Grower is still listed by the server; deletion was not confirmed');toast('Grower deleted and verified')}catch(e){await refreshLists().catch(()=>{});toast(e.message)}
+  $('#growerStatus').textContent=growers.length+' growers · tap a grower for options';
+  if(!growers.length){out.innerHTML='<div class="plant-empty">No growers added yet. Add a grower from the Grower field in a planting record.</div>';return}
+  out.innerHTML=growers.map(g=>{
+    const used=Number(g.used||0);
+    return '<div class="activity-variety-row" data-grower="'+esc(g.name)+'" role="button" tabindex="0"><div><b>'+esc(g.name)+'</b><div class="meta">'+used+' planting record'+(used===1?'':'s')+'</div></div><span class="meta" aria-hidden="true">›</span></div>';
+  }).join('');
+  out.querySelectorAll('[data-grower]').forEach(row=>{
+    const open=()=>{
+      const name=row.dataset.grower,g=growers.find(x=>x.name===name);
+      $('#growerOptionsName').value=name;
+      $('#growerOptionsTitle').textContent=name;
+      $('#growerOptionsInfo').textContent=Number(g?.used||0)+' planting record'+(Number(g?.used||0)===1?'':'s');
+      showDialog($('#growerOptionsDlg'));
+    };
+    row.onclick=open;
+    row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
   });
 }
-$('#addGrowerBtn').onclick=async()=>{
-  const name=prompt('Enter new grower:','');
-  if(!name||!name.trim())return;
-  try{await api('growers',{method:'POST',body:JSON.stringify({name:name.trim()})});await refreshLists();toast('Grower added')}catch(e){toast(e.message)}
-}
+$('#growerOptionsCancel').onclick=()=>closeDialog($('#growerOptionsDlg'));
+$('#growerRenameBtn').onclick=async()=>{
+  const from=$('#growerOptionsName').value,to=prompt('Edit grower name:',from);
+  if(!to||!to.trim()||to.trim()===from)return;
+  try{
+    await api('growers/rename',{method:'POST',body:JSON.stringify({from,to:to.trim()})});
+    closeDialog($('#growerOptionsDlg'));await refreshLists();toast('Grower name updated');
+  }catch(e){toast(e.message)}
+};
+$('#growerDeleteBtn').onclick=async()=>{
+  const name=$('#growerOptionsName').value;
+  if(!name)return toast('Choose a grower first');
+  if(!confirm('Delete grower "'+name+'"? Growers used by existing planting records cannot be deleted.'))return;
+  try{
+    const result=await api('growers/delete',{method:'POST',body:JSON.stringify({name})});
+    const lists=await refreshLists();
+    if(lists.growers.some(g=>String(g.name||'').trim().toLowerCase()===name.trim().toLowerCase()))throw new Error(result?.error||result?.diagnostic?.error||'Grower is still listed by the server; deletion was not confirmed');
+    closeDialog($('#growerOptionsDlg'));toast('Grower deleted and verified');
+  }catch(e){await refreshLists().catch(()=>{});toast(e.message)}
+};
 async function handleVarietyChange(selector){
   const select=$(selector);
   if(!select||select.value!=='__add__')return;
