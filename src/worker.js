@@ -78,7 +78,7 @@ async function getVarieties(db) {
   }
   const names = [...active.values()].filter(Boolean).sort((a, b) => a.localeCompare(b));
   return Promise.all(names.map(async name => {
-    const row = await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE LOWER(TRIM(variety))=?").bind(name).first();
+    const row = await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE LOWER(TRIM(variety))=?").bind(norm(name)).first();
     return { name, used: Number(row?.count || 0) };
   }));
 }
@@ -197,7 +197,7 @@ async function handle(request, env, a, b) {
       const varieties = await getVarieties(db);
       const variety = varieties.find(value => norm(value.name) === norm(name));
       if (!variety) return json({ error: "Variety not found" }, 404);
-      const usedCount = Number((await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE LOWER(TRIM(variety))=LOWER(?)").bind(norm(name)).first())?.count || 0);
+      const usedCount = Number((await db.prepare("SELECT COUNT(*) AS count FROM planting_records WHERE LOWER(TRIM(variety))=?").bind(norm(name)).first())?.count || 0);
       if (usedCount) return json({ error: "Used by " + usedCount + " planting records", count: usedCount }, 409);
       await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)")
         .bind(who, "variety deleted", "variety:" + JSON.stringify({ name: variety.name })).run();
