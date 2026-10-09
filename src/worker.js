@@ -1,6 +1,25 @@
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v)) ? null : +v;
 
+async function getCurrentGrowerAssignments(db) {
+  const rows=(await db.prepare("SELECT id,action,detail FROM activity WHERE action IN ('planting created','planting edited','grower renamed') ORDER BY id").all()).results;
+  const assignments=new Map();
+  for(const row of rows){
+    const detail=String(row.detail||'');
+    if(row.action==='grower renamed'&&detail.startsWith('grower rename:')){
+      try{
+        const v=JSON.parse(detail.slice(14));
+        for(const [id,name] of assignments)if(name===String(v.from||''))assignments.set(id,String(v.to||''));
+      }catch{}
+      continue;
+    }
+    const idMatch=detail.match(/planting_id:(\d+)/);
+    const growerMatch=detail.match(/(?:^|\s)grower=(.*?)(?:\s+contributors:|$)/);
+    if(idMatch&&growerMatch)assignments.set(Number(idMatch[1]),growerMatch[1].trim());
+  }
+  return assignments;
+}
+
 async function getGrowers(db) {
   const active = new Set();
   const rows=(await db.prepare("SELECT DISTINCT detail FROM activity WHERE action IN ('grower added','grower renamed','grower deleted','planting created','planting edited') ORDER BY id").all()).results;
@@ -111,8 +130,9 @@ async function handle(request, env, a, b) {
       if(!name)return json({error:"Grower name is required"},400);
       const growers=await getGrowers(db);
       if(!growers.some(g=>g.name===name))return json({error:"Grower not found"},404);
-      const records=(await db.prepare("SELECT detail FROM activity WHERE action IN ('planting created','planting edited')").all()).results;
-      const used=records.some(r=>String(r.detail||'').includes('grower='+name));
+      const assignments=await getCurrentGrowerAssignments(db);
+      const plantingIds=new Set((await db.prepare("SELECT id FROM planting_records").all()).results.map(r=>Number(r.id)));
+      const used=[...assignments].some(([id,value])=>plantingIds.has(id)&&value===name);
       if(used)return json({error:"This grower is used by planting records"},409);
       await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)").bind(who,"grower deleted","grower:"+JSON.stringify({name})).run();
       return json({ok:true,growers:await getGrowers(db)});
@@ -273,11 +293,7 @@ async function handle(request, env, a, b) {
         "SELECT id,at,user,action,detail FROM activity WHERE action IN ('planting created','planting edited') ORDER BY id"
       ).all()).results;
 
-      const growerByRecord = new Map();
-      for(const item of history){
-        const match=String(item.detail||'').match(/(?:^|\s)grower=(.*?)(?:\s+contributors:|$)/);
-        if(match)growerByRecord.set(Number(String(item.detail||'').match(/planting_id:(\d+)/)?.[1]),match[1].trim());
-      }
+      const growerByRecord = await getCurrentGrowerAssignments(db);
       const byRecord = new Map();
       for (const item of history) {
         const match = String(item.detail || "").match(/planting_id:(\d+)/);
