@@ -212,7 +212,9 @@ async function handle(request, env, a, b) {
       const latitude = num(p.latitude) ?? field.lat ?? null;
       const longitude = num(p.longitude) ?? field.lng ?? null;
       const variety = String(p.variety || "").trim();
+      const grower = String(p.grower || "").trim();
       const notes = String(p.notes || "").trim();
+      if(grower && !(await getGrowers(db)).some(g=>g.name===grower))return json({error:"Select an existing grower or add the grower first"},400);
       if (variety) {
         const varieties = await getVarieties(db);
         if (!varieties.some(v => v.name === variety)) return json({ error: "Select an existing variety or add the new variety first" }, 400);
