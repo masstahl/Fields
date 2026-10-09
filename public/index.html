@@ -216,7 +216,7 @@ $('#varietyRenameBtn').onclick=async()=>{
 $('#varietyDeleteBtn').onclick=async()=>{
   const name=$('#varietyOptionsName').value;
   if(!name)return toast('Choose a variety first');
-  if(!confirm('Delete variety "'+name+'"? It will be removed from the Plant Field dropdown. Existing planting records will be preserved.'))return;
+  if(!confirm('Delete variety "'+name+'"? Names used by existing planting records cannot be deleted.'))return;
   try{
     await api('varieties/delete',{method:'POST',body:JSON.stringify({name})});
     if(activeVarietyFilter===name)activeVarietyFilter=null;
@@ -449,7 +449,7 @@ async function loadPlantingRecords(){
 
 async function openPlantEdit(record){
   if(!record)return;
-  await refreshLists();
+  try{await refreshLists()}catch(e){toast(e.message);return}
   const value=await showPlantEditDialog(record);
   if(!value)return;
   try{
@@ -503,7 +503,6 @@ if($('#editPlantGrower'))$('#editPlantGrower').onchange=()=>handleGrowerChange('
 let loginHistory=[];
 let loginHistoryShown=10;
 async function loadActivity(accessKey){
-  await refreshLists();
   await loadPlantingRecords();
   const key=accessKey===undefined?(localStorage.getItem('fieldAdmin')||''):accessKey;
   try{
@@ -616,7 +615,7 @@ const localDate=()=>{
 };
 
 async function openPlantField(f){
-  await refreshLists();
+  try{await refreshLists()}catch(e){toast(e.message);return}
   $('#plantFieldName').value='';
   $('#plantHeading').value='';
   $('#plantLat').value='';
