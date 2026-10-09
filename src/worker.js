@@ -8,7 +8,7 @@ async function getGrowers(db) {
     const detail=String(row.detail||'');
     try{
       if(detail.startsWith('grower:')){const v=JSON.parse(detail.slice(7));if(v?.name)active.add(String(v.name).trim())}
-      else if(detail.startsWith('grower rename:')){const v=JSON.parse(detail.slice(13));if(v?.from)active.delete(String(v.from).trim());if(v?.to)active.add(String(v.to).trim())}
+      else if(detail.startsWith('grower rename:')){const v=JSON.parse(detail.slice(14));if(v?.from)active.delete(String(v.from).trim());if(v?.to)active.add(String(v.to).trim())}
       else if(detail.includes(' grower=')){const match=detail.match(/(?:^|\s)grower=(.*?)(?:\s+contributors:|$)/);if(match&&match[1])active.add(match[1].trim())}
     }catch{}
   }
