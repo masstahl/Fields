@@ -50,7 +50,13 @@ async function getGrowers(db) {
     } catch {}
   }
 
-  return [...active.values()].filter(Boolean).sort((a, b) => a.localeCompare(b)).map(name => ({ name }));
+  const names = [...active.values()].filter(Boolean).sort((a, b) => a.localeCompare(b));
+  const assignments = await getCurrentGrowerAssignments(db);
+  const plantingIds = new Set((await db.prepare("SELECT id FROM planting_records").all()).results.map(row => Number(row.id)));
+  return names.map(name => ({
+    name,
+    used: [...assignments].filter(([id, value]) => plantingIds.has(id) && norm(value) === norm(name)).length
+  }));
 }
 
 async function getVarieties(db) {
@@ -133,7 +139,7 @@ async function handle(request, env, a, b) {
 
   try {
     if (a === "growers" && m === "GET") return json(await getGrowers(db));
-    if (a === "growers" && m === "POST") {
+    if (a === "growers" && !b && m === "POST") {
       const p=await request.json();const name=String(p.name||"").trim();
       if(!name)return json({error:"Grower name is required"},400);
       const growers=await getGrowers(db);
