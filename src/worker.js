@@ -1,4 +1,5 @@
-const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
+const APP_BUILD = "variety-delete-diagnostic-2026-10-09";
+const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-app-build": APP_BUILD } });
 const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v)) ? null : +v;
 
 async function getCurrentGrowerAssignments(db) {
@@ -92,6 +93,11 @@ async function handle(request, env, a, b) {
   if (!db) return json({ error: "Database binding is not configured" }, 500);
   const m = request.method;
 
+  if (a === "diagnostics" && m === "GET") {
+    const r = await db.prepare("SELECT COUNT(*) AS count FROM activity WHERE action='variety deleted'").first();
+    return json({ build: APP_BUILD, dbBinding: env.DB ? "DB" : "field-headings", deleteEventCount: Number(r?.count || 0), varietyCount: (await getVarieties(db)).length });
+  }
+
   if (a === "health" && m === "GET") {
     try {
       const r = await db.prepare("SELECT COUNT(*) AS count FROM fields").first();
@@ -168,7 +174,14 @@ async function handle(request, env, a, b) {
       if(!varieties.some(v=>v.name===name))return json({error:"Variety not found"},404);
       await db.prepare("INSERT INTO activity(user,action,detail) VALUES(?,?,?)")
         .bind(who,"variety deleted","variety:"+JSON.stringify({name})).run();
-      return json({ok:true,name,varieties:await getVarieties(db)});
+      const event = await db.prepare("SELECT id FROM activity WHERE action='variety deleted' AND detail=? ORDER BY id DESC LIMIT 1")
+        .bind("variety:"+JSON.stringify({name})).first();
+      const updatedVarieties = await getVarieties(db);
+      const stillListed = updatedVarieties.some(v => v.name === name);
+      if (!event || stillListed) {
+        return json({ error: "Deletion verification failed", diagnostic: { build: APP_BUILD, eventPersisted: !!event, stillListed, deleteEventCount: Number((await db.prepare("SELECT COUNT(*) AS count FROM activity WHERE action='variety deleted'").first())?.count || 0) } }, 500);
+      }
+      return json({ok:true,name,varieties:updatedVarieties,diagnostic:{build:APP_BUILD,eventPersisted:true,stillListed:false}});
     }
 
     if (a === "planting-records" && m === "POST") {
