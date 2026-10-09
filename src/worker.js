@@ -1,4 +1,4 @@
-const APP_BUILD = "variety-delete-diagnostic-2026-10-09";
+const APP_BUILD = "variety-delete-verified-preview-2026-10-09";
 const json = (data, status = 200) => new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-app-build": APP_BUILD } });
 const num = (v) => (v === null || v === "" || v === undefined || Number.isNaN(+v)) ? null : +v;
 
